@@ -1,0 +1,21 @@
+{
+  "template_id": "sentence.v1",
+  "note_type": "sentence",
+  "cards": [
+    {
+      "card_type": "recognition",
+      "front": "{{core}} 是什么意思？",
+      "back": "{{meaning_cn}}"
+    },
+    {
+      "card_type": "production",
+      "front": "“{{meaning_cn}}”用英文怎么说？",
+      "back": "{{core}}"
+    },
+    {
+      "card_type": "cloze",
+      "front": "补全句子：{{cloze_sentence}}",
+      "back": "{{core}}"
+    }
+  ]
+}
