@@ -1,0 +1,21 @@
+{
+  "template_id": "expression.v1",
+  "note_type": "expression",
+  "cards": [
+    {
+      "card_type": "recognition",
+      "front": "这个表达的自然含义是什么：{{core}}",
+      "back": "{{meaning_cn}}"
+    },
+    {
+      "card_type": "production",
+      "front": "{{meaning_cn}} 用自然英文怎么说？",
+      "back": "{{core}}"
+    },
+    {
+      "card_type": "output",
+      "front": "用 {{core}} 写一个自己的工作或生活句子。",
+      "back": "参考例句：{{examples}}"
+    }
+  ]
+}
