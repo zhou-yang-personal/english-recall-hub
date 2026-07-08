@@ -1,24 +1,30 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-08T12:39:12Z",
+  "updated_at": "2026-07-08T16:40:54Z",
   "collections": [
     {
       "collection_id": "book:to-all-the-boys-ive-loved-before",
       "name": "To All the Boys I've Loved Before",
       "type": "book",
-      "note_count": 6
+      "note_count": 7
+    },
+    {
+      "collection_id": "book:little-prince",
+      "name": "The Little Prince",
+      "type": "book",
+      "note_count": 9
     },
     {
       "collection_id": "scenario:daily-chat",
       "name": "Daily Chat",
       "type": "scenario",
-      "note_count": 1
+      "note_count": 8
     },
     {
       "collection_id": "scenario:business-communication",
       "name": "Business Communication",
       "type": "scenario",
-      "note_count": 1
+      "note_count": 5
     }
   ]
 }
