@@ -1,0 +1,34 @@
+{
+  "profile_id": "manman",
+  "schema_version": "0.1.0",
+  "updated_at": "2026-07-08T12:39:12Z",
+  "note_count": 8,
+  "packs": [
+    {
+      "pack_id": "notes_current",
+      "path": "profiles/manman/packs/notes_current.jsonl",
+      "format": "jsonl",
+      "note_count": 8,
+      "sealed": false,
+      "sha256": null
+    }
+  ],
+  "templates": [
+    "profiles/manman/templates/word.v1.json",
+    "profiles/manman/templates/phrase.v1.json",
+    "profiles/manman/templates/expression.v1.json"
+  ],
+  "collections_path": "profiles/manman/collections.json",
+  "dedupe_index_path": "profiles/manman/dedupe_index.json",
+  "builder_ledger_path": "profiles/manman/builder-ledger.jsonl",
+  "notes": {
+    "active": 8,
+    "mature": 0,
+    "suspended": 0,
+    "archived": 0
+  },
+  "warnings": [
+    "sha256 is null because this connector run could not compute a reliable pack hash in-runtime.",
+    "2026-07-07 draft inbox exists and should be backfilled in a later builder pass."
+  ]
+}
