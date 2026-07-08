@@ -1,0 +1,24 @@
+{
+  "profile_id": "manman",
+  "updated_at": "2026-07-08T12:39:12Z",
+  "collections": [
+    {
+      "collection_id": "book:to-all-the-boys-ive-loved-before",
+      "name": "To All the Boys I've Loved Before",
+      "type": "book",
+      "note_count": 6
+    },
+    {
+      "collection_id": "scenario:daily-chat",
+      "name": "Daily Chat",
+      "type": "scenario",
+      "note_count": 1
+    },
+    {
+      "collection_id": "scenario:business-communication",
+      "name": "Business Communication",
+      "type": "scenario",
+      "note_count": 1
+    }
+  ]
+}
