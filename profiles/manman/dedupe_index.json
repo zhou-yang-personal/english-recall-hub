@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-08T16:40:54Z",
+  "updated_at": "2026-07-10T16:38:38Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -28,6 +28,7 @@
     "phrase:including_other_networks": "note_phrase_including_other_networks_v1",
     "expression:the_information_is_managed_at_the_cxo_level": "note_expression_the_information_is_managed_at_the_cxo_level_v1",
     "expression:let_me_try_to_get_it": "note_expression_let_me_try_to_get_it_v1",
-    "phrase:tipped_back": "note_phrase_tipped_back_v1"
+    "phrase:tipped_back": "note_phrase_tipped_back_v1",
+    "word:playground": "note_word_playground_v1"
   }
 }
