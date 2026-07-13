@@ -1,14 +1,22 @@
 {
   "profile_id": "manman",
   "schema_version": "0.1.0",
-  "updated_at": "2026-07-10T16:38:38Z",
-  "note_count": 28,
+  "updated_at": "2026-07-13T20:40:17Z",
+  "note_count": 32,
   "packs": [
     {
       "pack_id": "notes_current",
       "path": "profiles/manman/packs/notes_current.jsonl",
       "format": "jsonl",
       "note_count": 28,
+      "sealed": false,
+      "sha256": null
+    },
+    {
+      "pack_id": "notes_20260713",
+      "path": "profiles/manman/packs/notes_20260713.jsonl",
+      "format": "jsonl",
+      "note_count": 4,
       "sealed": false,
       "sha256": null
     }
@@ -23,13 +31,14 @@
   "dedupe_index_path": "profiles/manman/dedupe_index.json",
   "builder_ledger_path": "profiles/manman/builder-ledger.jsonl",
   "notes": {
-    "active": 28,
+    "active": 32,
     "mature": 0,
     "suspended": 0,
     "archived": 0
   },
   "warnings": [
     "sha256 is null because this connector run could not compute a reliable pack hash in-runtime.",
+    "A separate unsealed pack was created for 2026-07-13 because safely rewriting the larger notes_current.jsonl file was not reliable in this connector run.",
     "No build/test/CI was run in the GitHub connector environment."
   ]
 }
