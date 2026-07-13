@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-10T16:38:38Z",
+  "updated_at": "2026-07-13T20:40:17Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -29,6 +29,10 @@
     "expression:the_information_is_managed_at_the_cxo_level": "note_expression_the_information_is_managed_at_the_cxo_level_v1",
     "expression:let_me_try_to_get_it": "note_expression_let_me_try_to_get_it_v1",
     "phrase:tipped_back": "note_phrase_tipped_back_v1",
-    "word:playground": "note_word_playground_v1"
+    "word:playground": "note_word_playground_v1",
+    "expression:would_the_20th_work_better_the_15th_may_be_too_soon": "note_expression_would_the_20th_work_better_the_15th_may_be_too_soon_v1",
+    "expression:schedule_the_appointment_while_preparing_documents": "note_expression_schedule_the_appointment_while_preparing_documents_v1",
+    "expression:tigos_fbb_subscriber_base_remains_stable_but_faces_pressure_from_cwp": "note_expression_tigos_fbb_subscriber_base_remains_stable_but_faces_pressure_from_cwp_v1",
+    "expression:support_internal_efforts_to_expand_claros_ftth_investment_budget": "note_expression_support_internal_efforts_to_expand_claros_ftth_investment_budget_v1"
   }
 }
