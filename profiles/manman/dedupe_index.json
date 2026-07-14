@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-13T20:40:17Z",
+  "updated_at": "2026-07-14T00:39:54Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -33,6 +33,8 @@
     "expression:would_the_20th_work_better_the_15th_may_be_too_soon": "note_expression_would_the_20th_work_better_the_15th_may_be_too_soon_v1",
     "expression:schedule_the_appointment_while_preparing_documents": "note_expression_schedule_the_appointment_while_preparing_documents_v1",
     "expression:tigos_fbb_subscriber_base_remains_stable_but_faces_pressure_from_cwp": "note_expression_tigos_fbb_subscriber_base_remains_stable_but_faces_pressure_from_cwp_v1",
-    "expression:support_internal_efforts_to_expand_claros_ftth_investment_budget": "note_expression_support_internal_efforts_to_expand_claros_ftth_investment_budget_v1"
+    "expression:support_internal_efforts_to_expand_claros_ftth_investment_budget": "note_expression_support_internal_efforts_to_expand_claros_ftth_investment_budget_v1",
+    "expression:show_strong_growth_across_top_cities": "note_expression_show_strong_growth_across_top_cities_v1",
+    "expression:when_should_i_expect_to_receive_the_checklist": "note_expression_when_should_i_expect_to_receive_the_checklist_v1"
   }
 }
