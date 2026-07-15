@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-15T00:39:41Z",
+  "updated_at": "2026-07-15T04:40:39Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -37,6 +37,9 @@
     "expression:show_strong_growth_across_top_cities": "note_expression_show_strong_growth_across_top_cities_v1",
     "expression:when_should_i_expect_to_receive_the_checklist": "note_expression_when_should_i_expect_to_receive_the_checklist_v1",
     "word:propagate": "note_word_propagate_v1",
-    "expression:thank_you_for_checking": "note_expression_thank_you_for_checking_v1"
+    "expression:thank_you_for_checking": "note_expression_thank_you_for_checking_v1",
+    "expression:demand_for_higher_speed_plans_is_already_growing": "note_expression_demand_for_higher_speed_plans_is_already_growing_v1",
+    "expression:500m_pricing_may_be_limiting_upgrades": "note_expression_500m_pricing_may_be_limiting_upgrades_v1",
+    "expression:encourage_entry_tier_upgrades_while_avoiding_100m_cannibalization": "note_expression_encourage_entry_tier_upgrades_while_avoiding_100m_cannibalization_v1"
   }
 }
