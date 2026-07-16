@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-15T16:39:20Z",
+  "updated_at": "2026-07-16T00:38:25Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -46,6 +46,7 @@
     "expression:we_expect_speed_upgrades_to_accelerate": "note_expression_we_expect_speed_upgrades_to_accelerate_v1",
     "expression:live_streaming_plan_sales_reach_3k_per_month": "note_expression_live_streaming_plan_sales_reach_3k_per_month_v1",
     "expression:500m_plus_plans_are_becoming_mainstream_in_latam": "note_expression_500m_plus_plans_are_becoming_mainstream_in_latam_v1",
-    "expression:claro_is_capturing_the_largest_share_of_fbb_growth_in_the_dominican_republic": "note_expression_claro_is_capturing_the_largest_share_of_fbb_growth_in_the_dominican_republic_v1"
+    "expression:claro_is_capturing_the_largest_share_of_fbb_growth_in_the_dominican_republic": "note_expression_claro_is_capturing_the_largest_share_of_fbb_growth_in_the_dominican_republic_v1",
+    "expression:claro_continues_to_grow_but_subscriber_growth_is_slowing": "note_expression_claro_continues_to_grow_but_subscriber_growth_is_slowing_v1"
   }
 }
