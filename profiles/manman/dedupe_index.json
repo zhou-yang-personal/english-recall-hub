@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-16T16:40:29Z",
+  "updated_at": "2026-07-17T04:38:12Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -49,6 +49,7 @@
     "expression:claro_is_capturing_the_largest_share_of_fbb_growth_in_the_dominican_republic": "note_expression_claro_is_capturing_the_largest_share_of_fbb_growth_in_the_dominican_republic_v1",
     "expression:claro_continues_to_grow_but_subscriber_growth_is_slowing": "note_expression_claro_continues_to_grow_but_subscriber_growth_is_slowing_v1",
     "expression:claros_regular_pricing_is_competitive_but_limited_promotions_make_the_first_year_less_attractive": "note_expression_claros_regular_pricing_is_competitive_but_limited_promotions_make_the_first_year_less_attractive_v1",
-    "expression:thats_great_news_thank_you_for_the_update": "note_expression_thats_great_news_thank_you_for_the_update_v1"
+    "expression:thats_great_news_thank_you_for_the_update": "note_expression_thats_great_news_thank_you_for_the_update_v1",
+    "expression:high_speed_demand_is_rising_and_claro_could_consider_stronger_promotions_to_better_meet_market_demand": "note_expression_high_speed_demand_is_rising_and_claro_could_consider_stronger_promotions_to_better_meet_market_demand_v1"
   }
 }
