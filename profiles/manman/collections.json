@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-18T04:42:04Z",
+  "updated_at": "2026-07-18T16:39:22Z",
   "collections": [
     {
       "collection_id": "book:to-all-the-boys-ive-loved-before",
@@ -18,13 +18,13 @@
       "collection_id": "scenario:daily-chat",
       "name": "Daily Chat",
       "type": "scenario",
-      "note_count": 15
+      "note_count": 16
     },
     {
       "collection_id": "scenario:business-communication",
       "name": "Business Communication",
       "type": "scenario",
-      "note_count": 27
+      "note_count": 28
     },
     {
       "collection_id": "scenario:ppt-speaking",
