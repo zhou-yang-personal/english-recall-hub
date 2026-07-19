@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-18T16:39:22Z",
+  "updated_at": "2026-07-19T08:39:05Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -53,6 +53,8 @@
     "expression:high_speed_demand_is_rising_and_claro_could_consider_stronger_promotions_to_better_meet_market_demand": "note_expression_high_speed_demand_is_rising_and_claro_could_consider_stronger_promotions_to_better_meet_market_demand_v1",
     "expression:you_will_receive_the_calendar_invite_with_all_the_details_this_afternoon": "note_expression_you_will_receive_the_calendar_invite_with_all_the_details_this_afternoon_v1",
     "expression:claros_competitively_priced_850_mbps_plan_helped_it_gain_subscribers_quickly_in_the_mid_to_high_speed_segment_in_2025": "note_expression_claros_competitively_priced_850_mbps_plan_helped_it_gain_subscribers_quickly_in_the_mid_to_high_speed_segment_in_2025_v1",
-    "expression:im_sorry_to_interrupt_but_i_havent_received_the_file_yet_im_worried_it_may_be_too_late_if_i_only_receive_it_on_monday_morning": "note_expression_im_sorry_to_interrupt_but_i_havent_received_the_file_yet_im_worried_it_may_be_too_late_if_i_only_receive_it_on_monday_morning_v1"
+    "expression:im_sorry_to_interrupt_but_i_havent_received_the_file_yet_im_worried_it_may_be_too_late_if_i_only_receive_it_on_monday_morning": "note_expression_im_sorry_to_interrupt_but_i_havent_received_the_file_yet_im_worried_it_may_be_too_late_if_i_only_receive_it_on_monday_morning_v1",
+    "word:deck": "note_word_deck_v1",
+    "word:lineage": "note_word_lineage_v1"
   }
 }
