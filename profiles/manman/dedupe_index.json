@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-20T16:40:31Z",
+  "updated_at": "2026-07-21T04:39:10Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -60,6 +60,7 @@
     "sentence:i_will_meet_you_downstairs_at_the_consulate": "note_sentence_i_will_meet_you_downstairs_at_the_consulate_v1",
     "word:signature": "note_word_signature_v1",
     "word:dorm": "note_word_dorm_v1",
-    "word:archive": "note_word_archive_v1"
+    "word:archive": "note_word_archive_v1",
+    "expression:i_generated_a_new_report_using_the_latest_ftth_coverage_information_could_you_please_approve_it": "note_expression_i_generated_a_new_report_using_the_latest_ftth_coverage_information_could_you_please_approve_it_v1"
   }
 }
