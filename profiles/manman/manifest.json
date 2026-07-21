@@ -1,8 +1,8 @@
 {
   "profile_id": "manman",
   "schema_version": "0.1.0",
-  "updated_at": "2026-07-21T04:39:10Z",
-  "note_count": 60,
+  "updated_at": "2026-07-21T16:38:12Z",
+  "note_count": 61,
   "packs": [
     {
       "pack_id": "notes_current",
@@ -80,7 +80,7 @@
       "pack_id": "notes_20260721",
       "path": "profiles/manman/packs/notes_20260721.jsonl",
       "format": "jsonl",
-      "note_count": 1,
+      "note_count": 2,
       "sealed": false,
       "sha256": null
     }
@@ -95,7 +95,7 @@
   "dedupe_index_path": "profiles/manman/dedupe_index.json",
   "builder_ledger_path": "profiles/manman/builder-ledger.jsonl",
   "notes": {
-    "active": 60,
+    "active": 61,
     "mature": 0,
     "suspended": 0,
     "archived": 0
