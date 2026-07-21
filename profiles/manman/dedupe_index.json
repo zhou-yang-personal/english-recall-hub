@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-21T04:39:10Z",
+  "updated_at": "2026-07-21T16:38:12Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -61,6 +61,7 @@
     "word:signature": "note_word_signature_v1",
     "word:dorm": "note_word_dorm_v1",
     "word:archive": "note_word_archive_v1",
-    "expression:i_generated_a_new_report_using_the_latest_ftth_coverage_information_could_you_please_approve_it": "note_expression_i_generated_a_new_report_using_the_latest_ftth_coverage_information_could_you_please_approve_it_v1"
+    "expression:i_generated_a_new_report_using_the_latest_ftth_coverage_information_could_you_please_approve_it": "note_expression_i_generated_a_new_report_using_the_latest_ftth_coverage_information_could_you_please_approve_it_v1",
+    "expression:around_what_time_can_i_pick_up_my_visa_today": "note_expression_around_what_time_can_i_pick_up_my_visa_today_v1"
   }
 }
