@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-21T16:38:12Z",
+  "updated_at": "2026-07-21T20:38:46Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -62,6 +62,9 @@
     "word:dorm": "note_word_dorm_v1",
     "word:archive": "note_word_archive_v1",
     "expression:i_generated_a_new_report_using_the_latest_ftth_coverage_information_could_you_please_approve_it": "note_expression_i_generated_a_new_report_using_the_latest_ftth_coverage_information_could_you_please_approve_it_v1",
-    "expression:around_what_time_can_i_pick_up_my_visa_today": "note_expression_around_what_time_can_i_pick_up_my_visa_today_v1"
+    "expression:around_what_time_can_i_pick_up_my_visa_today": "note_expression_around_what_time_can_i_pick_up_my_visa_today_v1",
+    "expression:fbb_penetration_is_approaching_50_percent": "note_expression_fbb_penetration_is_approaching_50_percent_v1",
+    "expression:near_parity_with_tigo_but_no_clear_speed_advantage": "note_expression_near_parity_with_tigo_but_no_clear_speed_advantage_v1",
+    "expression:as_market_growth_slows_customer_experience_becomes_a_key_driver_of_subscriber_growth": "note_expression_as_market_growth_slows_customer_experience_becomes_a_key_driver_of_subscriber_growth_v1"
   }
 }
