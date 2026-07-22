@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-21T20:38:46Z",
+  "updated_at": "2026-07-22T00:39:16Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -65,6 +65,9 @@
     "expression:around_what_time_can_i_pick_up_my_visa_today": "note_expression_around_what_time_can_i_pick_up_my_visa_today_v1",
     "expression:fbb_penetration_is_approaching_50_percent": "note_expression_fbb_penetration_is_approaching_50_percent_v1",
     "expression:near_parity_with_tigo_but_no_clear_speed_advantage": "note_expression_near_parity_with_tigo_but_no_clear_speed_advantage_v1",
-    "expression:as_market_growth_slows_customer_experience_becomes_a_key_driver_of_subscriber_growth": "note_expression_as_market_growth_slows_customer_experience_becomes_a_key_driver_of_subscriber_growth_v1"
+    "expression:as_market_growth_slows_customer_experience_becomes_a_key_driver_of_subscriber_growth": "note_expression_as_market_growth_slows_customer_experience_becomes_a_key_driver_of_subscriber_growth_v1",
+    "expression:ftth_expansion_is_steadily_replacing_legacy_access": "note_expression_ftth_expansion_is_steadily_replacing_legacy_access_v1",
+    "expression:the_fiber_subscriber_base_is_expanding_rapidly": "note_expression_the_fiber_subscriber_base_is_expanding_rapidly_v1",
+    "expression:average_broadband_speed_reached_130_mbps_in_2026_up_60_percent_in_one_year": "note_expression_average_broadband_speed_reached_130_mbps_in_2026_up_60_percent_in_one_year_v1"
   }
 }
