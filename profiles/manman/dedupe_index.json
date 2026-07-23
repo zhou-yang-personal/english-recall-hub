@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-07-22T08:39:34Z",
+  "updated_at": "2026-07-23T00:42:27Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -71,6 +71,7 @@
     "expression:average_broadband_speed_reached_130_mbps_in_2026_up_60_percent_in_one_year": "note_expression_average_broadband_speed_reached_130_mbps_in_2026_up_60_percent_in_one_year_v1",
     "expression:claro_trails_competitors_in_customer_experience": "note_expression_claro_trails_competitors_in_customer_experience_v1",
     "expression:claro_continues_to_grow_but_slower_subscriber_expansion_and_limited_speed_leadership_constrain_value_growth": "note_expression_claro_continues_to_grow_but_slower_subscriber_expansion_and_limited_speed_leadership_constrain_value_growth_v1",
-    "expression:ftth_subscribers_are_growing_rapidly_with_a_cagr_of_41_percent": "note_expression_ftth_subscribers_are_growing_rapidly_with_a_cagr_of_41_percent_v1"
+    "expression:ftth_subscribers_are_growing_rapidly_with_a_cagr_of_41_percent": "note_expression_ftth_subscribers_are_growing_rapidly_with_a_cagr_of_41_percent_v1",
+    "expression:i_forgot_the_apartments_exact_address_could_you_send_it_to_me_again_im_worried_i_may_need_to_provide_it_to_the_immigration_officer_upon_arrival": "note_expression_i_forgot_the_apartments_exact_address_could_you_send_it_to_me_again_im_worried_i_may_need_to_provide_it_to_the_immigration_officer_upon_arrival_v1"
   }
 }
