@@ -1,0 +1,136 @@
+English Recall Hub Project Source
+Version: 0.2.0-web-mvp-design
+
+Repository:
+zhou-yang-personal/english-recall-hub
+
+Default profile:
+manman
+
+Branches and paths:
+DRAFT_BRANCH=draft
+DRAFT_PATH=profiles/manman/inbox
+CARD_BRANCH=card
+CARD_PATH=profiles/manman
+PROGRESS_BRANCH=progress
+PROGRESS_PATH=profiles/manman
+DEV_BRANCH=dev
+
+Core data flow:
+ChatGPT Project
+→ draft DraftNote inbox
+→ Builder validation / dedupe / normalization
+→ card formal Notes and Templates
+→ Web/PWA sync to IndexedDB
+→ recognition / production review
+→ local SRS progress
+→ Cloudflare Worker backup to progress branch
+
+Product boundary:
+This is a personal/family multilingual recall tool, not a dictionary, course platform or complete SaaS.
+Normal use is: open app → choose local Profile → review.
+The first version has no registration, normal password, GitHub OAuth or user-entered GitHub token.
+A new device may use a one-time Profile setup link/QR to enable cloud backup. Later daily use only selects the Profile.
+
+Approved Web MVP stack:
+React + TypeScript + Vite
+React Router
+Dexie + IndexedDB
+Zod
+Web Speech API
+vite-plugin-pwa
+Cloudflare Workers Static Assets
+Cloudflare Worker API
+GitHub card/progress branches
+
+Runtime rules:
+IndexedDB is the runtime source of truth.
+GitHub card is the formal content source.
+GitHub progress is a bounded backup source, not a realtime database.
+GitHub write credentials exist only in Cloudflare Secrets and never in frontend JavaScript.
+Sync or backup failure must preserve local data.
+
+Draft/Card rules:
+ChatGPT writes DraftNote only.
+Do not bypass Builder.
+One DraftNote = one knowledge point.
+One Note = one knowledge point.
+One Note may generate multiple Cards.
+Pack is a physical storage shard; Collection/Tag is learning classification.
+
+MVP card types:
+recognition
+production
+
+Do not enable cloze/output/contrast in MVP because current formal Notes do not provide all required fields such as cloze_sentence.
+Card ID must be stable:
+hash(note_id + template_id + card_type)
+
+Current card compatibility:
+The current manman manifest contains 130 Notes in 27 listed packs.
+Current pack sha256 fields are null.
+The MVP compares manifest.updated_at; when changed, it re-reads listed packs/templates and upserts local data.
+Do not fabricate checksum validation.
+
+Pronunciation and languages:
+Note pronunciation only uses text, lang and optional hint_cn.
+Web Speech API provides playback.
+English preferences: en-US / en-GB.
+Spanish preference: es-MX with es-US / es-ES fallback.
+Speed choices: 0.75x / 1.0x / 1.25x.
+UI is Chinese in MVP, but learning data supports en/es/other language codes.
+Do not implement persistent audio-file cache, cloud TTS, IPA, speech recognition or pronunciation scoring.
+
+Progress rules:
+Every rating is saved to IndexedDB first.
+Backup is triggered while the app is active: app open, review completion, elapsed interval or manual action.
+PWA does not guarantee exact background scheduling.
+Progress backup stores latest.json and bounded daily snapshots by profile/device.
+MVP assumes one primary write device per Profile.
+Restore replaces ReviewState only; it does not replace formal Note/Card content.
+
+MVP must include:
+local Profile selection and isolation
+public card sync
+IndexedDB/offline review
+recognition + production
+unknown/fuzzy/known simple SRS
+English + Spanish TTS
+listening mode
+local progress persistence
+Worker progress backup/restore
+progress JSON export/import
+installable PWA/mobile layout
+
+MVP must not include:
+native iOS/Android app
+App Store/TestFlight/APK
+normal account/password system
+GitHub OAuth or browser PAT input
+multi-device realtime merge
+exact background scheduler or push notifications
+advanced card types
+cloud TTS/audio file cache/IPA/pronunciation scoring
+D1/KV/R2 or commercial database
+payment/ads/community decks
+
+Development source of truth:
+AGENTS.md
+AGENTS.common.md
+AGENTS.project.md
+README.md
+docs/design/current-core-design.md
+docs/design/web-mvp-framework-design.md
+docs/requirements/current-requirements.md
+docs/handoff/latest-handoff.md
+docs/changes/CHANGELOG-dev.md
+
+Secrets that must never be stored in this file or Git:
+GITHUB_PROGRESS_TOKEN
+PROFILE_SYNC_KEYS
+Cloudflare secrets
+GitHub PAT
+personal credentials
+IndexedDB exports
+progress runtime snapshots
+logs/build artifacts
