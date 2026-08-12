@@ -1,322 +1,379 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.1.0-docs-baseline`
-Updated: `2026-07-07`
+Version: `0.2.0-web-mvp-design`  
+Updated: `2026-08-12`  
 Branch: `dev`
 
 ## 1. Product Positioning
 
-English Recall Hub is a GitHub-backed, local-first mobile English recall app. It turns ChatGPT English-learning notes into durable, reviewable knowledge units and supports personal/family profiles.
+English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具。它不是通用词典、课程平台或完整 SaaS，而是把 ChatGPT 学习记录转化为可持续复习内容的轻量系统。
 
-It is not a generic dictionary, course app, or simple vocabulary notebook. Its value is the closed loop:
+核心闭环：
 
 ```text
 ChatGPT learning question
 → DraftNote
-→ validated Note
+→ Builder validation / dedupe / normalization
+→ formal Note
 → generated Card
-→ mobile SRS review
-→ local progress
-→ recent progress backup
+→ Web/PWA local review
+→ local SRS progress
+→ recent cloud backup
 ```
 
-## 2. Branch Model
+第一版的成功标准不是功能数量，而是用户能够在 iPhone、Android 和 PC 上快速打开、选择 Profile、同步卡片、离线复习、朗读并恢复进度。
+
+## 2. Final MVP Architecture
 
 ```text
-main       stable repository documentation
-dev        app source code and project documents
-draft      raw DraftNote inbox from ChatGPT Projects / app import
-card       validated formal Note packs and templates
-progress   recent profile/device progress backups
+Frontend / PWA
+  React + TypeScript + Vite
+  React Router
+  Dexie + IndexedDB
+  Web Speech API
+  vite-plugin-pwa
+
+Deployment / Backend
+  Cloudflare Workers Static Assets
+  Cloudflare Worker API
+  Cloudflare Secrets
+
+Content / Backup
+  GitHub draft branch
+  GitHub card branch
+  GitHub progress branch
 ```
 
-Branch responsibilities:
+第一版不开发 React Native/Expo、SQLite 原生应用、App Store/TestFlight 或 APK。
 
-- `dev`: code, design, requirements, governance docs.
-- `draft`: append-only draft input. It can contain duplicate or imperfect AI-generated drafts.
-- `card`: formal content library. App reads this branch.
-- `progress`: recent backup snapshots. App writes this branch at low frequency.
+## 3. Branch Responsibilities
 
-## 3. Data Flow
+```text
+main       stable documentation
+
+dev        application code, tests and project documents
+
+draft      raw DraftNote inbox written by ChatGPT/import flow
+
+card       validated formal Notes, Templates and manifest
+
+progress   recent profile/device progress snapshots
+```
+
+Hard boundaries:
+
+- ChatGPT writes DraftNote only; it does not bypass Builder.
+- Builder owns formal Note/Card publishing.
+- Web App reads `card` and writes review state locally first.
+- Worker writes `progress` with backend-only GitHub credentials.
+- `draft`, `card`, `progress` must never be mixed.
+
+## 4. Runtime Data Flow
+
+### 4.1 Draft to Card
 
 ```text
 ChatGPT Project
-  ↓
-DraftNote in draft branch
-  ↓
-Builder job
-  - schema validation
-  - dedupe_key check
-  - quality filtering
-  - collection/tag enrichment
-  - Note normalization
-  - pack publishing
-  ↓
-Formal Notes in card branch
-  ↓
-Mobile App sync
-  - read manifest
-  - download changed packs
-  - import SQLite
-  - generate Cards from Templates
-  ↓
-SRS review in local SQLite
-  ↓
-Progress backup to progress branch
+→ draft/profiles/{profile_id}/inbox/YYYY/MM/YYYY-MM-DD.jsonl
+→ Builder validates schema
+→ checks dedupe_key
+→ rejects / merges / publishes
+→ card/profiles/{profile_id}/manifest.json
+→ card/profiles/{profile_id}/packs/*.jsonl
+→ card/profiles/{profile_id}/templates/*.json
 ```
 
-Important boundary:
+### 4.2 Card Sync to Browser
 
-- Draft Builder publishes formal Notes, not next-day review queues.
-- The App decides review queues locally by SRS, daily limits, study scope and user progress.
-
-## 4. Core Concepts
-
-### 4.1 DraftNote
-
-DraftNote is the direct output from ChatGPT or app import. It is allowed to be incomplete or duplicated.
-
-Minimum draft fields:
-
-```json
-{
-  "draft_id": "draft_20260707_001",
-  "profile_id": "manman",
-  "source_project": "英文学习",
-  "source_question": "be concerned with 是什么意思",
-  "note_type": "phrase",
-  "core": "be concerned with",
-  "meaning_cn": "与……有关；关注的是……",
-  "source_sentence": "people who have been concerned with matters of consequence",
-  "dedupe_key": "phrase:be_concerned_with",
-  "collections": ["book:little-prince"],
-  "tags": ["phrase", "novel"],
-  "candidate_cards": ["recognition", "production", "cloze"]
-}
+```text
+Open PWA
+→ choose local Profile
+→ fetch card manifest
+→ compare manifest.updated_at with local sync state
+→ if changed, fetch listed packs/templates
+→ validate with Zod
+→ upsert Notes
+→ generate supported Cards
+→ upsert Cards
+→ keep previous local data if sync fails
 ```
 
-### 4.2 Note
+Current compatibility rule:
 
-One Note is one knowledge point. It is not one review question.
+- Existing `manman` manifest has 130 Notes in 27 packs.
+- Existing pack `sha256` fields are null.
+- MVP therefore uses `manifest.updated_at`; it does not claim checksum verification.
+- When the manifest changes, all listed packs are re-read and upserted. This is acceptable at the current scale.
 
-Example:
+### 4.3 Review
 
-```json
-{
-  "note_id": "note_phrase_be_concerned_with_v1",
-  "profile_id": "manman",
-  "type": "phrase",
-  "core": "be concerned with",
-  "meaning_cn": "与……有关；关注的是……",
-  "source_sentence": "people who have been concerned with matters of consequence",
-  "examples": [
-    {
-      "en": "This analysis is mainly concerned with fiber user growth.",
-      "cn": "这个分析主要关注光纤用户增长。"
-    }
-  ],
-  "pronunciation": {
-    "text": "be concerned with",
-    "lang": "en",
-    "hint_cn": "concerned 重音在第二音节；with 可弱读。"
-  },
-  "dedupe_key": "phrase:be_concerned_with",
-  "collections": ["book:little-prince"],
-  "tags": ["phrase", "novel", "business-transfer"],
-  "status": "active"
-}
+```text
+IndexedDB due query
+→ recognition / production card
+→ reveal answer
+→ unknown / fuzzy / known
+→ update ReviewState immediately
+→ recalculate dueAt
+→ continue offline
 ```
 
-### 4.3 Card
+### 4.4 Progress Backup
 
-Cards are concrete review prompts generated from Notes through Templates.
+```text
+Local ReviewState
+→ backup trigger
+→ Worker API validation
+→ Worker uses GitHub Secret
+→ progress/profiles/{profile_id}/devices/{device_id}/latest.json
+→ progress/profiles/{profile_id}/devices/{device_id}/snapshots/YYYY-MM-DD.json
+```
 
-One Note can generate multiple Cards:
+PWA cannot guarantee an exact background schedule. Backup is best-effort and is triggered by app open, review completion, elapsed backup interval and manual action.
 
-| Card type | Goal |
-|---|---|
-| recognition | English → Chinese understanding |
-| production | Chinese → English active recall |
-| cloze | phrase / grammar pattern completion |
-| contrast | confusing expression comparison |
-| output | sentence creation / usage |
+## 5. Core Domain Model
 
-Card ID must be stable:
+### 5.1 DraftNote
+
+Raw AI-generated learning input. It may be incomplete or duplicated and is never reviewed directly.
+
+### 5.2 Note
+
+One Note equals one knowledge point.
+
+Required MVP fields:
+
+```text
+note_id
+profile_id
+type
+core
+meaning_cn
+explanation_cn
+source_sentence
+examples
+pronunciation
+dedupe_key
+collections
+tags
+status
+created_at
+updated_at
+```
+
+Multilingual extension fields in browser storage:
+
+```text
+learning_lang
+native_lang
+```
+
+If old Notes do not contain them, defaults are inferred from Profile settings and `pronunciation.lang`.
+
+### 5.3 Card
+
+A concrete review prompt generated from a Note and Template.
+
+Stable ID:
 
 ```text
 card_id = hash(note_id + template_id + card_type)
 ```
 
-### 4.4 Template
-
-Template defines how a Note produces Cards. It is a rule, not visual styling.
-
-Example:
-
-```json
-{
-  "template_id": "phrase.v1",
-  "note_type": "phrase",
-  "cards": [
-    {
-      "card_type": "recognition",
-      "front": "{{core}} 是什么意思？",
-      "back": "{{meaning_cn}}"
-    },
-    {
-      "card_type": "production",
-      "front": "“{{meaning_cn_short}}”用英文怎么说？",
-      "back": "{{core}}"
-    },
-    {
-      "card_type": "cloze",
-      "front": "{{cloze_sentence}}",
-      "back": "{{core}}"
-    }
-  ]
-}
-```
-
-### 4.5 Pack
-
-Pack is a physical storage shard, not a learning category.
-
-Recommended rule:
+MVP enabled types:
 
 ```text
-Seal one pack every 5,000 Notes or when raw size exceeds about 5MB.
-Sealed packs are not modified.
-Recent additions go into notes_current.jsonl.
+recognition
+production
 ```
 
-Example card branch layout:
+Not enabled in MVP:
 
 ```text
-profiles/manman/
-  manifest.json
-  packs/
-    notes_000001_005000.jsonl.gz
-    notes_current.jsonl
-  templates/
-    word.v1.json
-    phrase.v1.json
-    sentence.v1.json
-    grammar.v1.json
-  collections.json
+cloze
+output
+contrast
 ```
 
-### 4.6 Collection and Tag
+Reason: current templates refer to `cloze_sentence`, while current formal Notes do not provide that field. Unsupported templates must be ignored rather than producing broken cards.
 
-Collection/tag controls learning scope.
+### 5.4 ReviewState
 
-Examples:
+Minimum fields:
 
 ```text
-collection: book:to-all-the-boys-i-loved-before
-collection: scenario:business-email
-collection: scenario:ppt-speaking
-
-tag: word
-tag: phrase
-tag: grammar
-tag: novel
-tag: business-transfer
+profile_id
+card_id
+state
+due_at
+interval_days
+review_count
+lapse_count
+last_reviewed_at
+updated_at
 ```
 
-Default study mode learns all active cards. Users can optionally include/exclude collections or tags.
+### 5.5 ProgressSnapshot
 
-## 5. Pronunciation MVP
+Minimum cloud-backup fields:
 
-MVP only supports:
+```text
+schema_version
+profile_id
+device_id
+created_at
+card_manifest_updated_at
+review_states
+settings_subset
+```
 
-1. Note pronunciation metadata.
-2. One-tap word / phrase / sentence TTS playback.
-3. US / UK accent preference.
-4. 0.75x / 1.0x / 1.25x speed.
-5. Local audio cache.
-6. Audio-first listening review mode.
+The snapshot backs up progress only; it does not duplicate formal Notes or Cards.
 
-Data rule:
+## 6. Local Database
+
+Dexie/IndexedDB is the runtime source of truth.
+
+MVP tables:
+
+```text
+profiles
+settings
+notes
+cards
+reviewStates
+syncStates
+```
+
+No full event-log table is required for MVP. Review history, analytics and complex conflict resolution are deferred.
+
+Profile isolation is mandatory. Every local Note, Card, ReviewState and SyncState query must include `profile_id`.
+
+## 7. Profile and Security Model
+
+The first version has no registration, normal password, GitHub OAuth or user-entered GitHub token.
+
+Normal flow:
+
+```text
+Open app
+→ choose Profile
+→ review
+```
+
+Cloud backup enrollment on a new device uses a one-time setup link or QR containing a Profile sync key. The PWA stores the key locally and removes it from the visible URL. Later launches only show Profile selection.
+
+Security boundaries:
+
+- GitHub PAT exists only in Cloudflare Secret.
+- Profile sync keys are never committed to GitHub.
+- Worker validates profile whitelist, sync key, device_id and request size.
+- First version assumes one primary write device per Profile.
+- Local-only mode remains usable without a sync key.
+
+## 8. Review Scheduling
+
+The MVP uses a transparent interval model, not FSRS.
+
+Initial scheduling:
+
+```text
+unknown → 10 minutes
+fuzzy   → 1 day
+known   → 3 days
+```
+
+Subsequent scheduling:
+
+```text
+unknown → 10 minutes; lapse_count + 1
+fuzzy   → max(1 day, interval × 1.5)
+known   → min(180 days, max(3 days, interval × 2.5))
+```
+
+Daily queue priority:
+
+```text
+overdue learning/relearning
+→ due review
+→ new cards within daily limit
+```
+
+Default daily new-card limit: 10. This must be configurable per Profile.
+
+## 9. Pronunciation and Languages
+
+Use Web Speech API only.
+
+MVP supports:
+
+```text
+English: en-US / en-GB
+Spanish: es-MX with fallback to es-US / es-ES
+Speed: 0.75 / 1.0 / 1.25
+```
+
+Note fields remain minimal:
 
 ```json
 {
   "pronunciation": {
-    "text": "jaw",
+    "text": "be concerned with",
     "lang": "en",
-    "hint_cn": "optional Chinese pronunciation tip"
+    "hint_cn": "optional"
   }
 }
 ```
 
-Do not store accent, speed, cache policy or audio path in every Note. Those belong to profile settings and local cache.
+The browser selects an available voice matching the Profile preference. If no exact voice exists, fall back by language prefix, then to the system default.
 
-## 6. Local SQLite Role
+Web MVP does not implement persistent audio-file cache, cloud TTS, IPA generation or pronunciation scoring.
 
-The mobile app local SQLite database is the runtime source of truth for review.
+## 10. Offline and PWA
 
-Core tables:
+PWA service worker caches the application shell. Formal Note/Card data and progress remain in IndexedDB.
 
-```text
-profiles
-profile_settings
-notes
-cards
-review_state
-review_events
-audio_cache
-sync_state
-backup_state
-```
+Offline behavior:
 
-GitHub card/progress branches are sync and recovery sources, not runtime databases.
+- After one successful sync, review must work without network.
+- Network failure must not delete local data.
+- Card sync, backup and restore show explicit status.
+- Backup failure leaves local progress intact and marks it pending.
 
-## 7. Progress Backup
+## 11. MVP Pages
 
-Progress backup is low-frequency and snapshot-based.
-
-Recommended triggers:
-
-- App open: check if backup is overdue.
-- Review completion: mark backup dirty if enough events accumulated.
-- Daily scheduled attempt.
-- Manual sync button.
-
-Progress branch layout:
+P0 pages:
 
 ```text
-profiles/manman/devices/iphone_001/
-  latest.json
-  snapshots/2026/07/progress_2026-07-07_2230.json.gz
-  events/2026/07/events_2026-07-07.jsonl.gz
+Profile Select
+Home
+Review
+Settings / Sync
 ```
 
-Retention:
+P1 page:
 
 ```text
-Last 7 days: keep frequent event backups.
-Last 30 days: keep daily latest snapshots.
-Older than 30 days: keep month-end snapshots only.
+Library / Search
 ```
 
-## 8. MVP Scope
+The UI is mobile-first, but must remain usable on desktop.
 
-Must have:
+## 12. Detailed Development Baseline
 
-- Multi-profile local accounts.
-- GitHub config per profile.
-- Card manifest sync.
-- Note import into SQLite.
-- Template-based Card generation.
-- SRS review with `unknown / fuzzy / known` feedback.
-- Pronunciation MVP.
-- Manual and low-frequency progress backup.
+The authoritative implementation-level design is:
 
-Explicitly not in MVP:
+```text
+docs/design/web-mvp-framework-design.md
+```
 
-- SaaS account system.
-- Full family permission management.
-- Pronunciation scoring.
-- Cloud TTS audio generation.
-- Audio branch.
-- Multi-device complex progress merge.
-- Commercial public service backend.
+It defines scope, modules, folder structure, APIs, data schema, use cases, estimates, acceptance criteria and risks.
+
+## 13. MVP Exclusions
+
+- Native mobile app.
+- Full account and permission system.
+- GitHub OAuth or browser PAT input.
+- Multi-device realtime merge.
+- Exact background task or push notification.
+- Advanced card types.
+- Cloud TTS/audio cache/pronunciation scoring.
+- Cloud database, payment, ads and community marketplace.
