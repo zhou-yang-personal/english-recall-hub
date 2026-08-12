@@ -15,10 +15,12 @@
 - Simplified card sync to compare `manifest.updated_at` and upsert listed packs when changed.
 - Removed persistent audio-file cache from Web MVP; retained browser system TTS and language/voice preferences.
 - Defined bounded progress snapshots through a Worker with GitHub credentials stored only in Cloudflare Secrets.
+- Updated external Project settings and the single Project Source file to remove the obsolete mobile/SQLite baseline.
 
 ### Added
 
 - `docs/design/web-mvp-framework-design.md` as the implementation-level baseline.
+- `docs/development/English-Recall-Hub-Project-Source.txt` as the single external Project Source.
 - Executable Dexie schema, module layout, Worker API and security boundaries.
 - Simple SRS rules and queue priority.
 - 22 acceptance use cases.
@@ -35,6 +37,8 @@ docs/design/current-core-design.md
 docs/design/web-mvp-framework-design.md
 docs/requirements/current-requirements.md
 docs/handoff/latest-handoff.md
+docs/development/project-entry-settings.md
+docs/development/English-Recall-Hub-Project-Source.txt
 docs/changes/CHANGELOG-dev.md
 ```
 
