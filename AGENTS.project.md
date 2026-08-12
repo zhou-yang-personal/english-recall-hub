@@ -1,27 +1,28 @@
 # AGENTS.project.md｜English Recall Hub 项目定制检查清单
 
-本文件只承载本项目定制规则。每日治理同步任务不得自动覆盖本文件；只有用户在当前会话中明确授权时才可以修改。
+本文件只承载本项目定制规则。公共治理同步任务不得自动覆盖本文件；只有用户在当前会话中明确授权时才可以修改。
 
 ## B0. 项目身份
 
-- [ ] 项目名称已确认：`English Recall Hub`。
-- [ ] 仓库已确认：`zhou-yang-personal/english-recall-hub`。
-- [ ] 产品定位已确认：GitHub-backed English recall app，把 ChatGPT 英文学习记录沉淀为可复习 Note/Card，并在手机端本地优先复习。
-- [ ] 核心用户场景已确认：单词、短语、语法、句子、日常/商务表达从 ChatGPT Project 进入 draft，经整理后进入 card 分支，App 同步后做 SRS 复习和进度备份。
-- [ ] 推荐技术栈已确认：移动端优先；MVP 可使用 `React Native / Expo + TypeScript + SQLite + system TTS + GitHub REST API`，如后续改为 Flutter 或原生实现，必须先更新本文件。
+- [ ] 项目名称：`English Recall Hub`。
+- [ ] 仓库：`zhou-yang-personal/english-recall-hub`。
+- [ ] 当前版本：`0.2.0-web-mvp-design`。
+- [ ] 产品定位：面向个人和家庭的多语言主动回忆工具，把 ChatGPT 学习记录转为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和进度备份。
+- [ ] 第一版平台：iPhone、Android、PC 浏览器；可安装为 PWA，不开发原生 iOS/Android App。
+- [ ] 第一版技术栈：`React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Workers Static Assets + Cloudflare Worker API`。
 
-## B1. 当前开发基线检查
+## B1. 分支与开发基线
 
-- [ ] 默认分支已确认：`main`。
-- [ ] 当前 source-of-truth 开发分支已确认：`dev`。
-- [ ] 计划数据分支已确认：`draft`、`card`、`progress`。
-- [ ] 修改前已从目标分支读取最新目标文件。
-- [ ] 常规任务分支命名建议使用：`chatgpt/task-xxx`。
-- [ ] Codex 任务分支命名建议使用：`codex/task-xxx`。
-- [ ] PR 目标分支默认已确认：`dev`。
+- [ ] 默认分支：`main`。
+- [ ] source-of-truth 开发分支：`dev`。
+- [ ] 数据分支：`draft`、`card`、`progress`。
+- [ ] 常规任务分支：`chatgpt/task-xxx`。
+- [ ] Codex 任务分支：`codex/task-xxx`。
+- [ ] PR 默认目标分支：`dev`。
 - [ ] 只有用户明确要求直接修改目标分支时，才允许跳过任务分支。
+- [ ] 修改前必须从目标分支重新读取最新文件和 SHA。
 
-## B2. 本项目必读文件检查
+## B2. 必读文件
 
 开始任何需求设计、代码修改、UI 调整、数据模型调整、同步逻辑调整或 PR 验收前，必须读取：
 
@@ -30,104 +31,153 @@
 - [ ] `AGENTS.project.md`
 - [ ] `README.md`
 - [ ] `docs/design/current-core-design.md`
+- [ ] `docs/design/web-mvp-framework-design.md`
 - [ ] `docs/requirements/current-requirements.md`
 - [ ] `docs/handoff/latest-handoff.md`，如存在。
 - [ ] `docs/changes/CHANGELOG-dev.md`，如存在。
 
 按任务类型追加读取：
 
-- [ ] 涉及 ChatGPT GitHub connector 操作时，已读取项目内 connector guide。
-- [ ] 涉及版本时，已读取所有项目版本文件。
-- [ ] 涉及依赖时，已读取 package / lock / dependency manifest。
-- [ ] 涉及移动端、SQLite、GitHub 同步、TTS、SRS、后台任务或数据分支时，已读取对应模块文件。
+- [ ] GitHub connector：`docs/development/chatgpt-github-connector-guide.md`。
+- [ ] 版本变更：全部版本文件。
+- [ ] 依赖变更：`package.json` 和 lock 文件。
+- [ ] Cloudflare、IndexedDB、TTS、PWA、SRS、同步或备份：对应源码、配置和测试。
 
-## B3. 本项目产品方向一致性检查
+## B3. 产品与架构硬约束
 
-- [ ] 本项目不是普通背单词 App、通用词典或课程 App，而是个人/家庭英文主动回忆系统。
-- [ ] 核心链路必须保持：`ChatGPT Project → draft 分支 → Builder 校验/去重/编译 → card 分支 → App 本地 SQLite → SRS 复习 → progress 分支近期备份`。
-- [ ] ChatGPT 只作为 DraftNote 生成入口，不承担正式卡片库可靠写入、去重、校验和归档职责。
-- [ ] App 必须 local-first：本地 SQLite 是运行库，GitHub 只做内容同步和进度备份。
-- [ ] `draft` 是入口，`card` 是正式内容库，`progress` 是恢复库，三者不得混用。
-- [ ] Pack 是物理分片，不作为主要学习分类；学习分类使用 `collection` / `tag` / `source`。
+- [ ] 项目不是词典、课程平台或完整 SaaS，而是个人/家庭主动回忆工具。
+- [ ] 核心链路保持：`ChatGPT Project → draft → Builder → card → Web/PWA IndexedDB → SRS → progress`。
+- [ ] ChatGPT 只生成 DraftNote，不直接绕过 Builder 修改正式 Note/Card。
+- [ ] Web App local-first：IndexedDB 是运行时数据源；GitHub 只负责内容同步和进度备份。
+- [ ] 第一版无注册、无普通密码、无 GitHub OAuth、无前端 GitHub token。
+- [ ] 正常打开后只选择本地 Profile；新设备可通过一次性 Profile setup link 配置云备份凭证。
+- [ ] GitHub 写权限只保存在 Cloudflare Secret 中，不进入浏览器、仓库、日志或 URL 查询参数。
+- [ ] Pack 是物理存储分片；Collection/Tag 才是学习范围。
+- [ ] UI 第一版为中文，但数据模型必须支持 `learning_lang=en/es/...`。
 
-## B4. 数据模型约束
+## B4. 当前 MVP 范围
 
-- [ ] 采用 `DraftNote → Note → Card → ReviewState → ProgressSnapshot` 数据链路。
-- [ ] 一个 Note 表示一个知识点；一个 Note 可由 template 生成多张 Card。
-- [ ] Card ID 必须稳定，可由 `note_id + template_id + card_type` hash 生成。
-- [ ] Note 必须有 `dedupe_key`，用于避免重复知识点。
-- [ ] Note 状态至少区分：`active`、`mature`、`suspended`、`archived`。
-- [ ] Draft 允许重复和待清洗；正式 Note 不允许未经校验直接发布。
-- [ ] 正式 card 分支按 pack 分片；sealed pack 原则上不再修改。
-- [ ] `notes_current.jsonl` 仅承接近期新增内容，达到阈值后封包。
-- [ ] Manifest 是 App 同步入口；App 不扫描 GitHub 目录作为主同步机制。
+必须实现：
 
-## B5. 语音与听力 MVP 约束
+1. 本地 Profile 选择和隔离。
+2. 读取公开 `card` 分支的 manifest、pack 和 template。
+3. Dexie/IndexedDB 本地保存 Note、Card、复习状态和同步状态。
+4. Recognition / Production 两种卡片。
+5. Unknown / Fuzzy / Known 三档简单 SRS。
+6. 离线打开和离线复习。
+7. Web Speech API 朗读；英文/西语语言选择和三档速度。
+8. 听力模式：先播放、隐藏文本、揭示答案。
+9. 本地进度即时保存。
+10. Worker 后台备份和恢复 `progress`。
+11. 本地 progress JSON 导出/导入兜底。
+12. PWA 安装与移动端适配。
 
-MVP 只做以下发音能力：
+第一版明确不做：
 
-1. 每个 Note 有 `pronunciation` 字段。
-2. 单词 / 短语 / 句子一键朗读。
-3. 美音 / 英音偏好。
-4. 0.75x / 1.0x / 1.25x 速度。
-5. 本地缓存。
-6. 听力复习模式。
+- 普通账号密码、GitHub OAuth、用户输入 PAT。
+- 原生 iOS/Android App、App Store、TestFlight、APK。
+- 多设备实时冲突合并。
+- 精确后台定时任务、Push Notification。
+- Cloze / Output / Contrast 正式启用。
+- 云 TTS、音频文件缓存、IPA、发音评分。
+- D1、KV、R2、商业数据库和复杂后端框架。
+- 支付、广告、社区卡组、复杂埋点。
 
-数据边界：
+## B5. 数据模型约束
 
-- [ ] Note 只保存 `pronunciation.text`、`pronunciation.lang`、可选 `pronunciation.hint_cn`。
-- [ ] 用户偏好如 accent、speed、cache_enabled 放入 profile settings，不在每个 Note 中重复。
-- [ ] 音频文件只存本地 cache，不提交到 `card` 分支。
-- [ ] MVP 不做 IPA、云端音频、音频分支、发音评分、音素级纠错。
+- [ ] 数据链路：`DraftNote → Note → Card → ReviewState → ProgressSnapshot`。
+- [ ] 一个 Note 表示一个知识点；一个 Note 可生成多张 Card。
+- [ ] `card_id = hash(note_id + template_id + card_type)`，必须跨设备稳定。
+- [ ] Note 必须有 `dedupe_key`。
+- [ ] Note 状态至少包括：`active`、`mature`、`suspended`、`archived`。
+- [ ] 第一版兼容 card 分支现有 schema，不要求 Builder 先重构。
+- [ ] 当前 manifest 的 pack `sha256` 为空，因此 MVP 使用 `manifest.updated_at` 判断变化，变化后重新读取列出的 pack 并 upsert；不得伪造 checksum 校验。
+- [ ] 现有模板引用的 `cloze_sentence` 在 Note 中不存在，MVP 只启用 recognition / production。
+- [ ] 同步失败不得清空本地 Note/Card；继续使用最后一次成功数据。
 
-## B6. 同步与备份约束
+## B6. TTS 与多语言约束
 
-- [ ] App 打开时强制检查 card manifest；无网络时使用本地 SQLite。
-- [ ] 复习结果先写本地 SQLite，不得每答一题写 GitHub。
-- [ ] progress 分支只保存低频 snapshot / event backup，不做实时数据库。
-- [ ] progress 备份按 profile/device 独立目录，避免多设备覆盖。
-- [ ] 第一版默认一个 profile 只有一个主设备写 progress；多设备复杂合并后续再做。
-- [ ] 云端只保留近期备份，避免 progress 分支长期膨胀。
+- [ ] Note 中只保存 `pronunciation.text`、`pronunciation.lang`、可选 `pronunciation.hint_cn`。
+- [ ] voice、accent、speed 属于 Profile 设置，不在每个 Note 中重复。
+- [ ] 使用浏览器 Web Speech API，实际 voice 以设备可用列表为准，必须有语言级 fallback。
+- [ ] 英语支持 `en-US` / `en-GB`；西语优先支持 `es-MX`，并兼容 `es-ES` / `es-US`。
+- [ ] 速度仅提供 `0.75x / 1.0x / 1.25x`。
+- [ ] Web MVP 不承诺音频文件缓存；缓存的是卡片、进度和语音偏好。
 
-## B7. 本项目版本检查
+## B7. 进度备份约束
 
-- [ ] 当前版本已确认：`0.1.0-docs-baseline`。
-- [ ] README 当前版本已同步：`README.md`。
-- [ ] 最新交接版本已同步：`docs/handoff/latest-handoff.md`。
-- [ ] 变更记录已同步：`docs/changes/CHANGELOG-dev.md`。
-- [ ] 暂无代码 package 版本文件；新增 App 工程后必须补充对应版本文件清单。
-- [ ] 不改依赖时，未修改 lock 文件。
+- [ ] 每次评分立即写 IndexedDB。
+- [ ] PWA 不承诺精确后台执行；备份触发为：打开应用、完成复习、距离上次备份超过阈值、手动备份。
+- [ ] Worker API 使用 Profile 白名单、sync key、请求体大小限制和安全 device_id。
+- [ ] 第一版每个 Profile 只有一个主写设备；其他设备需先恢复并明确接管。
+- [ ] `progress` 分支保存 `latest.json` 和有限天数的日快照，不保存完整 IndexedDB、音频、日志或构建产物。
+- [ ] 恢复时只覆盖 ReviewState 和必要设置，不覆盖 card 内容源。
 
-## B8. 本项目构建与 CI 检查
+## B8. 工程与模块约束
 
-当前状态：
+计划目录：
 
-- [ ] 当前只有文档基线，尚未创建移动端 App 工程。
-- [ ] 当前未建立 CI；未发现 CI 时，不得声称 CI 通过。
-- [ ] App 工程创建后，必须在本文件补充安装、开发、构建、类型检查和测试命令。
+```text
+src/app              页面与路由
+src/components       复用 UI
+src/domain           Note/Card/SRS 纯业务逻辑
+src/db               Dexie schema 与 repository
+src/services         card sync、TTS、progress、export/import
+src/config           Profile 与运行配置
+worker                Cloudflare Worker API
+tests                 unit/component/e2e
+```
 
-## B9. 本项目禁止事项检查
+- [ ] 不引入 Redux/Zustand；首版使用 React state/context 和 Dexie live query。
+- [ ] 不引入 Axios、Hono、tRPC、GraphQL、Tailwind 或重型 UI 组件库。
+- [ ] 网络请求使用原生 `fetch`。
+- [ ] 数据边界使用 Zod 校验。
+- [ ] 样式使用 CSS Modules / CSS Variables。
 
-- [ ] 不提交 GitHub token、ChatGPT Project 配置密钥、个人凭据或设备私钥。
-- [ ] 不提交手机本地 SQLite、音频缓存、progress 运行快照到 `dev`。
-- [ ] 不把音频文件写入 `card` 分支作为 MVP 主链路。
-- [ ] 不让 ChatGPT 直接写正式 Note/Card 绕过 Builder 校验。
-- [ ] 不把 pack 作为产品主分类暴露给用户。
-- [ ] 不在 MVP 做完整 SaaS 账户系统、发音评分或多设备复杂冲突合并。
-- [ ] 不做无关 UI 风格重写。
-- [ ] 不修改用户未授权的依赖、CI、发布或数据分支历史。
+## B9. 版本、构建与测试
 
-## B10. 本项目交付附加要求
+当前文档版本文件：
 
-每次修改完成后必须汇报：目标分支、任务分支、commit hash、最新版本号、修改文件清单、做了什么、没做什么、是否修改依赖 / lock 文件、是否执行 build / test / check、未验证项和原因。
+- [ ] `README.md`
+- [ ] `AGENTS.project.md`
+- [ ] `docs/design/current-core-design.md`
+- [ ] `docs/design/web-mvp-framework-design.md`
+- [ ] `docs/requirements/current-requirements.md`
+- [ ] `docs/handoff/latest-handoff.md`
+- [ ] `docs/changes/CHANGELOG-dev.md`
 
-## B11. ChatGPT GitHub Connector 操作检查
+创建工程后追加：
 
-- [ ] 已读取项目内 connector guide。
-- [ ] 使用 `fetch_file` 获取文件内容和 sha。
-- [ ] 使用 `update_file` 更新已有 UTF-8 文本文件。
-- [ ] 使用 `create_file` 新增小型 UTF-8 文本文件。
-- [ ] 不使用 `update_ref` 做分支状态探测。
-- [ ] 每次写入后已回读关键文件确认。
-- [ ] 遇到 safety block、not fast-forward、sha 冲突时，已停止说明或重新读取后再判断，未盲目重试。
-- [ ] 操作结束前已复盘是否出现新的 connector 问题或更优流程。
+- [ ] `package.json`
+- [ ] `wrangler.jsonc` 或 `wrangler.toml`
+- [ ] PWA manifest 中的版本标记，如存在。
+
+计划命令：
+
+```text
+npm install
+npm run dev
+npm run build
+npm run typecheck
+npm run test
+npm run test:e2e
+npm run deploy
+```
+
+- [ ] 当前尚未创建应用代码和 CI；未执行时不得声称通过。
+- [ ] 不改依赖时不得修改 lock 文件。
+
+## B10. 禁止事项
+
+- [ ] 不提交 GitHub token、Cloudflare Secret、sync key、个人凭据或设备私钥。
+- [ ] 不提交 IndexedDB 导出、progress 运行快照到 `dev`、浏览器缓存、日志、安装包或构建产物。
+- [ ] 不把 GitHub token、Profile sync key 编译进前端 JS。
+- [ ] 不让 ChatGPT 直接修改正式 card pack。
+- [ ] 不把未来能力提前做成当前复杂模块。
+- [ ] 不做无关重构、全局格式化或未经授权的依赖/CI/部署变更。
+
+## B11. 交付要求
+
+每次修改后必须报告：目标分支、任务分支、commit/PR、版本、文件清单、核心逻辑、使用方式、验证命令和结果、未验证项、依赖/lock 变化及风险。
+
+GitHub connector 操作还必须：先读 connector guide；已有文件使用 `fetch_file + update_file`；新增小文件使用 `create_file`；写入后回读；不使用 `update_ref` 做探测；遇到 safety block 或 SHA 冲突停止盲试。
