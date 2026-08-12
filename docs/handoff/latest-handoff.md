@@ -1,58 +1,178 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.1.0-docs-baseline`
-Updated: `2026-07-07`
-Branch: `dev`
+Version: `0.2.0-web-mvp-design`  
+Updated: `2026-08-12`  
+Source-of-truth branch: `dev`
 
-## Current State
+## 1. Current Direction
 
-The repository has been initialized as a documentation-first baseline for the English Recall Hub mobile app.
+The project has moved from a proposed React Native/Expo mobile app to a Web/PWA MVP.
 
-Current confirmed direction:
+Approved first-version stack:
+
+```text
+React + TypeScript + Vite
+React Router
+Dexie + IndexedDB
+Zod
+Web Speech API
+vite-plugin-pwa
+Cloudflare Workers Static Assets
+Cloudflare Worker API
+GitHub card/progress branches
+```
+
+User experience target:
+
+```text
+open app
+→ choose Profile
+→ sync formal cards
+→ review offline
+→ listen
+→ save locally
+→ back up / restore progress
+```
+
+Normal use has no account registration, normal password, GitHub OAuth or user-entered GitHub token.
+
+## 2. Architecture Boundaries
 
 ```text
 ChatGPT Project
-→ draft branch DraftNote inbox
-→ Builder validation / dedupe / normalization
-→ card branch formal Note packs
-→ mobile App local SQLite
-→ SRS review and pronunciation playback
-→ progress branch recent backup snapshots
+→ draft DraftNote
+→ Builder validation/dedupe/normalization
+→ card formal Notes/Templates
+→ Web/PWA IndexedDB runtime
+→ simple SRS
+→ Worker-backed progress snapshots
 ```
 
-## Created Governance Baseline
+- ChatGPT does not write formal Card data directly.
+- Browser IndexedDB is the runtime source of truth.
+- GitHub `card` is the formal content source.
+- GitHub `progress` is a bounded backup source, not a realtime database.
+- GitHub write credentials are stored only in Cloudflare Secrets.
+- A new device may use a one-time Profile setup link; later use only selects a Profile.
 
-- `AGENTS.md`: fixed entrypoint.
-- `AGENTS.common.md`: common cross-project checklist from governance kit.
-- `AGENTS.project.md`: English Recall Hub project-specific rules.
-- `docs/development/chatgpt-github-connector-guide.md`: connector workflow and project-specific cautions.
+## 3. Current Data Reality
 
-## Created Product Documents
+The current `card/profiles/manman/manifest.json` contains:
 
-- `README.md`
-- `docs/design/current-core-design.md`
-- `docs/requirements/current-requirements.md`
-- `docs/changes/CHANGELOG-dev.md`
+```text
+schema_version: 0.1.0
+note_count: 130
+listed packs: 27
+pack sha256: null
+```
 
-## Key Architecture Decisions
+MVP sync rule:
 
-1. Use Note → Card model.
-2. Pack is physical storage shard; Collection/Tag is learning classification.
-3. App is local-first and uses SQLite as runtime source of truth.
-4. GitHub card branch is content sync source, not runtime DB.
-5. GitHub progress branch is recent backup source, not realtime DB.
-6. Pronunciation MVP uses system TTS and local cache only.
+```text
+compare manifest.updated_at
+→ if changed, fetch listed packs/templates
+→ validate and upsert
+→ retain last local data on failure
+```
 
-## Next Recommended Steps
+Current formal templates include recognition, production and some unsupported card types. Because current Notes do not provide `cloze_sentence`, MVP enables only:
 
-1. Create `draft`, `card`, `progress` branches from `dev` baseline.
-2. Add schema documents for DraftNote, Note, Template, Manifest and ProgressSnapshot.
-3. Decide mobile framework and initialize app project on `dev`.
-4. Add local SQLite schema.
-5. Implement profile settings and card sync skeleton.
-6. Implement system TTS playback and audio cache.
-7. Implement first SRS review loop.
+```text
+recognition
+production
+```
 
-## Verification
+## 4. Documentation Baseline
 
-No build/test was run because the repository currently contains documentation only and no mobile app code.
+The approved development baseline is defined by:
+
+```text
+AGENTS.project.md
+docs/design/current-core-design.md
+docs/design/web-mvp-framework-design.md
+docs/requirements/current-requirements.md
+```
+
+The detailed design includes:
+
+- Final technical selection.
+- Folder and module structure.
+- Dexie schema.
+- Card sync and generation rules.
+- SRS scheduling.
+- TTS and listening mode.
+- Profile enrollment and Worker security.
+- Progress backup/restore API.
+- PWA/offline strategy.
+- Test plan.
+- 22 acceptance use cases.
+- 12–13 working-day estimate.
+- 4,200–6,500 production LOC estimate.
+
+## 5. MVP Scope
+
+Must implement:
+
+```text
+local Profile selection
+public card sync
+IndexedDB/offline review
+recognition + production
+unknown/fuzzy/known SRS
+English + Spanish TTS
+listening mode
+local progress
+Worker backup/restore
+progress export/import
+PWA install/mobile layout
+```
+
+Not in MVP:
+
+```text
+native mobile app
+normal account/password
+GitHub OAuth/PAT input
+multi-device realtime merge
+exact background scheduling/push
+cloze/output/contrast
+cloud TTS/audio cache/IPA/scoring
+cloud database/payment/community
+```
+
+## 6. Next Development Steps
+
+After this documentation PR is accepted:
+
+1. Initialize Vite + React + TypeScript project on a new task branch.
+2. Add Cloudflare Vite/Worker and Wrangler configuration.
+3. Add package scripts and update `AGENTS.project.md` with confirmed commands.
+4. Implement Dexie schema and Profile selection.
+5. Implement manifest/pack/template sync against current card data.
+6. Implement recognition/production generation and stable Card IDs.
+7. Implement review queue and scheduler.
+8. Implement Web Speech API and listening mode.
+9. Implement Worker progress backup/restore.
+10. Add PWA/offline behavior, tests and device acceptance.
+
+## 7. Estimated Delivery
+
+```text
+Full Web MVP with backup/restore: 12–13 working days
+Local-only MVP without cloud backup: 8–9 working days
+Production source: 4,200–6,500 LOC
+Tests: 1,200–2,000 LOC
+```
+
+## 8. Verification Status
+
+This handoff describes a documentation/design baseline only.
+
+```text
+Application build: not run; application project not initialized
+Unit tests: not run; no application code yet
+E2E tests: not run; no application code yet
+CI: not configured
+```
+
+Do not claim implementation completion from this document update.
