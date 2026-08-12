@@ -1,77 +1,94 @@
 # English Recall Hub｜External Entry Settings
 
-This document records what should be configured outside the repository.
+Version: `0.2.0-web-mvp-design`  
+Updated: `2026-08-12`
 
-## 1. ChatGPT Project Instructions
+This document records configuration outside the repository.
 
-Recommended project instruction for English-learning conversations:
+## 1. English-learning ChatGPT Project
 
-```text
-When the user asks about English words, phrases, grammar, sentences, pronunciation, or expression optimization, explain normally first.
-If the point is worth reviewing, generate a DraftNote for English Recall Hub.
-Default SYNC_PROFILE_ID should be configured per ChatGPT Project.
-DraftNotes must target the `draft` branch, not the `card` branch.
-Do not write formal Note/Card directly.
-Use one Note per knowledge point.
-Keep pronunciation minimal: text, lang, optional hint_cn.
-```
-
-Per-project variables to record in the project description or pinned source:
+The English-learning Project remains responsible for teaching first and writing review-worthy DraftNotes to:
 
 ```text
-SYNC_REPO=zhou-yang-personal/english-recall-hub
-SYNC_PROFILE_ID=manman
-SYNC_DRAFT_BRANCH=draft
-SYNC_DRAFT_PATH=profiles/manman/inbox
-SYNC_CARD_BRANCH=card
-SYNC_CARD_PATH=profiles/manman
-SYNC_PROGRESS_BRANCH=progress
-SYNC_PROGRESS_PATH=profiles/manman
+REPO=zhou-yang-personal/english-recall-hub
+PROFILE_ID=manman
+DRAFT_BRANCH=draft
+DRAFT_PATH=profiles/manman/inbox
+CARD_BRANCH=card
+CARD_PATH=profiles/manman
+PROGRESS_BRANCH=progress
+PROGRESS_PATH=profiles/manman
 ```
 
-For family members, use different `SYNC_PROFILE_ID` and paths.
-
-## 2. Project Introductions / New Session Opener
-
-Recommended new-session opener:
+Hard rules:
 
 ```text
-你现在接手 English Recall Hub 项目。请先读取仓库根目录 AGENTS.md，并按其要求继续读取 AGENTS.common.md、AGENTS.project.md、README.md、docs/design/current-core-design.md、docs/requirements/current-requirements.md、docs/changes/CHANGELOG-dev.md。如涉及 GitHub connector 操作，还必须读取 docs/development/chatgpt-github-connector-guide.md。当前 source-of-truth 分支是 dev，数据分支规划为 draft/card/progress。不要直接写正式 card 分支，ChatGPT 只生成 DraftNote。
+ChatGPT writes DraftNote only.
+Do not bypass Builder.
+One DraftNote = one knowledge point.
+pronunciation only uses text/lang/hint_cn.
+Do not write card/progress/dev unless explicitly doing repository work.
 ```
 
-## 3. Codex / Development Agent Prompt
+These rules are unchanged by the Web/PWA architecture decision.
 
-Recommended Codex entry:
+## 2. Single Project Source File
+
+The external ChatGPT Project should use only this source file:
+
+```text
+docs/development/English-Recall-Hub-Project-Source.txt
+```
+
+The `0.2.0` source file replaces the earlier version that referred to a mobile App and SQLite. It now states:
+
+```text
+Web/PWA runtime
+Dexie/IndexedDB
+Web Speech API
+Cloudflare Worker progress backup
+no normal login/password/token input
+```
+
+## 3. Development Session Opener
+
+```text
+你现在接手 English Recall Hub 项目。请先读取仓库根目录 AGENTS.md，并继续读取其中列出的 AGENTS.common.md、AGENTS.project.md、README.md、docs/design/current-core-design.md、docs/design/web-mvp-framework-design.md、docs/requirements/current-requirements.md、docs/handoff/latest-handoff.md 和 docs/changes/CHANGELOG-dev.md。如涉及 GitHub connector 操作，还必须读取 docs/development/chatgpt-github-connector-guide.md。当前 source-of-truth 分支是 dev；第一版技术基线是 React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Workers Static Assets/Worker API。不要回到 React Native/Expo 或 SQLite 原生 App 基线。
+```
+
+## 4. Codex / Development Agent Entry
 
 ```text
 Repository: zhou-yang-personal/english-recall-hub
 Source-of-truth branch: dev
-Before any design or code change, read AGENTS.md and all required files listed inside it.
-Follow the current design in docs/design/current-core-design.md.
-Do not commit tokens, SQLite DBs, audio cache, progress snapshots, build artifacts, or generated app packages.
-Do not implement SaaS account system, cloud TTS, pronunciation scoring, or multi-device merge unless explicitly requested.
+Before any design or code change, read AGENTS.md and every required file listed inside it.
+Follow docs/design/web-mvp-framework-design.md as the implementation baseline.
+The MVP is Web/PWA: React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Worker.
+Do not implement native mobile builds, normal account/password, GitHub OAuth, browser PAT input, cloud TTS, pronunciation scoring, multi-device realtime merge, or cloud database unless explicitly requested.
+Do not commit GitHub tokens, Cloudflare Secrets, Profile sync keys, IndexedDB exports, progress snapshots, logs, build artifacts or generated packages.
 ```
 
-## 4. GitHub Repository Settings
-
-Recommended settings:
+## 5. Repository and Deployment Settings
 
 - Keep `main` as stable default branch.
-- Use `dev` as source-of-truth development branch.
-- Create protected or clearly separated data branches later: `draft`, `card`, `progress`.
-- Do not allow accidental direct writes to `card` from ChatGPT except through Builder workflow.
-- Use fine-grained tokens with minimum permissions if mobile app sync requires GitHub write access.
+- Keep `dev` as the development source of truth.
+- Keep `draft`, `card`, `progress` separated.
+- Formal `card` content remains Builder-owned.
+- Cloudflare Worker stores GitHub write credentials as Secrets.
+- The browser never receives GitHub PAT.
+- Normal use opens the PWA and selects a Profile.
+- New-device backup enrollment uses a one-time Profile setup link/QR.
 
-## 5. Project Source Files
+## 6. External Configuration Not Stored in Git
 
-Add the following files to ChatGPT Project Sources when available:
+Configure in Cloudflare only:
 
 ```text
-AGENTS.md
-AGENTS.common.md
-AGENTS.project.md
-README.md
-docs/design/current-core-design.md
-docs/requirements/current-requirements.md
-docs/development/project-entry-settings.md
+GITHUB_PROGRESS_TOKEN
+PROFILE_SYNC_KEYS
+ALLOWED_ORIGINS
+MAX_BACKUP_BODY_BYTES
+SNAPSHOT_RETENTION_DAYS
 ```
+
+Never paste actual values into Project Instructions, Project Sources, repository files or chat output.
