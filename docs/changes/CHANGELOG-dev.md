@@ -16,6 +16,7 @@
 - Removed persistent audio-file cache from Web MVP; retained browser system TTS and language/voice preferences.
 - Defined bounded progress snapshots through a Worker with GitHub credentials stored only in Cloudflare Secrets.
 - Updated external Project settings and the single Project Source file to remove the obsolete mobile/SQLite baseline.
+- Updated the GitHub connector guide so Web/PWA reads `card` publicly and Worker-only code writes `progress`.
 
 ### Added
 
@@ -37,6 +38,7 @@ docs/design/current-core-design.md
 docs/design/web-mvp-framework-design.md
 docs/requirements/current-requirements.md
 docs/handoff/latest-handoff.md
+docs/development/chatgpt-github-connector-guide.md
 docs/development/project-entry-settings.md
 docs/development/English-Recall-Hub-Project-Source.txt
 docs/changes/CHANGELOG-dev.md
