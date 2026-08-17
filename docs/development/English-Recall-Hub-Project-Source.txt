@@ -1,120 +1,85 @@
 English Recall Hub Project Source
-Version: 0.2.0-web-mvp-design
+Version: 0.3.0-account-sync-design
 
-Repository:
-zhou-yang-personal/english-recall-hub
+Repository: zhou-yang-personal/english-recall-hub
+Development branch: dev
+Default content profile: manman
 
-Default profile:
-manman
-
-Branches and paths:
+Content branches:
 DRAFT_BRANCH=draft
 DRAFT_PATH=profiles/manman/inbox
 CARD_BRANCH=card
 CARD_PATH=profiles/manman
-PROGRESS_BRANCH=progress
-PROGRESS_PATH=profiles/manman
-DEV_BRANCH=dev
+PROGRESS_BRANCH=progress (reserved, not MVP runtime)
 
-Core data flow:
-ChatGPT Project
-→ draft DraftNote inbox
-→ Builder validation / dedupe / normalization
-→ card formal Notes and Templates
-→ Web/PWA sync to IndexedDB
-→ recognition / production review
-→ local SRS progress
-→ Cloudflare Worker backup to progress branch
+Product flow:
+ChatGPT → DraftNote → Builder → GitHub card content
+→ Web/PWA IndexedDB review → ReviewEvents
+→ Supabase account progress synchronization
 
 Product boundary:
-This is a personal/family multilingual recall tool, not a dictionary, course platform or complete SaaS.
-Normal use is: open app → choose local Profile → review.
-The first version has no registration, normal password, GitHub OAuth or user-entered GitHub token.
-A new device may use a one-time Profile setup link/QR to enable cloud backup. Later daily use only selects the Profile.
+This is a personal/family multilingual recall tool, not a dictionary, course platform or public SaaS.
+First sign-in uses Supabase email OTP. Later use reuses the persisted session.
+After setup, local Home/Review remain usable offline.
 
-Approved Web MVP stack:
-React + TypeScript + Vite
-React Router
-Dexie + IndexedDB
-Zod
-Web Speech API
-vite-plugin-pwa
+Approved stack:
+React + TypeScript + Vite + React Router
+Dexie + IndexedDB + Zod
+Web Speech API + vite-plugin-pwa
+Supabase Auth + Postgres + RLS
 Cloudflare Workers Static Assets
-Cloudflare Worker API
-GitHub card/progress branches
+GitHub public card branch
 
-Runtime rules:
-IndexedDB is the runtime source of truth.
-GitHub card is the formal content source.
-GitHub progress is a bounded backup source, not a realtime database.
-GitHub write credentials exist only in Cloudflare Secrets and never in frontend JavaScript.
-Sync or backup failure must preserve local data.
+Identity model:
+Account = authenticated Supabase user.
+LearnerProfile = settings/progress identity owned by Account.
+ContentProfile = GitHub content path such as manman.
+Do not conflate these concepts.
 
-Draft/Card rules:
-ChatGPT writes DraftNote only.
-Do not bypass Builder.
-One DraftNote = one knowledge point.
-One Note = one knowledge point.
-One Note may generate multiple Cards.
-Pack is a physical storage shard; Collection/Tag is learning classification.
+Progress model:
+Every rating writes a pending ReviewEvent and materialized ReviewState in one Dexie transaction.
+ReviewEvent is the synchronized fact; ReviewState is rebuilt locally.
+Events use UUID idempotency keys and server sync_seq ordering.
+Sync uploads pending events, pulls newer events, replays affected Cards and then advances the cursor.
+Failure retains local events and state.
 
-MVP card types:
-recognition
-production
+Content model:
+ChatGPT writes DraftNote only; Builder owns formal content.
+One Note is one knowledge point; one Note can generate multiple Cards.
+MVP Card types are recognition and production.
+Stable Card ID is lowercase SHA-256 of note_id|template_id|card_type.
+The client follows manifest counts and paths; it never hardcodes Note counts.
+Null pack hashes are not treated as verified checksums.
+The JSONL parser accepts a final record without a trailing newline.
 
-Do not enable cloze/output/contrast in MVP because current formal Notes do not provide all required fields such as cloze_sentence.
-Card ID must be stable:
-hash(note_id + template_id + card_type)
+TTS/PWA:
+Use browser Web Speech API with en-US/en-GB and es-MX/es-US/es-ES fallback.
+Rates are 0.75, 1.0 and 1.25.
+No cloud TTS/audio files/IPA/pronunciation scoring.
+Service worker caches the shell; business data remains in IndexedDB.
 
-Current card compatibility:
-The current manman manifest contains 130 Notes in 27 listed packs.
-Current pack sha256 fields are null.
-The MVP compares manifest.updated_at; when changed, it re-reads listed packs/templates and upserts local data.
-Do not fabricate checksum validation.
+Code design:
+Use feature-first lightweight Ports and Adapters.
+Domain scheduling, Card generation and event replay stay pure TypeScript.
+Only real external boundaries get ports; no DI container, Redux/Zustand or custom backend framework.
 
-Pronunciation and languages:
-Note pronunciation only uses text, lang and optional hint_cn.
-Web Speech API provides playback.
-English preferences: en-US / en-GB.
-Spanish preference: es-MX with es-US / es-ES fallback.
-Speed choices: 0.75x / 1.0x / 1.25x.
-UI is Chinese in MVP, but learning data supports en/es/other language codes.
-Do not implement persistent audio-file cache, cloud TTS, IPA, speech recognition or pronunciation scoring.
+MVP includes:
+email OTP/persisted session; LearnerProfile isolation; public card sync
+offline recognition/production; scheduler v1; multi-device event sync/replay
+English/Spanish TTS/listening; export/import; installable PWA; RLS tests
 
-Progress rules:
-Every rating is saved to IndexedDB first.
-Backup is triggered while the app is active: app open, review completion, elapsed interval or manual action.
-PWA does not guarantee exact background scheduling.
-Progress backup stores latest.json and bounded daily snapshots by profile/device.
-MVP assumes one primary write device per Profile.
-Restore replaces ReviewState only; it does not replace formal Note/Card content.
+MVP excludes:
+native apps; normal passwords/social login/public SaaS
+family invitation/role/admin system; real-time collaboration/manual conflicts
+Cloudflare progress API/D1/KV/R2; advanced Cards; cloud TTS/push
+payment/ads/analytics/community
 
-MVP must include:
-local Profile selection and isolation
-public card sync
-IndexedDB/offline review
-recognition + production
-unknown/fuzzy/known simple SRS
-English + Spanish TTS
-listening mode
-local progress persistence
-Worker progress backup/restore
-progress JSON export/import
-installable PWA/mobile layout
+Never store:
+Supabase access/secret/service-role keys; database password
+Cloudflare API token; GitHub PAT; personal credentials
+auth tokens; IndexedDB exports; runtime progress; logs/build artifacts
 
-MVP must not include:
-native iOS/Android app
-App Store/TestFlight/APK
-normal account/password system
-GitHub OAuth or browser PAT input
-multi-device realtime merge
-exact background scheduler or push notifications
-advanced card types
-cloud TTS/audio file cache/IPA/pronunciation scoring
-D1/KV/R2 or commercial database
-payment/ads/community decks
-
-Development source of truth:
+Authoritative files:
 AGENTS.md
 AGENTS.common.md
 AGENTS.project.md
@@ -124,13 +89,3 @@ docs/design/web-mvp-framework-design.md
 docs/requirements/current-requirements.md
 docs/handoff/latest-handoff.md
 docs/changes/CHANGELOG-dev.md
-
-Secrets that must never be stored in this file or Git:
-GITHUB_PROGRESS_TOKEN
-PROFILE_SYNC_KEYS
-Cloudflare secrets
-GitHub PAT
-personal credentials
-IndexedDB exports
-progress runtime snapshots
-logs/build artifacts

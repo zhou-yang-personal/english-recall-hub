@@ -6,10 +6,10 @@
 
 - [ ] 项目名称：`English Recall Hub`。
 - [ ] 仓库：`zhou-yang-personal/english-recall-hub`。
-- [ ] 当前版本：`0.2.0-web-mvp-design`。
-- [ ] 产品定位：面向个人和家庭的多语言主动回忆工具，把 ChatGPT 学习记录转为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和进度备份。
+- [ ] 当前版本：`0.3.0-account-sync-design`。
+- [ ] 产品定位：面向个人和家庭的多语言主动回忆工具，把 ChatGPT 学习记录转为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和账号进度同步。
 - [ ] 第一版平台：iPhone、Android、PC 浏览器；可安装为 PWA，不开发原生 iOS/Android App。
-- [ ] 第一版技术栈：`React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Workers Static Assets + Cloudflare Worker API`。
+- [ ] 第一版技术栈：`React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Supabase Auth/Postgres/RLS + Cloudflare Workers Static Assets`。
 
 ## B1. 分支与开发基线
 
@@ -46,12 +46,13 @@
 ## B3. 产品与架构硬约束
 
 - [ ] 项目不是词典、课程平台或完整 SaaS，而是个人/家庭主动回忆工具。
-- [ ] 核心链路保持：`ChatGPT Project → draft → Builder → card → Web/PWA IndexedDB → SRS → progress`。
+- [ ] 核心链路保持：`ChatGPT Project → draft → Builder → card → Web/PWA IndexedDB → SRS → Supabase ReviewEvents`。
 - [ ] ChatGPT 只生成 DraftNote，不直接绕过 Builder 修改正式 Note/Card。
 - [ ] Web App local-first：IndexedDB 是运行时数据源；GitHub 只负责内容同步和进度备份。
-- [ ] 第一版无注册、无普通密码、无 GitHub OAuth、无前端 GitHub token。
-- [ ] 正常打开后只选择本地 Profile；新设备可通过一次性 Profile setup link 配置云备份凭证。
-- [ ] GitHub 写权限只保存在 Cloudflare Secret 中，不进入浏览器、仓库、日志或 URL 查询参数。
+- [ ] 第一版使用 Supabase email OTP 轻量账号；无普通密码、GitHub OAuth 或前端 GitHub token。
+- [ ] 日常打开复用已持久化会话；云端暂不可用时，已初始化设备仍可离线复习并保留待同步事件。
+- [ ] 必须区分 `Account`、`LearnerProfile` 与 GitHub `ContentProfile`，不得再用一个 Profile 同时承担身份、内容路径和备份凭据。
+- [ ] Supabase secret/service-role key、数据库密码、GitHub PAT 和 Cloudflare token 不进入浏览器、仓库或日志。
 - [ ] Pack 是物理存储分片；Collection/Tag 才是学习范围。
 - [ ] UI 第一版为中文，但数据模型必须支持 `learning_lang=en/es/...`。
 
@@ -59,7 +60,7 @@
 
 必须实现：
 
-1. 本地 Profile 选择和隔离。
+1. Supabase email OTP 登录、会话持久化和 LearnerProfile 隔离。
 2. 读取公开 `card` 分支的 manifest、pack 和 template。
 3. Dexie/IndexedDB 本地保存 Note、Card、复习状态和同步状态。
 4. Recognition / Production 两种卡片。
@@ -67,25 +68,25 @@
 6. 离线打开和离线复习。
 7. Web Speech API 朗读；英文/西语语言选择和三档速度。
 8. 听力模式：先播放、隐藏文本、揭示答案。
-9. 本地进度即时保存。
-10. Worker 后台备份和恢复 `progress`。
+9. 本地 ReviewEvent/ReviewState 原子保存。
+10. Supabase ReviewEvent 幂等增量同步和新设备重建。
 11. 本地 progress JSON 导出/导入兜底。
 12. PWA 安装与移动端适配。
 
 第一版明确不做：
 
-- 普通账号密码、GitHub OAuth、用户输入 PAT。
+- 普通账号密码、社交登录、GitHub OAuth、用户输入 PAT。
 - 原生 iOS/Android App、App Store、TestFlight、APK。
-- 多设备实时冲突合并。
+- 实时协同、家庭邀请/角色、人工冲突处理界面。
 - 精确后台定时任务、Push Notification。
 - Cloze / Output / Contrast 正式启用。
 - 云 TTS、音频文件缓存、IPA、发音评分。
-- D1、KV、R2、商业数据库和复杂后端框架。
+- Cloudflare progress API、D1、KV、R2 和复杂后端框架。
 - 支付、广告、社区卡组、复杂埋点。
 
 ## B5. 数据模型约束
 
-- [ ] 数据链路：`DraftNote → Note → Card → ReviewState → ProgressSnapshot`。
+- [ ] 数据链路：`DraftNote → Note → Card`；进度链路：`LearnerProfile + Card → ReviewEvent → ReviewState`。
 - [ ] 一个 Note 表示一个知识点；一个 Note 可生成多张 Card。
 - [ ] `card_id = hash(note_id + template_id + card_type)`，必须跨设备稳定。
 - [ ] Note 必须有 `dedupe_key`。
@@ -94,6 +95,8 @@
 - [ ] 当前 manifest 的 pack `sha256` 为空，因此 MVP 使用 `manifest.updated_at` 判断变化，变化后重新读取列出的 pack 并 upsert；不得伪造 checksum 校验。
 - [ ] 现有模板引用的 `cloze_sentence` 在 Note 中不存在，MVP 只启用 recognition / production。
 - [ ] 同步失败不得清空本地 Note/Card；继续使用最后一次成功数据。
+- [ ] ReviewEvent 是同步事实，ReviewState 是本地物化视图；禁止用整包快照覆盖作为多设备主同步。
+- [ ] 每个 ReviewEvent 使用 UUID 幂等键；远端 `sync_seq` 是跨设备顺序。
 
 ## B6. TTS 与多语言约束
 
@@ -104,32 +107,32 @@
 - [ ] 速度仅提供 `0.75x / 1.0x / 1.25x`。
 - [ ] Web MVP 不承诺音频文件缓存；缓存的是卡片、进度和语音偏好。
 
-## B7. 进度备份约束
+## B7. 账号与进度同步约束
 
-- [ ] 每次评分立即写 IndexedDB。
-- [ ] PWA 不承诺精确后台执行；备份触发为：打开应用、完成复习、距离上次备份超过阈值、手动备份。
-- [ ] Worker API 使用 Profile 白名单、sync key、请求体大小限制和安全 device_id。
-- [ ] 第一版每个 Profile 只有一个主写设备；其他设备需先恢复并明确接管。
-- [ ] `progress` 分支保存 `latest.json` 和有限天数的日快照，不保存完整 IndexedDB、音频、日志或构建产物。
-- [ ] 恢复时只覆盖 ReviewState 和必要设置，不覆盖 card 内容源。
+- [ ] 每次评分在一个 Dexie 事务中写入 pending ReviewEvent 和 ReviewState，提交后才能进入下一张卡。
+- [ ] 同步顺序为：上传 pending 事件、按 `sync_seq` 分页拉取、幂等 upsert、本地重放、事务更新 cursor。
+- [ ] PWA 不承诺精确后台执行；同步触发为应用打开、联网恢复、复习完成、手动操作和前台防抖。
+- [ ] Supabase 使用独立 `english_recall` schema；所有暴露表必须显式授权并启用 RLS。
+- [ ] 未认证用户不得读取/写入 Profile 或 ReviewEvent；用户之间必须通过 `auth.uid()` 隔离。
+- [ ] `progress` 分支不再作为 MVP 运行时数据库，只保留未来冷备份可能性。
 
 ## B8. 工程与模块约束
 
 计划目录：
 
 ```text
-src/app              页面与路由
-src/components       复用 UI
-src/domain           Note/Card/SRS 纯业务逻辑
-src/db               Dexie schema 与 repository
-src/services         card sync、TTS、progress、export/import
-src/config           Profile 与运行配置
-worker                Cloudflare Worker API
-tests                 unit/component/e2e
+src/app              启动、路由、上下文
+src/features         auth/profile/content-sync/review/progress-sync/tts
+src/domain           Note/Card/SRS/ReviewEvent 重放纯逻辑
+src/infrastructure   Dexie/GitHub/Supabase/Web Speech adapters
+src/shared           小型通用错误、ID、时间工具
+supabase             本地配置、migration、seed
+tests                unit/integration/e2e
 ```
 
 - [ ] 不引入 Redux/Zustand；首版使用 React state/context 和 Dexie live query。
 - [ ] 不引入 Axios、Hono、tRPC、GraphQL、Tailwind 或重型 UI 组件库。
+- [ ] 使用轻量 Ports and Adapters；只为真实外部边界建立 port，不引入 DI 容器。
 - [ ] 网络请求使用原生 `fetch`。
 - [ ] 数据边界使用 Zod 校验。
 - [ ] 样式使用 CSS Modules / CSS Variables。
@@ -169,9 +172,9 @@ npm run deploy
 
 ## B10. 禁止事项
 
-- [ ] 不提交 GitHub token、Cloudflare Secret、sync key、个人凭据或设备私钥。
+- [ ] 不提交 GitHub token、Cloudflare/Supabase Secret、数据库密码、个人凭据或设备私钥。
 - [ ] 不提交 IndexedDB 导出、progress 运行快照到 `dev`、浏览器缓存、日志、安装包或构建产物。
-- [ ] 不把 GitHub token、Profile sync key 编译进前端 JS。
+- [ ] 不把 GitHub token、Supabase secret/service-role key 或数据库密码编译进前端 JS；publishable key 可作为前端配置。
 - [ ] 不让 ChatGPT 直接修改正式 card pack。
 - [ ] 不把未来能力提前做成当前复杂模块。
 - [ ] 不做无关重构、全局格式化或未经授权的依赖/CI/部署变更。

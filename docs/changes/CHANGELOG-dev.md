@@ -1,5 +1,30 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.3.0-account-sync-design｜2026-08-17
+
+### Changed
+
+- Replaced Profile sync-key + Cloudflare Worker + GitHub progress snapshots with Supabase email OTP, Postgres/RLS and incremental ReviewEvent synchronization.
+- Separated Account, LearnerProfile and GitHub ContentProfile responsibilities.
+- Made ReviewEvent the synchronized fact and ReviewState a deterministic local materialized view.
+- Defined idempotent event push, `sync_seq` cursor pull and cross-device replay convergence.
+- Reduced Cloudflare to static PWA deployment; removed the custom progress API from MVP.
+- Reorganized the implementation baseline using scenario, logical, process, development and deployment views.
+- Selected feature-first lightweight Ports and Adapters with explicit dependency rules and no DI container/global state framework.
+- Updated current card reality from 130 to 137 observed Notes while forbidding hardcoded counts.
+- Added the JSONL no-trailing-newline compatibility requirement.
+- Replaced backup/restore acceptance cases with account, RLS, offline queue, idempotency and new-device convergence cases.
+- Kept future family roles, Realtime, remote checkpoints and privileged backend code behind observed upgrade triggers.
+
+### Verification
+
+```text
+Documentation/design consistency checks: completed
+Application build/test/E2E: not run; application project not initialized
+Cloudflare/Supabase: not provisioned
+Dependencies/lock files: not changed
+```
+
 ## 0.2.0-web-mvp-design｜2026-08-12
 
 ### Changed

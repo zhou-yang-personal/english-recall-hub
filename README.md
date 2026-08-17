@@ -1,80 +1,70 @@
 # English Recall Hub
 
-English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具。它把 ChatGPT 中学到的单词、短语、句子、语法和表达沉淀为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和进度备份。
+English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具。它把 ChatGPT 中学到的单词、短语、句子、语法和表达沉淀为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和账号进度同步。
 
 ## Current baseline
 
-- Version: `0.2.0-web-mvp-design`
+- Version: `0.3.0-account-sync-design`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
-- First delivery platform: Web/PWA on iPhone, Android and desktop browsers
+- First platform: Web/PWA on iPhone, Android and desktop
+- Status: design baseline only; application project is not initialized
 
 ## Product flow
 
 ```text
-ChatGPT Project
-→ draft DraftNote
-→ Builder validate / dedupe / normalize
-→ card formal Notes and Templates
-→ Web/PWA sync to IndexedDB
-→ recognition / production review
-→ local SRS progress
-→ Worker backup to progress branch
+ChatGPT Project → draft DraftNote → Builder validation/dedupe
+→ card formal Notes/Templates → Web/PWA IndexedDB
+→ recognition/production review → local ReviewEvents
+→ Supabase account progress synchronization
 ```
 
-## Web MVP architecture
+## MVP architecture
 
 ```text
-React + TypeScript + Vite
-Dexie + IndexedDB
-Web Speech API
-vite-plugin-pwa
-Cloudflare Workers Static Assets + Worker API
-GitHub card/progress branches
+React + TypeScript + Vite + React Router
+Dexie / IndexedDB + Zod
+Web Speech API + vite-plugin-pwa
+Supabase Auth (email OTP) + Postgres + RLS
+Cloudflare Workers Static Assets
+GitHub public `card` content
 ```
 
-The first version deliberately avoids a full account system:
+Core boundaries:
 
-```text
-No registration
-No normal password
-No GitHub OAuth
-No user-entered GitHub token
-Open app → choose local Profile → review
-```
-
-GitHub write credentials are stored only as Cloudflare Secrets. A new device may use a one-time Profile setup link to enable cloud backup; normal daily use only selects the Profile.
+- IndexedDB is the runtime source; review works offline after setup.
+- GitHub `card` is Builder-owned content and is read publicly.
+- Supabase stores Account, LearnerProfile and append-only ReviewEvents.
+- ReviewEvents synchronize incrementally; ReviewState is rebuilt locally.
+- Cloudflare serves the PWA; no custom progress Worker API is required in MVP.
+- Frontend contains no GitHub PAT, Supabase secret/service-role key or database password.
 
 ## MVP scope
 
 Must have:
 
-1. Local Profile selection and isolation.
-2. Public `card` branch synchronization.
-3. IndexedDB local storage and offline review.
-4. Recognition / Production cards.
-5. Unknown / Fuzzy / Known simple SRS.
-6. English and Spanish browser TTS.
-7. Audio-first listening mode.
-8. Local progress persistence.
-9. Worker-based progress backup and restore.
-10. Progress JSON export/import fallback.
-11. Installable PWA and mobile layout.
+1. Email OTP account and persisted session.
+2. LearnerProfile selection and isolation from ContentProfile paths.
+3. Current manifest/pack/template import without hardcoded counts.
+4. IndexedDB/offline recognition and production review.
+5. Unknown/fuzzy/known scheduler v1.
+6. Idempotent ReviewEvent synchronization and new-device reconstruction.
+7. English/Spanish browser TTS and listening mode.
+8. Progress JSON export/import.
+9. Installable mobile-first PWA.
 
-Not in the first version:
+Not in MVP:
 
-- Native iOS/Android apps.
-- Account/password system or GitHub OAuth.
-- Multi-device realtime merge.
-- Exact background scheduling or push notification.
-- Cloze / Output / Contrast activation.
-- Cloud TTS, audio-file cache, IPA or pronunciation scoring.
-- Cloud database, payment, ads or community decks.
+- Native apps, normal passwords, social login or public SaaS.
+- Family invitation/role/admin system or real-time collaboration.
+- Cloudflare progress API, D1/KV/R2 or a custom backend framework.
+- Advanced card types, cloud TTS, pronunciation scoring or push notifications.
+- Payment, ads, analytics platform or community decks.
 
 ## Current card data
 
-The existing `card` branch is already usable as the MVP content source. The current `manman` manifest contains 130 Notes in 27 listed packs. Pack hashes are currently absent, so the first client will compare `manifest.updated_at` and re-read listed packs when the manifest changes.
+The `card` branch is already usable. On `2026-08-17`, the `manman` manifest listed 137 Notes in 27 packs and all pack hashes were null. These numbers are observations, not client constants; the client follows `manifest.updated_at` and listed paths.
 
 ## Required reading before development
 
@@ -89,15 +79,9 @@ docs/handoff/latest-handoff.md
 docs/changes/CHANGELOG-dev.md
 ```
 
-For GitHub connector operations:
+## Planned commands
 
-```text
-docs/development/chatgpt-github-connector-guide.md
-```
-
-## Planned development commands
-
-The application project has not yet been initialized. After initialization, the baseline commands will be:
+The application has not been initialized. Planned commands are:
 
 ```bash
 npm install

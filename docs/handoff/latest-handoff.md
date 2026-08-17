@@ -1,178 +1,119 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.2.0-web-mvp-design`  
-Updated: `2026-08-12`  
+Version: `0.3.0-account-sync-design`
+Updated: `2026-08-17`
 Source-of-truth branch: `dev`
 
 ## 1. Current Direction
 
-The project has moved from a proposed React Native/Expo mobile app to a Web/PWA MVP.
-
-Approved first-version stack:
+The project is a Web/PWA with local-first review and lightweight account progress synchronization.
 
 ```text
-React + TypeScript + Vite
-React Router
-Dexie + IndexedDB
-Zod
-Web Speech API
-vite-plugin-pwa
+React/TypeScript/Vite
+Dexie/IndexedDB
+Supabase email OTP + Postgres + RLS
+GitHub `card` public content
 Cloudflare Workers Static Assets
-Cloudflare Worker API
-GitHub card/progress branches
+Web Speech API
 ```
 
-User experience target:
+Normal experience:
 
 ```text
-open app
-→ choose Profile
-→ sync formal cards
-→ review offline
-→ listen
-→ save locally
-→ back up / restore progress
+sign in once → choose LearnerProfile → review offline
+→ save locally → synchronize ReviewEvents across devices
 ```
 
-Normal use has no account registration, normal password, GitHub OAuth or user-entered GitHub token.
+## 2. Important Design Correction
 
-## 2. Architecture Boundaries
+The previous `0.2.0` design used a Profile sync key, Cloudflare Worker and GitHub `progress` snapshots. That model was suitable only for backup/restore and did not satisfy the actual account/multi-device requirement.
+
+The current design replaces it with:
 
 ```text
-ChatGPT Project
-→ draft DraftNote
-→ Builder validation/dedupe/normalization
-→ card formal Notes/Templates
-→ Web/PWA IndexedDB runtime
-→ simple SRS
-→ Worker-backed progress snapshots
+Supabase Account
+→ LearnerProfile
+→ append-only ReviewEvents
+→ idempotent push + cursor pull
+→ deterministic local ReviewState replay
 ```
 
-- ChatGPT does not write formal Card data directly.
-- Browser IndexedDB is the runtime source of truth.
-- GitHub `card` is the formal content source.
-- GitHub `progress` is a bounded backup source, not a realtime database.
-- GitHub write credentials are stored only in Cloudflare Secrets.
-- A new device may use a one-time Profile setup link; later use only selects a Profile.
+`Account`, `LearnerProfile` and GitHub `ContentProfile` are separate concepts. GitHub `progress` is no longer an MVP runtime database.
 
-## 3. Current Data Reality
+## 3. Five-view Development Baseline
 
-The current `card/profiles/manman/manifest.json` contains:
+`docs/design/web-mvp-framework-design.md` now defines:
+
+- Scenario view: sign-in, daily/offline review, new device, content update and cloud failure.
+- Logical view: modules, domain concepts and dependency direction.
+- Process view: startup, rating transaction, progress sync and content sync.
+- Development view: feature-first Ports and Adapters structure.
+- Deployment view: Cloudflare static PWA + GitHub card + shared Supabase schema.
+- Data contracts, RLS intent, scheduler, traceability, milestones and acceptance gates.
+
+## 4. Current Data Reality
+
+Observed on `2026-08-17`:
 
 ```text
+card profile: manman
 schema_version: 0.1.0
-note_count: 130
+note_count: 137
 listed packs: 27
 pack sha256: null
 ```
 
-MVP sync rule:
-
-```text
-compare manifest.updated_at
-→ if changed, fetch listed packs/templates
-→ validate and upsert
-→ retain last local data on failure
-```
-
-Current formal templates include recognition, production and some unsupported card types. Because current Notes do not provide `cloze_sentence`, MVP enables only:
-
-```text
-recognition
-production
-```
-
-## 4. Documentation Baseline
-
-The approved development baseline is defined by:
-
-```text
-AGENTS.project.md
-docs/design/current-core-design.md
-docs/design/web-mvp-framework-design.md
-docs/requirements/current-requirements.md
-```
-
-The detailed design includes:
-
-- Final technical selection.
-- Folder and module structure.
-- Dexie schema.
-- Card sync and generation rules.
-- SRS scheduling.
-- TTS and listening mode.
-- Profile enrollment and Worker security.
-- Progress backup/restore API.
-- PWA/offline strategy.
-- Test plan.
-- 22 acceptance use cases.
-- 12–13 working-day estimate.
-- 4,200–6,500 production LOC estimate.
+Counts are not hardcoded. Recognition/production are enabled; unsupported templates are ignored. JSONL final records without a trailing newline must parse correctly.
 
 ## 5. MVP Scope
 
 Must implement:
 
 ```text
-local Profile selection
-public card sync
-IndexedDB/offline review
-recognition + production
-unknown/fuzzy/known SRS
-English + Spanish TTS
-listening mode
-local progress
-Worker backup/restore
+email OTP and persisted session
+LearnerProfile/ContentProfile separation
+public card sync and IndexedDB
+recognition/production + scheduler v1
+atomic ReviewEvent/ReviewState save
+idempotent multi-device event sync/replay
+English/Spanish TTS and listening mode
 progress export/import
-PWA install/mobile layout
+PWA install and Cloudflare deployment
+RLS isolation tests
 ```
 
 Not in MVP:
 
 ```text
-native mobile app
-normal account/password
-GitHub OAuth/PAT input
-multi-device realtime merge
-exact background scheduling/push
-cloze/output/contrast
-cloud TTS/audio cache/IPA/scoring
-cloud database/payment/community
+native apps; normal passwords/social login/public SaaS
+family roles/invitations/admin site; real-time collaboration
+custom progress API; D1/KV/R2; advanced cards
+cloud TTS/scoring; push; payment/ads/analytics/community
 ```
 
 ## 6. Next Development Steps
 
-After this documentation PR is accepted:
+1. Accept this design baseline into `dev`.
+2. Initialize Vite/React/TypeScript/PWA and the feature-first directory.
+3. Add Dexie schema, scheduler v1 and event replay unit tests.
+4. Add local Supabase configuration/migrations and two-user RLS tests.
+5. Implement email OTP and LearnerProfile selection.
+6. Implement real current-card import and Card generation.
+7. Implement Home/Review/TTS.
+8. Implement ReviewEvent push/pull/replay.
+9. Add offline/update/export/import behavior.
+10. Deploy to Cloudflare and perform browser/device acceptance.
 
-1. Initialize Vite + React + TypeScript project on a new task branch.
-2. Add Cloudflare Vite/Worker and Wrangler configuration.
-3. Add package scripts and update `AGENTS.project.md` with confirmed commands.
-4. Implement Dexie schema and Profile selection.
-5. Implement manifest/pack/template sync against current card data.
-6. Implement recognition/production generation and stable Card IDs.
-7. Implement review queue and scheduler.
-8. Implement Web Speech API and listening mode.
-9. Implement Worker progress backup/restore.
-10. Add PWA/offline behavior, tests and device acceptance.
+Estimated full MVP: `13–15 working days`.
 
-## 7. Estimated Delivery
-
-```text
-Full Web MVP with backup/restore: 12–13 working days
-Local-only MVP without cloud backup: 8–9 working days
-Production source: 4,200–6,500 LOC
-Tests: 1,200–2,000 LOC
-```
-
-## 8. Verification Status
-
-This handoff describes a documentation/design baseline only.
+## 7. Verification Status
 
 ```text
-Application build: not run; application project not initialized
-Unit tests: not run; no application code yet
-E2E tests: not run; no application code yet
+Application build: not run; application not initialized
+Unit/integration/E2E: not run; no application code
 CI: not configured
+Cloudflare/Supabase: not provisioned
+Dependencies/lock files: not changed
 ```
 
-Do not claim implementation completion from this document update.
+This handoff describes an executable design baseline, not completed implementation.

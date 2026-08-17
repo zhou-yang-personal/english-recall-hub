@@ -1,473 +1,337 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.2.0-web-mvp-design`  
-Updated: `2026-08-12`  
-Status: Approved development baseline  
+Version: `0.3.0-account-sync-design`
+Updated: `2026-08-17`
+Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
 
-## 1. Purpose
+## 1. Purpose and Boundaries
 
-This document is the implementation-level baseline for the first usable English Recall Hub Web/PWA.
+This is the implementation baseline for the first usable Web/PWA. It uses the 4+1 view model so scenarios, runtime behavior, code structure and deployment remain traceable.
 
-It is intentionally scoped to the current real need:
-
-```text
-family use
-→ open on iPhone / Android / PC
-→ choose Profile
-→ sync formal cards
-→ review offline
-→ listen to pronunciation
-→ preserve and recover progress
-```
-
-The design avoids building an account platform, native mobile app or general learning SaaS before the core review loop is proven.
-
-## 2. Final Decision
-
-### 2.1 Selected Architecture
+Real first-version need:
 
 ```text
-React + TypeScript + Vite
-+ React Router
-+ Dexie / IndexedDB
-+ Zod
-+ Web Speech API
-+ vite-plugin-pwa
-+ Cloudflare Workers Static Assets
-+ Cloudflare Worker API
-+ GitHub card / progress branches
+personal/family use
+→ sign in once without a normal password
+→ choose a learner Profile
+→ sync formal cards from GitHub
+→ review and listen offline
+→ synchronize progress across the user's devices
 ```
 
-### 2.2 Why Web/PWA
-
-The Web/PWA approach directly satisfies the first-version constraints:
-
-- One codebase for iPhone, Android and desktop.
-- No App Store, TestFlight, APK or Apple certificate workflow.
-- Immediate deployment through a URL.
-- Home-screen installation and offline app shell.
-- Browser IndexedDB is sufficient for card and progress scale.
-- System TTS supports English and Spanish without cloud cost.
-- A Worker can hide GitHub write credentials from the browser.
-
-### 2.3 Rejected for MVP
+Selected stack:
 
 ```text
-React Native / Expo
-Flutter
-native iOS / Android
-full account backend
-GitHub OAuth
-browser PAT input
-D1 / KV / R2
-cloud TTS
-advanced card engine
-realtime multi-device merge
+React + TypeScript + Vite + React Router
+Dexie / IndexedDB + Zod
+Web Speech API + vite-plugin-pwa
+Supabase Auth + Postgres + Row Level Security
+Cloudflare Workers Static Assets
+GitHub card branch
 ```
 
-These remain future options only if actual use exposes a concrete need.
+Key decisions:
 
-## 3. Current Repository Reality
+| Decision | Why |
+|---|---|
+| IndexedDB is the runtime source | Review must be immediate and offline |
+| GitHub `card` is the content source | Existing Builder/Note pipeline remains valid |
+| Supabase stores accounts and progress | Account sync needs queryable user-isolated cloud state |
+| Review events are synchronized | Idempotent events converge more safely than whole-snapshot replacement |
+| Browser accesses Supabase directly | Auth JWT + RLS avoid a custom progress backend |
+| Cloudflare serves static assets only | No server-only MVP use case remains |
+| Email OTP is the only MVP sign-in | Passwordless and simple on mobile |
 
-The implementation must start from current data, not an imagined clean schema.
+Explicit non-goals:
 
-Current `card/profiles/manman/manifest.json`:
+```text
+native apps; normal passwords; social login; public SaaS
+family invitations/roles/admin console; real-time collaboration
+manual conflict UI; custom API framework; D1/KV/R2
+cloud TTS/audio/IPA/scoring; advanced card types
+push/exact background jobs; payment/ads/analytics/community
+```
+
+Supabase Realtime and Edge Functions are not required unless a later concrete requirement needs them.
+
+## 2. Current Reality
+
+There is no application code, package manifest, build configuration, test suite or CI yet.
+
+Observed `card/profiles/manman/manifest.json` on `2026-08-17`:
 
 ```text
 schema_version: 0.1.0
-note_count: 130
+note_count: 137
 listed packs: 27
 pack sha256: null
 ```
 
-Current formal Notes already contain the data needed for MVP:
+The count is a snapshot, never a client constant. The client follows the manifest. Recognition and production are supported; cloze/output/contrast are ignored because current Notes lack fields such as `cloze_sentence`. JSONL parsing must process a final record even when the file has no trailing newline.
+
+## 3. Scenario View (+1)
+
+### S1. First sign-in
 
 ```text
-note_id
-profile_id
-type
-core
-meaning_cn
-explanation_cn
-source_sentence
-examples
-pronunciation
-dedupe_key
-collections
-tags
-source_draft_ids
-status
-created_at
-updated_at
+open PWA → enter email → enter OTP → persist Supabase session
+→ load/create LearnerProfile → sync cards/progress → Home
 ```
 
-Current templates provide recognition and production rules. Phrase and sentence templates also contain cloze rules, but formal Notes do not contain `cloze_sentence`. Therefore:
+No GitHub token, Supabase secret key or normal password appears in the UI.
+
+### S2. Daily/offline review
 
 ```text
-MVP enabled: recognition, production
-MVP disabled: cloze, output, contrast
+open cached PWA → render Home from IndexedDB → review
+→ commit each rating locally before next card
+→ if offline, keep progress pending → synchronize after reconnect
 ```
 
-The client must ignore unsupported card types safely.
-
-## 4. System Context
+### S3. New device
 
 ```text
-┌─────────────────────────────────────────────┐
-│ ChatGPT English-learning Projects           │
-└──────────────────────┬──────────────────────┘
-                       │ DraftNote JSONL
-                       ▼
-┌─────────────────────────────────────────────┐
-│ GitHub draft branch                         │
-└──────────────────────┬──────────────────────┘
-                       │ scheduled Builder
-                       ▼
-┌─────────────────────────────────────────────┐
-│ GitHub card branch                          │
-│ manifest + packs + templates                │
-└──────────────────────┬──────────────────────┘
-                       │ public read
-                       ▼
-┌─────────────────────────────────────────────┐
-│ Cloudflare-hosted Web/PWA                    │
-│ React UI + IndexedDB + Web Speech API        │
-└──────────────────────┬──────────────────────┘
-                       │ progress backup API
-                       ▼
-┌─────────────────────────────────────────────┐
-│ Cloudflare Worker                           │
-│ validates Profile/device/sync key            │
-└──────────────────────┬──────────────────────┘
-                       │ backend GitHub token
-                       ▼
-┌─────────────────────────────────────────────┐
-│ GitHub progress branch                      │
-│ latest + bounded daily snapshots            │
-└─────────────────────────────────────────────┘
+sign in with same account → select LearnerProfile
+→ download card content → download review events in pages
+→ rebuild ReviewState locally → continue review
 ```
 
-## 5. Deployment Model
-
-Use one Cloudflare Worker project with Static Assets.
+### S4. Content update
 
 ```text
-browser request /
-→ serve built PWA assets
-
-browser request /api/*
-→ execute Worker handler
+compare manifest.updated_at → fetch listed templates/packs when changed
+→ validate → generate supported Cards → commit complete import
+→ retain progress by stable card_id
 ```
 
-Benefits:
-
-- One deployment target.
-- Same-origin API calls.
-- No separate CORS deployment complexity.
-- Worker Secrets available to progress endpoints.
-- Local development can exercise frontend and Worker together.
-
-Planned production URL:
+### S5. Auth/cloud failure
 
 ```text
-https://english-recall-hub.<account>.workers.dev
+Supabase unavailable or session expired
+→ local review stays available → events remain pending
+→ retry after connectivity/session recovery
 ```
 
-A custom domain is optional and outside MVP acceptance.
+## 4. Logical View
 
-## 6. Project Structure
+Identity and content are different concepts:
 
 ```text
-/
-├─ src/
-│  ├─ app/
-│  │  ├─ App.tsx
-│  │  ├─ router.tsx
-│  │  └─ providers.tsx
-│  ├─ pages/
-│  │  ├─ ProfileSelectPage.tsx
-│  │  ├─ HomePage.tsx
-│  │  ├─ ReviewPage.tsx
-│  │  └─ SettingsSyncPage.tsx
-│  ├─ components/
-│  │  ├─ ProfileCard.tsx
-│  │  ├─ ReviewCard.tsx
-│  │  ├─ ReviewRatingButtons.tsx
-│  │  ├─ TtsButton.tsx
-│  │  ├─ SyncStatus.tsx
-│  │  ├─ CountSummary.tsx
-│  │  └─ ConfirmDialog.tsx
-│  ├─ domain/
-│  │  ├─ note.ts
-│  │  ├─ card.ts
-│  │  ├─ cardGenerator.ts
-│  │  ├─ reviewState.ts
-│  │  ├─ scheduler.ts
-│  │  └─ progressSnapshot.ts
-│  ├─ db/
-│  │  ├─ db.ts
-│  │  ├─ schema.ts
-│  │  └─ repositories/
-│  │     ├─ profileRepository.ts
-│  │     ├─ noteRepository.ts
-│  │     ├─ cardRepository.ts
-│  │     ├─ reviewRepository.ts
-│  │     └─ syncRepository.ts
-│  ├─ services/
-│  │  ├─ cardSync/
-│  │  │  ├─ cardSourceClient.ts
-│  │  │  ├─ cardSyncService.ts
-│  │  │  └─ jsonlParser.ts
-│  │  ├─ tts/
-│  │  │  ├─ voiceResolver.ts
-│  │  │  └─ ttsService.ts
-│  │  ├─ progress/
-│  │  │  ├─ progressApiClient.ts
-│  │  │  ├─ progressExport.ts
-│  │  │  └─ progressImport.ts
-│  │  └─ setup/
-│  │     └─ profileEnrollment.ts
-│  ├─ schemas/
-│  │  ├─ manifestSchema.ts
-│  │  ├─ noteSchema.ts
-│  │  ├─ templateSchema.ts
-│  │  └─ progressSchema.ts
-│  ├─ config/
-│  │  ├─ profiles.ts
-│  │  └─ runtime.ts
-│  ├─ styles/
-│  │  ├─ tokens.css
-│  │  └─ global.css
-│  └─ utils/
-│     ├─ hash.ts
-│     ├─ time.ts
-│     └─ result.ts
-├─ worker/
-│  ├─ index.ts
-│  ├─ routes/
-│  │  ├─ health.ts
-│  │  ├─ backup.ts
-│  │  └─ restore.ts
-│  ├─ services/
-│  │  ├─ githubContentsClient.ts
-│  │  ├─ progressStore.ts
-│  │  └─ retentionService.ts
-│  ├─ security/
-│  │  ├─ auth.ts
-│  │  └─ validation.ts
-│  └─ types.ts
-├─ tests/
-│  ├─ unit/
-│  ├─ component/
-│  └─ e2e/
-├─ public/
-│  └─ icons/
-├─ package.json
-├─ vite.config.ts
-├─ wrangler.jsonc
-└─ tsconfig.json
+Account          Supabase authenticated user
+LearnerProfile   learner settings/progress identity; belongs to one Account
+ContentProfile   GitHub card source such as `manman`; not a login identity
 ```
 
-No separate UI package, state-management package or backend framework is required.
+A LearnerProfile references one ContentProfile. Multiple accounts can review the same ContentProfile without sharing progress.
 
-## 7. Frontend Pages
-
-### 7.1 Profile Select
-
-Responsibilities:
-
-- Read configured Profiles.
-- Show display name and local/cloud status.
-- Switch current Profile.
-- Process one-time enrollment URL on a new device.
-- Allow local-only mode.
-
-Normal daily experience:
+Domain chain:
 
 ```text
-open app → tap Profile → Home
+DraftNote → Note → Card
+LearnerProfile + Card → ReviewEvent → materialized ReviewState
 ```
 
-### 7.2 Home
+- ReviewEvent is the synchronized fact.
+- ReviewState is a local materialized view rebuilt from ordered events.
+- `card_id = sha256(note_id + "|" + template_id + "|" + card_type)` using lowercase hexadecimal.
 
-Show:
+Feature modules:
 
 ```text
-due count
-learning/relearning count
-new count
-last card sync
-last progress backup
-pending backup state
+auth          email OTP session
+profiles      LearnerProfile create/select
+content-sync  GitHub manifest/template/pack import
+review        queue, UI, rating and scheduler
+progress-sync pending push, remote pull and replay
+tts           voice resolution/playback
+settings      learner preferences
+local-store   Dexie schema/transactions
 ```
 
-Primary actions:
+Dependency rule:
 
 ```text
-Start Review
-Sync Cards
-Backup Progress
+React UI → feature use cases → pure domain
+feature use cases → ports → Dexie/GitHub/Supabase/Web Speech adapters
 ```
 
-### 7.3 Review
+Domain code never imports React, Dexie, Supabase or browser globals.
 
-States:
+## 5. Process View
+
+### 5.1 Startup
 
 ```text
-loading queue
-question
-answer revealed
-session complete
-no due cards
+1. Render cached shell and open Dexie.
+2. Load persisted Supabase session.
+3. Show SignInPage when no session exists.
+4. Load local Profiles and render Home from local data.
+5. In background, sync progress and check the card manifest.
 ```
 
-Controls:
+Startup does not wait for network after local initialization.
+
+### 5.2 Rating transaction
+
+One Dexie transaction performs:
 
 ```text
-play TTS
-replay TTS
-reveal answer
-unknown / fuzzy / known
-exit session
+read ReviewState → create UUID ReviewEvent
+→ calculate scheduler-v1 state → write pending event + ReviewState
+→ commit → advance UI
 ```
 
-### 7.4 Settings / Sync
+If it fails, the UI stays on the current Card.
 
-Settings:
+### 5.3 Progress synchronization
 
 ```text
-English accent
-Spanish accent
-TTS speed
-listening mode default
-daily new-card limit
-backup interval
+1. Verify authenticated session.
+2. Upload pending events in bounded batches.
+3. Insert with event_id conflict ignored; Supabase assigns sync_seq.
+4. Pull events where sync_seq > local cursor, page by page.
+5. Upsert locally by event_id.
+6. Replay affected cards in canonical sync_seq order.
+7. Mark events synced and advance cursor transactionally.
 ```
 
-Operations:
+Triggers: app open after local render, browser `online`, review completion, manual sync and a short active-use debounce. No exact background schedule is promised.
+
+Convergence rules:
+
+- `event_id` makes retries idempotent.
+- `sync_seq` is the cross-device order.
+- Pending local events follow synchronized events until upload.
+- Replay uses `effective_at = max(previous.last_reviewed_at, event.reviewed_at)` so a late upload cannot move time backwards.
+- The same event set and scheduler version must create the same ReviewState on every device.
+
+### 5.4 Content synchronization
 
 ```text
-sync cards
-backup now
-check remote backup
-restore
-export progress
-import progress
-clear local Profile data with confirmation
+fetch/validate manifest → return unchanged when timestamp matches
+→ fetch every listed template/pack → parse non-empty JSONL records
+→ validate Notes independently → generate recognition/production
+→ commit complete import → suspend removed Cards, retain progress
 ```
 
-### 7.5 Library
+A missing required pack preserves the previous dataset. Invalid rows are skipped and reported without discarding valid rows.
 
-Library/search is P1. Do not block MVP delivery on it.
+## 6. Development View
 
-## 8. Local Database Design
-
-Use one Dexie database, versioned from day one.
-
-### 8.1 Tables
+Use lightweight Ports and Adapters inside feature folders. Create a port only for a real external boundary that needs a production adapter and a test fake:
 
 ```text
-profiles
-settings
-notes
-cards
-reviewStates
-syncStates
+AuthClient  CardSource  ProgressRemote  LocalStore  SpeechPlayer  Clock
 ```
 
-### 8.2 Suggested Dexie Schema
+No dependency-injection container is used; `src/app/bootstrap.ts` assembles adapters. Do not create interfaces for pure functions or one-line utilities.
+
+Planned directory:
+
+```text
+src/
+├─ app/                    App, router, bootstrap, small AppContext
+├─ features/
+│  ├─ auth/                page + use cases + Supabase port
+│  ├─ profiles/
+│  ├─ content-sync/
+│  ├─ review/
+│  ├─ progress-sync/
+│  ├─ settings/
+│  └─ tts/
+├─ domain/                 models, cardGenerator, scheduler, replay
+├─ infrastructure/
+│  ├─ db/                  Dexie database/schema
+│  ├─ github/              public CardSource
+│  ├─ supabase/            auth/progress adapters
+│  └─ speech/              Web Speech adapter
+├─ shared/                 errors, result, ids, time
+└─ styles/
+
+supabase/
+├─ config.toml
+├─ migrations/
+└─ seed.sql
+
+tests/{unit,integration,e2e}/
+```
+
+State rules:
+
+- Session and selected LearnerProfile: one small React context.
+- Persistent business state: Dexie observable queries.
+- Page interaction: local React state/reducer.
+- No Redux, Zustand, global event bus or server-state cache library.
+- Shared UI is created only after a second real use appears.
+
+Typed boundary errors:
+
+```text
+AUTH_REQUIRED, AUTH_OTP_FAILED, NETWORK_ERROR
+INVALID_MANIFEST, INVALID_PACK_ROW, DB_TRANSACTION_FAILED
+PROGRESS_PUSH_FAILED, PROGRESS_PULL_FAILED, PROGRESS_REPLAY_FAILED
+TTS_UNAVAILABLE, IMPORT_INVALID
+```
+
+## 7. Deployment View
+
+```text
+Cloudflare static PWA
+       │ browser
+       ├── public read ── GitHub `card`
+       └── authenticated ── shared Supabase project
+                            schema `english_recall`
+                            Auth + Postgres + RLS
+```
+
+Frontend configuration:
+
+```text
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+VITE_CARD_REPOSITORY_BASE_URL
+```
+
+These are not privileged credentials. Database passwords, secret/service-role keys, GitHub PATs and Cloudflare tokens never enter frontend code, Git, logs or Project Sources.
+
+The shared Supabase project uses a dedicated exposed `english_recall` schema. Other apps use other schemas. Every exposed table has explicit grants and RLS.
+
+## 8. Domain and Local Data
+
+Key types:
 
 ```ts
-profiles: '&profileId'
-settings: '&profileId'
-notes: '&[profileId+noteId], profileId, [profileId+dedupeKey], [profileId+status]'
-cards: '&[profileId+cardId], profileId, [profileId+noteId], [profileId+status]'
-reviewStates: '&[profileId+cardId], [profileId+dueAt], [profileId+state]'
-syncStates: '&profileId'
-```
-
-### 8.3 Profile
-
-```ts
-type Profile = {
-  profileId: string;
+type LearnerProfile = {
+  learnerProfileId: string; // UUID
+  userId: string;
   displayName: string;
+  contentProfileId: string;
+  uiLang: 'zh-CN';
   nativeLang: string;
   defaultLearningLang: string;
-  cardManifestUrl: string;
-  cloudBackupEnabled: boolean;
-  primaryDeviceId: string;
-  createdAt: string;
-  updatedAt: string;
-};
-```
-
-The Profile sync key is stored separately from exported business data and must never be included in progress export.
-
-### 8.4 Settings
-
-```ts
-type ProfileSettings = {
-  profileId: string;
-  uiLang: 'zh-CN';
   englishVoiceLocale: 'en-US' | 'en-GB';
   spanishVoiceLocale: 'es-MX' | 'es-US' | 'es-ES';
   ttsRate: 0.75 | 1 | 1.25;
   listeningModeDefault: boolean;
   dailyNewCardLimit: number;
-  backupIntervalHours: number;
 };
-```
 
-### 8.5 Note
-
-The browser Note mirrors the formal Note and adds normalized language fields:
-
-```ts
-type LocalNote = {
-  profileId: string;
-  noteId: string;
-  type: 'word' | 'phrase' | 'sentence' | 'grammar' | 'expression';
-  core: string;
-  meaningCn: string;
-  explanationCn?: string;
-  sourceSentence?: string;
-  examples: Array<{ en?: string; es?: string; target?: string; cn: string }>;
-  pronunciationText?: string;
-  pronunciationLang?: string;
-  pronunciationHintCn?: string;
-  learningLang: string;
-  nativeLang: string;
-  dedupeKey: string;
-  collections: string[];
-  tags: string[];
-  status: 'active' | 'mature' | 'suspended' | 'archived';
-  sourceUpdatedAt?: string;
-};
-```
-
-### 8.6 Card
-
-```ts
-type LocalCard = {
-  profileId: string;
+type ReviewEvent = {
+  eventId: string;
+  learnerProfileId: string;
   cardId: string;
-  noteId: string;
-  templateId: string;
-  cardType: 'recognition' | 'production';
-  front: string;
-  back: string;
-  status: 'active' | 'suspended';
-  sourceUpdatedAt?: string;
+  rating: 'unknown' | 'fuzzy' | 'known';
+  reviewedAt: string;
+  effectiveAt: string;
+  deviceId: string;
+  schedulerVersion: 1;
+  remoteSeq?: number;
+  syncStatus: 'pending' | 'synced';
 };
-```
 
-### 8.7 ReviewState
-
-```ts
 type ReviewState = {
-  profileId: string;
+  learnerProfileId: string;
   cardId: string;
   state: 'new' | 'learning' | 'review' | 'relearning' | 'mature';
   dueAt: string;
@@ -475,688 +339,185 @@ type ReviewState = {
   reviewCount: number;
   lapseCount: number;
   lastReviewedAt?: string;
-  updatedAt: string;
+  lastEventId?: string;
 };
 ```
 
-### 8.8 SyncState
+ReviewState is derived and is not the cloud synchronization authority.
+
+Suggested Dexie v1 schema:
 
 ```ts
-type SyncState = {
-  profileId: string;
-  manifestUpdatedAt?: string;
-  lastSuccessfulCardSyncAt?: string;
-  lastCardSyncError?: string;
-  lastSuccessfulBackupAt?: string;
-  backupPending: boolean;
-  remoteBackupCreatedAt?: string;
-};
+learnerProfiles: '&learnerProfileId, userId, contentProfileId'
+notes: '&[contentProfileId+noteId], contentProfileId, [contentProfileId+status]'
+cards: '&[contentProfileId+cardId], contentProfileId, [contentProfileId+noteId], [contentProfileId+status]'
+reviewEvents: '&eventId, learnerProfileId, [learnerProfileId+cardId], [learnerProfileId+syncStatus], remoteSeq'
+reviewStates: '&[learnerProfileId+cardId], [learnerProfileId+dueAt], [learnerProfileId+state]'
+syncStates: '&learnerProfileId'
 ```
 
-## 9. Card Source Sync
+Review queries use `learnerProfileId`; content queries use `contentProfileId`.
 
-### 9.1 Source URLs
+## 9. Supabase Data and RLS
 
-Manifest:
+MVP remote tables in schema `english_recall`:
+
+```sql
+learner_profiles (
+  learner_profile_id uuid primary key,
+  user_id uuid not null references auth.users,
+  display_name text not null,
+  content_profile_id text not null,
+  settings jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+)
+
+review_events (
+  sync_seq bigint generated always as identity unique,
+  event_id uuid primary key,
+  user_id uuid not null references auth.users,
+  learner_profile_id uuid not null references learner_profiles,
+  card_id text not null,
+  rating text not null,
+  reviewed_at timestamptz not null,
+  device_id text not null,
+  scheduler_version smallint not null,
+  created_at timestamptz not null default now()
+)
+```
+
+Constraints limit rating, scheduler version, device-id pattern and text lengths.
+
+RLS intent:
 
 ```text
-https://raw.githubusercontent.com/zhou-yang-personal/english-recall-hub/card/profiles/{profile_id}/manifest.json
+learner_profiles select/insert/update/delete: user_id = auth.uid()
+review_events select/insert: user_id = auth.uid()
+event learner_profile_id must belong to the same auth.uid()
+review_events update/delete: denied to normal clients
 ```
 
-Pack/template paths are resolved from manifest entries against the same repository/branch base.
+Integration tests use two users. A publishable key without an authenticated user must read/write neither table.
 
-### 9.2 Algorithm
+## 10. Scheduler and Queue
+
+Initial rating:
 
 ```text
-1. fetch manifest
-2. validate manifest with Zod
-3. compare updated_at with SyncState
-4. if unchanged, return unchanged
-5. fetch all listed templates
-6. fetch all listed packs
-7. parse JSONL line by line
-8. validate each Note independently
-9. collect valid Notes and row errors
-10. generate supported Cards
-11. transactionally upsert Notes and Cards
-12. preserve existing ReviewState by stable card_id
-13. remove local active Notes/Cards no longer present only after complete successful import
-14. update SyncState
+unknown → relearning, +10 minutes, interval 0
+fuzzy   → learning, +1 day, interval 1
+known   → review, +3 days, interval 3
 ```
 
-### 9.3 Partial Invalid Rows
-
-One invalid JSONL row must not fail the whole pack.
-
-Sync result includes:
+Existing state:
 
 ```text
-packs requested
-packs loaded
-notes valid
-notes skipped
-cards generated
-warnings
+unknown → relearning, +10 minutes, lapse +1
+fuzzy   → review, max(1, round(interval × 1.5)) days
+known   → review/mature, min(180, max(3, round(interval × 2.5))) days
 ```
 
-### 9.4 Failure Rule
+`mature` begins at 90 days. Scheduler v1 is a pure function used by both normal rating and replay.
 
-If manifest or required pack retrieval fails before a complete import:
+Queue order:
 
 ```text
-do not delete or replace the previous local dataset
-record failure
-show “同步失败，继续使用本地数据”
+overdue relearning → overdue learning → due review/mature → new within limit
 ```
 
-### 9.5 Future Hash Upgrade
+## 11. Pages, TTS and PWA
 
-When Builder later supplies reliable per-pack hashes, SyncState may store hashes and fetch only changed packs. This is P1 and must not be implemented with fabricated null hashes.
-
-## 10. Card Generation
-
-### 10.1 Supported Templates
-
-Only template entries with:
+P0 routes:
 
 ```text
-card_type = recognition | production
+/sign-in   email/OTP
+/profiles  select/create LearnerProfile
+/          Home
+/review    review session
+/settings  preferences and both sync controls
 ```
 
-are used.
+Home distinguishes content sync from progress sync and shows due/learning/new counts. A successful card download must never be shown as successful progress synchronization.
 
-### 10.2 Minimal Interpolation
-
-Supported scalar variables:
+Voice fallback:
 
 ```text
-{{core}}
-{{meaning_cn}}
+exact locale → language prefix → browser language default → system default
 ```
 
-The MVP does not implement a general template expression language.
-
-### 10.3 Stable IDs
-
-```ts
-cardId = sha256(`${noteId}|${templateId}|${cardType}`)
-```
-
-A deterministic browser-compatible hash function must be tested. If Web Crypto SHA-256 complicates synchronous generation, a stable pure TypeScript hash may be used, but it cannot change after release.
-
-### 10.4 Update Behavior
-
-When Note content changes but stable identifiers remain:
-
-```text
-update Card front/back
-retain ReviewState
-```
-
-When a Card disappears from supported templates:
-
-```text
-mark local Card suspended
-retain ReviewState for possible future return
-```
-
-## 11. Review Queue and Scheduler
-
-### 11.1 Queue Query
-
-```text
-selected profile
-AND card status active
-AND note status active/mature
-AND dueAt <= now
-```
-
-Then add new Cards up to daily limit.
-
-### 11.2 Priority
-
-```text
-relearning overdue
-learning overdue
-review overdue
-due today
-new cards
-```
-
-### 11.3 Rating Rules
-
-New Card:
-
-```text
-unknown → relearning, due +10 min, interval 0
-fuzzy   → learning, due +1 day, interval 1
-known   → review, due +3 days, interval 3
-```
-
-Existing Card:
-
-```text
-unknown → relearning, due +10 min, lapse +1
-fuzzy   → review, interval max(1, round(interval × 1.5))
-known   → review/mature, interval min(180, max(3, round(interval × 2.5)))
-```
-
-A Card may become `mature` when interval reaches 90 days. Mature is a label; it still remains reviewable when due.
-
-### 11.4 Atomic Save
-
-The rating operation updates ReviewState before advancing to the next Card. If it fails, the UI stays on the current Card and displays an error.
-
-## 12. TTS and Listening Mode
-
-### 12.1 Voice Resolution
-
-```text
-exact preferred locale and voice
-→ language-prefix match
-→ browser default for requested language
-→ system default
-```
-
-Voice list may load asynchronously. The service must refresh available voices after `voiceschanged`.
-
-### 12.2 Playback
-
-```ts
-const utterance = new SpeechSynthesisUtterance(text);
-utterance.lang = resolvedLocale;
-utterance.voice = resolvedVoice;
-utterance.rate = configuredRate;
-speechSynthesis.cancel();
-speechSynthesis.speak(utterance);
-```
-
-### 12.3 Listening Mode
-
-```text
-enter Card
-→ auto/play pronunciation
-→ hide core/front target text
-→ user recalls
-→ reveal answer and text
-→ rate with the normal ReviewState
-```
-
-Listening mode does not generate duplicate Cards in MVP.
-
-### 12.4 Boundaries
-
-No audio file creation, persistent audio cache, cloud TTS, speech recognition, IPA or pronunciation score.
-
-## 13. Profile Enrollment and Security
-
-### 13.1 Daily User Experience
-
-```text
-open app → choose Profile → use app
-```
-
-No daily password or GitHub login.
-
-### 13.2 New Device Setup
-
-An administrator creates a one-time setup link or QR for a Profile:
-
-```text
-https://app/#/setup?profile=manman&key=<profile-sync-key>
-```
-
-The app:
-
-```text
-validates Profile exists
-stores sync key locally
-creates/loads device_id
-removes key from visible navigation state
-continues to Profile Home
-```
-
-Use URL fragment routing so the key is not sent as a normal server query parameter. The app must call `history.replaceState` after saving it.
-
-### 13.3 Worker Secrets
-
-```text
-GITHUB_PROGRESS_TOKEN
-PROFILE_SYNC_KEYS
-ALLOWED_ORIGINS
-MAX_BACKUP_BODY_BYTES
-SNAPSHOT_RETENTION_DAYS
-```
-
-Example logical format:
-
-```json
-{
-  "manman": "random-long-key",
-  "mom": "another-random-long-key"
-}
-```
-
-Secrets are configured in Cloudflare, never committed.
-
-### 13.4 Worker Request Authentication
-
-Headers:
-
-```text
-X-Profile-Id
-X-Profile-Sync-Key
-X-Device-Id
-```
-
-Worker checks:
-
-```text
-origin allowlist
-profile allowlist
-constant-time key comparison where practical
-device id safe pattern
-body size
-Zod payload schema
-```
-
-## 14. Worker API
-
-### 14.1 GET /api/health
-
-Response:
-
-```json
-{
-  "ok": true,
-  "service": "english-recall-hub",
-  "version": "0.2.0-web-mvp-design"
-}
-```
-
-### 14.2 POST /api/progress/backup
-
-Request body:
-
-```json
-{
-  "schema_version": "1.0",
-  "profile_id": "manman",
-  "device_id": "device_xxx",
-  "created_at": "2026-08-12T00:00:00Z",
-  "card_manifest_updated_at": "2026-08-11T16:39:31Z",
-  "review_states": [],
-  "settings_subset": {
-    "daily_new_card_limit": 10,
-    "tts_rate": 1
-  }
-}
-```
-
-Writes:
-
-```text
-progress/profiles/{profile_id}/devices/{device_id}/latest.json
-progress/profiles/{profile_id}/devices/{device_id}/snapshots/YYYY-MM-DD.json
-```
-
-Backup sequence:
-
-```text
-validate request
-fetch existing GitHub file SHA if present
-create/update latest
-create/update today's snapshot
-remove snapshots older than retention only when safe
-return written paths and timestamp
-```
-
-If cleanup fails after latest succeeds, return success with warning rather than reporting total failure.
-
-### 14.3 GET /api/progress/restore
-
-Query:
-
-```text
-profile_id
-device_id
-```
-
-Authentication uses the same headers.
-
-Response returns latest snapshot metadata and payload. `404` means no remote backup, not a server error.
-
-### 14.4 Error Shape
-
-```json
-{
-  "ok": false,
-  "code": "INVALID_PROFILE",
-  "message": "Profile is not allowed"
-}
-```
-
-Do not expose GitHub response bodies containing sensitive request context.
-
-## 15. Progress Restore Semantics
-
-Restore flow:
-
-```text
-fetch remote latest metadata
-→ show backup time/device/profile
-→ user confirms
-→ validate snapshot
-→ transactionally replace ReviewState for selected Profile
-→ retain local Notes/Cards
-→ mark local sync state restored
-```
-
-The MVP does not merge two active device histories. If a user switches primary device, they restore first and then continue on the new device.
-
-## 16. Export / Import
-
-Export contains:
-
-```text
-schema_version
-profile metadata without secrets
-created_at
-card_manifest_updated_at
-review_states
-settings_subset
-```
-
-Export excludes:
-
-```text
-GitHub token
-Profile sync key
-browser storage internals
-formal Notes/Card content
-```
-
-Import validates schema and requires explicit confirmation before replacing local progress.
-
-## 17. PWA and Offline Strategy
-
-Use `vite-plugin-pwa` to generate service worker and web manifest.
-
-Cache:
-
-```text
-HTML shell
-versioned JS/CSS assets
-icons
-```
-
-Do not rely on Cache API for Note/Card business data. That data belongs in IndexedDB.
-
-Update behavior:
-
-```text
-new app version available
-→ show refresh/update prompt
-→ avoid refreshing during an active review answer save
-```
-
-Offline rules:
-
-- The app shell opens after first successful load.
-- Local Profile, Home and Review work offline.
-- Card sync/backup/restore show offline status.
-- TTS availability depends on installed system voices.
-
-## 18. Error Handling
-
-Define typed result categories:
-
-```text
-NETWORK_ERROR
-SOURCE_NOT_FOUND
-INVALID_MANIFEST
-INVALID_PACK_ROW
-DB_TRANSACTION_FAILED
-TTS_UNAVAILABLE
-BACKUP_UNAUTHORIZED
-BACKUP_CONFLICT
-RESTORE_NOT_FOUND
-IMPORT_INVALID
-```
-
-User-facing messages are concise and preserve local-data guarantees.
-
-Examples:
-
-```text
-同步失败，继续使用上一次已同步的卡片。
-备份失败，本地进度已保留，稍后可重试。
-当前设备没有可用的西语语音，请在系统中安装语音或更换语音区域。
-```
-
-## 19. Testing Strategy
-
-### 19.1 Unit Tests
-
-- Scheduler ratings and interval caps.
-- Stable Card ID.
-- Note language inference.
-- Template filtering/interpolation.
-- JSONL parsing with invalid rows.
-- Voice fallback selection.
-- Progress schema and sanitization.
-
-### 19.2 Component Tests
-
-- Profile selection.
-- Home count rendering.
-- Review front/reveal/rating states.
-- Listening mode text hiding.
-- Sync and backup status messages.
-- Restore/import confirmation.
-
-### 19.3 Worker Tests
-
-- Valid backup.
-- Invalid Profile/key/origin/device.
-- Oversized body.
-- Existing GitHub file update with SHA.
-- No remote restore.
-- Retention warning behavior.
-
-### 19.4 End-to-End Tests
-
-Critical browser flows:
-
-```text
-first open → select Profile → sync → review → refresh → progress retained
-network failure → local review remains usable
-backup → clear local progress → restore
-Profile A / Profile B isolation
-PWA shell offline
-```
-
-### 19.5 Manual Device Acceptance
-
-Required:
-
-```text
-iPhone Safari installed to home screen
-Android Chrome installed to home screen
-desktop Chrome or Edge
-```
-
-TTS must be manually checked because installed voices vary by device.
-
-## 20. Implementation Milestones
-
-### M1. Repository and PWA Shell — 1 day
-
-```text
-Vite/React/TypeScript
-Cloudflare Vite/Worker config
-routing
-PWA manifest/icons placeholder
-base mobile layout
-```
-
-### M2. Dexie and Profile — 1 day
-
-```text
-DB schema
-Profile selection
-settings
-local-only mode
-enrollment parsing
-```
-
-### M3. Card Source Sync — 2 days
-
-```text
-manifest/templates/packs
-Zod validation
-JSONL parsing
-transactional upsert
-sync status
-```
-
-### M4. Card Generation and Review — 2 days
-
-```text
-recognition/production generation
-stable IDs
-due queue
-review UI
-scheduler
-```
-
-### M5. TTS and Listening — 1 day
-
-```text
-voice list/fallback
-speed and language settings
-listening mode
-```
-
-### M6. Progress Backup and Restore — 2 days
-
-```text
-Worker auth
-GitHub Contents API
-latest/daily snapshots
-restore
-retention
-```
-
-### M7. Offline and Export/Import — 1 day
-
-```text
-PWA update/offline handling
-progress JSON export/import
-mobile polish
-```
-
-### M8. Test and Device Fixes — 2–3 days
-
-```text
-unit/component/e2e
-Safari fixes
-Android fixes
-error-state validation
-```
-
-Total: `12–13 working days`.
-
-If cloud backup/restore is deferred, the local-only usable MVP is `8–9 working days`.
-
-## 21. Estimated Code Size
-
-| Area | Files | Production LOC |
-|---|---:|---:|
-| App/pages/components | 16–22 | 1,500–2,200 |
-| Domain/SRS/generation | 6–9 | 600–900 |
-| Dexie/repositories | 7–10 | 700–1,000 |
-| Sync/TTS/export services | 8–11 | 700–1,100 |
-| Worker/security/GitHub | 7–10 | 700–1,100 |
-| Config/styles/PWA | 5–8 | 300–500 |
-| **Production total** | **35–50** | **4,200–6,500** |
-
-Tests:
-
-```text
-10–18 test files
-1,200–2,000 LOC
-```
-
-This is an estimate for planning, not a target to inflate code volume.
-
-## 22. Build and Deploy Commands
-
-Planned scripts:
-
-```bash
-npm install
-npm run dev
-npm run build
-npm run typecheck
-npm run test
-npm run test:e2e
-npm run deploy
-```
-
-Recommended script semantics:
-
-```text
-dev       local Vite + Worker development
-build     production frontend/Worker build
-typecheck tsc without emit
-test      Vitest
-test:e2e  Playwright
-deploy    Wrangler deploy
-```
-
-Cloudflare Secret configuration is a deployment prerequisite and must be documented without writing actual values.
-
-## 23. Acceptance Gate
-
-The Web MVP is ready for family trial only when:
-
-1. No login/token input appears in normal use.
-2. Existing current card data imports correctly.
-3. Recognition and Production review work.
-4. Rating survives refresh and offline use.
-5. English and Spanish TTS work with fallback.
-6. Profile isolation is verified.
-7. Sync failure preserves local data.
-8. Backup failure preserves local progress.
-9. Backup and restore round-trip succeeds.
-10. iPhone and Android home-screen installations are manually verified.
-11. Unit/component/e2e checks pass or any unexecuted checks are stated explicitly.
-
-## 24. Key Risks and Boundaries
-
-| Risk | Decision |
+English locales are en-US/en-GB; Spanish locales are es-MX/es-US/es-ES; rates are 0.75/1.0/1.25. Listening mode reuses the same Card and ReviewState.
+
+The service worker caches only the app shell and versioned assets. Business data remains in IndexedDB. Updates never interrupt an in-flight rating transaction.
+
+## 12. Security and Recovery
+
+- RLS is enabled before frontend access.
+- Only the publishable Supabase key enters frontend code.
+- External payloads are validated at boundaries.
+- Failed content import never deletes the last successful dataset.
+- Failed progress push never deletes pending events.
+- Sign-out asks before clearing local learner data.
+- Progress export excludes auth tokens and platform credentials.
+- GitHub `progress` is not an MVP runtime database; it remains reserved for a possible future cold backup.
+
+## 13. Tests and Traceability
+
+| Need | Modules | Minimum proof |
+|---|---|---|
+| Passwordless account | auth | OTP success/failure and persisted session |
+| Profile isolation | profiles, db, RLS | two-user and two-profile isolation |
+| Existing cards | content-sync | current manifest/templates/packs fixture import |
+| Offline review | review, db, PWA | rating persists with network disabled |
+| Stable scheduling | scheduler | matrix, caps and fixed-clock tests |
+| Multi-device convergence | progress-sync, replay | interleaved events converge |
+| Idempotent retry | progress-sync | duplicate upload creates one row |
+| Cloud failure safety | progress-sync | pending events survive failure |
+| TTS/listening | tts, review | fallback and hidden-before-reveal tests |
+| Installable PWA | app, deployment | E2E plus iPhone/Android acceptance |
+
+Test layers: unit domain tests; Dexie/Supabase/RLS integration tests; component tests; critical E2E flows; manual device/TTS acceptance.
+
+## 14. Delivery Plan
+
+| Milestone | Scope | Estimate |
+|---|---|---:|
+| M1 | Vite/PWA, feature structure, Dexie, scheduler/replay | 2 days |
+| M2 | Supabase local setup, OTP, Profile, RLS tests | 1.5 days |
+| M3 | Manifest/packs/templates, validation, Card generation | 2 days |
+| M4 | Home, queue, Review UI, TTS/listening | 2 days |
+| M5 | Event push/pull/replay/status/retry | 2 days |
+| M6 | Offline/update, export/import, Cloudflare deploy | 1.5 days |
+| M7 | Automated tests and device fixes | 2–3 days |
+
+Estimated total: `13–15 working days`. It is a planning range, not a code-volume target.
+
+## 15. Acceptance Gate
+
+1. Email OTP works and daily use does not repeatedly request login.
+2. The same Account loads its LearnerProfile on a second device.
+3. Current card data imports without hardcoded Note counts.
+4. Recognition and Production work.
+5. Every rating persists before UI navigation.
+6. Offline ratings sync after reconnect.
+7. Interleaved two-device events converge.
+8. Content/progress failures preserve local data.
+9. RLS blocks cross-user access.
+10. English/Spanish TTS fallback works.
+11. Export/import round-trips without secrets.
+12. PWA installation is verified on iPhone and Android.
+13. Build, typecheck and test results are reported honestly.
+
+## 16. Upgrade Triggers
+
+| Observed trigger | Possible upgrade |
 |---|---|
-| Browser data may be cleared | Worker backup + local JSON export |
-| TTS voices differ by device | locale fallback; no promised voice name |
-| Current packs have no hashes | use manifest.updated_at and full upsert |
-| Current cloze templates lack data | disable cloze in MVP |
-| Background timing is unreliable | backup on active-use triggers, not exact schedule |
-| Profile selector is not authentication | one-time local enrollment protects cloud writes |
-| Multi-device conflicts | one primary write device per Profile |
-| GitHub Contents API conflicts | fetch current SHA and retry only after re-read |
-
-## 25. Future Upgrade Triggers
-
-Only evaluate the following after real usage shows the trigger:
-
-```text
-private card content → add authentication/OAuth
-frequent multi-device use → event log and merge
-poor browser TTS → cloud TTS/native app
-need reliable reminders → native push or scheduled service
-large pack sync cost → Builder hashes and sealed packs
-need richer recall → add cloze/output after schema support
-```
+| Family members must manage each other | memberships/invitations/roles |
+| Event rebuild becomes slow | remote materialized state/checkpoints |
+| Open devices need instant updates | Supabase Realtime |
+| Privileged validation is required | RPC/Edge Function/Cloudflare Worker |
+| Card data becomes private | authenticated card API |
+| Browser voices are inadequate | cloud TTS/native app |
+| Pack sync becomes costly | Builder hashes/sealed packs |
 
 Until a trigger occurs, these are not development tasks.

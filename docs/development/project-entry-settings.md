@@ -1,13 +1,13 @@
 # English Recall Hub｜External Entry Settings
 
-Version: `0.2.0-web-mvp-design`  
-Updated: `2026-08-12`
+Version: `0.3.0-account-sync-design`
+Updated: `2026-08-17`
 
 This document records configuration outside the repository.
 
 ## 1. English-learning ChatGPT Project
 
-The English-learning Project remains responsible for teaching first and writing review-worthy DraftNotes to:
+The English-learning Project teaches first and writes review-worthy DraftNotes only to:
 
 ```text
 REPO=zhou-yang-personal/english-recall-hub
@@ -16,79 +16,55 @@ DRAFT_BRANCH=draft
 DRAFT_PATH=profiles/manman/inbox
 CARD_BRANCH=card
 CARD_PATH=profiles/manman
-PROGRESS_BRANCH=progress
-PROGRESS_PATH=profiles/manman
 ```
 
-Hard rules:
+It never bypasses Builder or writes runtime account/progress data.
 
-```text
-ChatGPT writes DraftNote only.
-Do not bypass Builder.
-One DraftNote = one knowledge point.
-pronunciation only uses text/lang/hint_cn.
-Do not write card/progress/dev unless explicitly doing repository work.
-```
+## 2. Single Project Source
 
-These rules are unchanged by the Web/PWA architecture decision.
-
-## 2. Single Project Source File
-
-The external ChatGPT Project should use only this source file:
+Use only:
 
 ```text
 docs/development/English-Recall-Hub-Project-Source.txt
 ```
 
-The `0.2.0` source file replaces the earlier version that referred to a mobile App and SQLite. It now states:
-
-```text
-Web/PWA runtime
-Dexie/IndexedDB
-Web Speech API
-Cloudflare Worker progress backup
-no normal login/password/token input
-```
+The `0.3.0` source states Web/PWA + IndexedDB + Supabase account/event sync and replaces the obsolete GitHub progress snapshot model.
 
 ## 3. Development Session Opener
 
 ```text
-你现在接手 English Recall Hub 项目。请先读取仓库根目录 AGENTS.md，并继续读取其中列出的 AGENTS.common.md、AGENTS.project.md、README.md、docs/design/current-core-design.md、docs/design/web-mvp-framework-design.md、docs/requirements/current-requirements.md、docs/handoff/latest-handoff.md 和 docs/changes/CHANGELOG-dev.md。如涉及 GitHub connector 操作，还必须读取 docs/development/chatgpt-github-connector-guide.md。当前 source-of-truth 分支是 dev；第一版技术基线是 React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Workers Static Assets/Worker API。不要回到 React Native/Expo 或 SQLite 原生 App 基线。
+你现在接手 English Recall Hub 项目。请先读取仓库根目录 AGENTS.md 及其列出的全部必读文件。当前 source-of-truth 分支是 dev；第一版基线是 React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Supabase Auth/Postgres/RLS + Cloudflare Workers Static Assets。实现遵循 docs/design/web-mvp-framework-design.md 的 4+1 视图、feature-first Ports and Adapters、ReviewEvent 增量同步和范围边界。不要恢复旧的 Profile sync key、Cloudflare progress API 或 GitHub progress snapshot 主链路。
 ```
 
-## 4. Codex / Development Agent Entry
+## 4. Repository and Platform Settings
+
+- `main` remains stable default; `dev` remains development source of truth.
+- `draft`, `card`, `progress` stay separated; `progress` is not an MVP runtime database.
+- Formal `card` content remains Builder-owned and publicly read by the PWA.
+- Cloudflare serves static PWA assets.
+- A shared Supabase project exposes the isolated `english_recall` schema.
+- Supabase Auth uses email OTP; Postgres tables use explicit grants and RLS.
+- Frontend uses only Supabase URL/publishable key and public card URL.
+
+## 5. External Configuration Not Stored in Git
+
+Frontend-safe build configuration:
 
 ```text
-Repository: zhou-yang-personal/english-recall-hub
-Source-of-truth branch: dev
-Before any design or code change, read AGENTS.md and every required file listed inside it.
-Follow docs/design/web-mvp-framework-design.md as the implementation baseline.
-The MVP is Web/PWA: React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Worker.
-Do not implement native mobile builds, normal account/password, GitHub OAuth, browser PAT input, cloud TTS, pronunciation scoring, multi-device realtime merge, or cloud database unless explicitly requested.
-Do not commit GitHub tokens, Cloudflare Secrets, Profile sync keys, IndexedDB exports, progress snapshots, logs, build artifacts or generated packages.
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+VITE_CARD_REPOSITORY_BASE_URL
 ```
 
-## 5. Repository and Deployment Settings
-
-- Keep `main` as stable default branch.
-- Keep `dev` as the development source of truth.
-- Keep `draft`, `card`, `progress` separated.
-- Formal `card` content remains Builder-owned.
-- Cloudflare Worker stores GitHub write credentials as Secrets.
-- The browser never receives GitHub PAT.
-- Normal use opens the PWA and selects a Profile.
-- New-device backup enrollment uses a one-time Profile setup link/QR.
-
-## 6. External Configuration Not Stored in Git
-
-Configure in Cloudflare only:
+Never place these privileged values in Git, Project Instructions, Project Sources or chat output:
 
 ```text
-GITHUB_PROGRESS_TOKEN
-PROFILE_SYNC_KEYS
-ALLOWED_ORIGINS
-MAX_BACKUP_BODY_BYTES
-SNAPSHOT_RETENTION_DAYS
+Supabase access token
+Supabase secret/service-role key
+database password
+Cloudflare API token
+GitHub PAT
+personal credentials
 ```
 
-Never paste actual values into Project Instructions, Project Sources, repository files or chat output.
+Account creation, email verification, CAPTCHA, 2FA and payment confirmation remain user-owned actions. After the user completes CLI login, development agents may apply reviewed migrations/configuration and deploy within the authorized project.

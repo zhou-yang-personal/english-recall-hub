@@ -68,9 +68,10 @@
 - 需要写 draft 时，只写 DraftNote JSONL，不写正式 Note/Card。
 - `card` 分支正式内容由 Builder 生成；ChatGPT 不直接绕过 Builder 修改正式 pack。
 - Web/PWA 从公开 `card` 分支读取内容；浏览器不直接写 GitHub。
-- `progress` 由 Cloudflare Worker 使用后台 Secret 写入；前端不得持有 GitHub PAT。
-- 不把 IndexedDB 导出、Profile sync key、浏览器缓存、音频、日志、安装包或构建产物写入仓库。
-- 任何 GitHub token、Cloudflare Secret、Project 私密配置、设备私钥都不得写入仓库。
+- MVP 账号和进度同步由 Supabase Auth/Postgres/RLS 承担；`progress` 分支不作为运行时数据库。
+- 前端只允许使用 Supabase publishable key，不得持有 GitHub PAT、Supabase secret/service-role key 或数据库密码。
+- 不把 IndexedDB 导出、auth token、浏览器缓存、音频、日志、安装包或构建产物写入仓库。
+- 任何 GitHub token、Cloudflare/Supabase Secret、Project 私密配置或设备私钥都不得写入仓库。
 
 ## 6. 常见失败与处理方式
 
