@@ -6,7 +6,7 @@
 
 - [ ] 项目名称：`English Recall Hub`。
 - [ ] 仓库：`zhou-yang-personal/english-recall-hub`。
-- [ ] 当前版本：`0.3.0-account-sync-design`。
+- [ ] 当前版本：`0.3.1-m1-foundation`。
 - [ ] 产品定位：面向个人和家庭的多语言主动回忆工具，把 ChatGPT 学习记录转为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和账号进度同步。
 - [ ] 第一版平台：iPhone、Android、PC 浏览器；可安装为 PWA，不开发原生 iOS/Android App。
 - [ ] 第一版技术栈：`React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Supabase Auth/Postgres/RLS + Cloudflare Workers Static Assets`。
@@ -118,7 +118,7 @@
 
 ## B8. 工程与模块约束
 
-计划目录：
+当前目录基线：
 
 ```text
 src/app              启动、路由、上下文
@@ -149,13 +149,11 @@ tests                unit/integration/e2e
 - [ ] `docs/handoff/latest-handoff.md`
 - [ ] `docs/changes/CHANGELOG-dev.md`
 
-创建工程后追加：
-
 - [ ] `package.json`
 - [ ] `wrangler.jsonc` 或 `wrangler.toml`
 - [ ] PWA manifest 中的版本标记，如存在。
 
-计划命令：
+当前命令：
 
 ```text
 npm install
@@ -163,11 +161,10 @@ npm run dev
 npm run build
 npm run typecheck
 npm run test
-npm run test:e2e
 npm run deploy
 ```
 
-- [ ] 当前尚未创建应用代码和 CI；未执行时不得声称通过。
+- [ ] 应用代码已创建，CI 和 E2E 尚未创建；未执行时不得声称通过。
 - [ ] 不改依赖时不得修改 lock 文件。
 
 ## B10. 禁止事项

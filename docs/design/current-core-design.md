@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.3.0-account-sync-design`
+Version: `0.3.1-m1-foundation`
 Updated: `2026-08-17`
 Branch: `dev`
 

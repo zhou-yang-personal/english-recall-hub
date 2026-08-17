@@ -1,6 +1,6 @@
 # English Recall Hub｜External Entry Settings
 
-Version: `0.3.0-account-sync-design`
+Version: `0.3.1-m1-foundation`
 Updated: `2026-08-17`
 
 This document records configuration outside the repository.
@@ -28,7 +28,7 @@ Use only:
 docs/development/English-Recall-Hub-Project-Source.txt
 ```
 
-The `0.3.0` source states Web/PWA + IndexedDB + Supabase account/event sync and replaces the obsolete GitHub progress snapshot model.
+The `0.3.1` source states Web/PWA + IndexedDB + Supabase account/event sync and records the implemented M1 application foundation.
 
 ## 3. Development Session Opener
 

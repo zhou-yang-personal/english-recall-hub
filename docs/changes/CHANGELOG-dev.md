@@ -1,5 +1,31 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.3.1-m1-foundation｜2026-08-17
+
+### Added
+
+- Initialized the React 19, TypeScript, Vite 8 and React Router Web/PWA application.
+- Added the five P0 routes and a responsive, dependency-light application shell.
+- Added vite-plugin-pwa shell caching and Cloudflare Workers Static Assets SPA configuration.
+- Added Dexie v1 stores for LearnerProfile, Note, Card, ReviewEvent, ReviewState and SyncState.
+- Implemented Scheduler v1, monotonic effective timestamps and deterministic ReviewEvent replay.
+- Implemented the atomic rating transaction for pending ReviewEvent plus materialized ReviewState.
+- Added fixed-clock scheduler/replay unit tests and fake-IndexedDB transaction integration tests.
+- Added `.env.example`, npm scripts and the committed dependency lock file.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 12 passed in 3 files
+npm run build: passed; PWA service worker generated
+npx wrangler deploy --dry-run: passed; no cloud account used
+npm audit: 0 vulnerabilities
+E2E/CI: not configured
+Cloudflare/Supabase: not provisioned
+```
+
 ## 0.3.0-account-sync-design｜2026-08-17
 
 ### Changed

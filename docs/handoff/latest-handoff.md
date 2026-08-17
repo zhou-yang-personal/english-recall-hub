@@ -1,6 +1,6 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.3.0-account-sync-design`
+Version: `0.3.1-m1-foundation`
 Updated: `2026-08-17`
 Source-of-truth branch: `dev`
 
@@ -91,29 +91,38 @@ custom progress API; D1/KV/R2; advanced cards
 cloud TTS/scoring; push; payment/ads/analytics/community
 ```
 
-## 6. Next Development Steps
+## 6. Implemented M1 Foundation
 
-1. Accept this design baseline into `dev`.
-2. Initialize Vite/React/TypeScript/PWA and the feature-first directory.
-3. Add Dexie schema, scheduler v1 and event replay unit tests.
-4. Add local Supabase configuration/migrations and two-user RLS tests.
-5. Implement email OTP and LearnerProfile selection.
-6. Implement real current-card import and Card generation.
-7. Implement Home/Review/TTS.
-8. Implement ReviewEvent push/pull/replay.
-9. Add offline/update/export/import behavior.
-10. Deploy to Cloudflare and perform browser/device acceptance.
+- React 19, TypeScript, Vite, React Router and vite-plugin-pwa application shell.
+- P0 routes for Home, sign-in, LearnerProfiles, review and settings.
+- Cloudflare static-assets SPA configuration with no custom Worker API.
+- Dexie v1 stores for profiles, content, events, materialized state and sync cursors.
+- Pure Scheduler v1 and deterministic ReviewEvent ordering/replay.
+- Atomic Dexie rating transaction that appends a pending event and updates ReviewState.
+- Fixed-clock unit tests and fake-IndexedDB transaction/rollback integration tests.
+
+## 7. Next Development Steps
+
+1. Add local Supabase configuration/migrations and two-user RLS tests.
+2. Implement email OTP and LearnerProfile selection.
+3. Implement real current-card import, Zod validation and Card generation.
+4. Connect Home/Review UI and TTS to IndexedDB.
+5. Implement ReviewEvent push/pull/replay and sync cursor transactions.
+6. Add offline/update/export/import behavior.
+7. Add browser E2E, deploy to Cloudflare and perform device acceptance.
 
 Estimated full MVP: `13–15 working days`.
 
-## 7. Verification Status
+## 8. Verification Status
 
 ```text
-Application build: not run; application not initialized
-Unit/integration/E2E: not run; no application code
+Application typecheck/lint/build: passed
+Unit/integration: 12 passed across 3 test files
+Wrangler deploy --dry-run: passed; 9 static files discovered
+E2E: not configured
 CI: not configured
 Cloudflare/Supabase: not provisioned
-Dependencies/lock files: not changed
+Dependencies/package-lock.json: created; npm audit reported 0 vulnerabilities
 ```
 
-This handoff describes an executable design baseline, not completed implementation.
+This handoff describes an implemented M1 foundation, not a completed MVP.

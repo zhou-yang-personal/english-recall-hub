@@ -4,12 +4,12 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.3.0-account-sync-design`
+- Version: `0.3.1-m1-foundation`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
 - First platform: Web/PWA on iPhone, Android and desktop
-- Status: design baseline only; application project is not initialized
+- Status: M1 foundation implemented; account/content synchronization is not yet connected
 
 ## Product flow
 
@@ -79,9 +79,7 @@ docs/handoff/latest-handoff.md
 docs/changes/CHANGELOG-dev.md
 ```
 
-## Planned commands
-
-The application has not been initialized. Planned commands are:
+## Development commands
 
 ```bash
 npm install
@@ -89,6 +87,7 @@ npm run dev
 npm run build
 npm run typecheck
 npm run test
-npm run test:e2e
 npm run deploy
 ```
+
+Copy `.env.example` to `.env.local` only when M2 Supabase integration begins. The current M1 shell, scheduler, replay and local database tests require no cloud account.

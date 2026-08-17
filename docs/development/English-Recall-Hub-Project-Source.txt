@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.3.0-account-sync-design
+Version: 0.3.1-m1-foundation
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev
@@ -62,6 +62,11 @@ Code design:
 Use feature-first lightweight Ports and Adapters.
 Domain scheduling, Card generation and event replay stay pure TypeScript.
 Only real external boundaries get ports; no DI container, Redux/Zustand or custom backend framework.
+
+Current implementation:
+M1 React/Vite/PWA shell and P0 routes are initialized.
+Dexie v1 stores, Scheduler v1, deterministic ReviewEvent replay and atomic rating writes exist.
+Account, card-content and remote progress synchronization remain subsequent milestones.
 
 MVP includes:
 email OTP/persisted session; LearnerProfile isolation; public card sync
