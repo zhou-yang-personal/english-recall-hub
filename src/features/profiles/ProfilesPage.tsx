@@ -19,6 +19,11 @@ export function ProfilesPage() {
   const [loading, setLoading] = useState(true);
   const [linkingProfileId, setLinkingProfileId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const duplicateKeys = new Set(
+    profiles
+      .map((profile) => `${profile.displayName.trim().toLocaleLowerCase()}|${profile.contentProfileId}`)
+      .filter((key, index, keys) => keys.indexOf(key) !== index),
+  );
 
   useEffect(() => {
     let active = true;
@@ -84,7 +89,17 @@ export function ProfilesPage() {
             { displayName, contentProfileId: 'manman' },
             appServices.localProfiles,
           );
-      setProfiles((current) => [...current, profile]);
+      setProfiles((current) => {
+        const existingIndex = current.findIndex(
+          ({ learnerProfileId }) => learnerProfileId === profile.learnerProfileId,
+        );
+
+        if (existingIndex === -1) {
+          return [...current, profile];
+        }
+
+        return current.map((item, index) => index === existingIndex ? profile : item);
+      });
       setDisplayName('');
       setMessage(
         profile.cloudSyncId
@@ -132,6 +147,12 @@ export function ProfilesPage() {
 
       {loading ? <p role="status">正在读取学习者…</p> : null}
 
+      {duplicateKeys.size > 0 ? (
+        <p className="status-message" role="status">
+          发现同名学习者。它们是不同的进度记录，系统不会自动合并或删除；记录尾号用于区分。
+        </p>
+      ) : null}
+
       <div className="profile-list">
         {profiles.map((profile) => (
           <div className="profile-card" key={profile.learnerProfileId}>
@@ -142,6 +163,9 @@ export function ProfilesPage() {
                   ? cloudStatus === 'paired' ? '家庭云端已连接' : '本机可用 · 云同步暂停'
                   : '仅保存在本机'}
                 {' · '}内容：{profile.contentProfileId}
+                {duplicateKeys.has(
+                  `${profile.displayName.trim().toLocaleLowerCase()}|${profile.contentProfileId}`,
+                ) ? ` · 记录尾号：${profile.learnerProfileId.slice(-4)}` : ''}
               </span>
             </button>
             {cloudStatus === 'paired' && !profile.cloudSyncId ? (

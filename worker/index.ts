@@ -280,9 +280,10 @@ async function createProfile(request: Request, env: WorkerEnv): Promise<Response
     displayName?: unknown;
     contentProfileId?: unknown;
   };
-  const learnerProfileId = typeof body.learnerProfileId === 'string'
+  const requestedProfileId = typeof body.learnerProfileId === 'string'
     ? body.learnerProfileId
-    : crypto.randomUUID();
+    : undefined;
+  const learnerProfileId = requestedProfileId ?? crypto.randomUUID();
   const displayName = typeof body.displayName === 'string' ? body.displayName.trim() : '';
   const contentProfileId = typeof body.contentProfileId === 'string' ? body.contentProfileId : '';
 
@@ -296,6 +297,31 @@ async function createProfile(request: Request, env: WorkerEnv): Promise<Response
 
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(learnerProfileId)) {
     return apiError(400, 'INVALID_LEARNER_PROFILE_ID', '学习者标识无效。');
+  }
+
+  const existingQuery = new URLSearchParams({
+    select: 'learner_profile_id,display_name,content_profile_id,settings',
+    user_id: `eq.${env.FAMILY_OWNER_USER_ID}`,
+    order: 'created_at.asc',
+  });
+  const existingResponse = await supabaseRequest(env, `learner_profiles?${existingQuery}`);
+  const existingRows = await existingResponse.json() as RemoteProfileRow[];
+  const normalizedName = displayName.toLocaleLowerCase();
+  const matchingProfile = existingRows.find((row) =>
+    row.content_profile_id === contentProfileId
+    && row.display_name.trim().toLocaleLowerCase() === normalizedName,
+  );
+
+  if (matchingProfile) {
+    if (!requestedProfileId || matchingProfile.learner_profile_id === requestedProfileId) {
+      return json({ profile: toClientProfile(matchingProfile) });
+    }
+
+    return apiError(
+      409,
+      'PROFILE_NAME_CONFLICT',
+      '家庭云端已有同名学习者；为避免拆分进度，请先选择现有学习者。',
+    );
   }
 
   const query = new URLSearchParams({

@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.5.0-m4-family-sync",
+  "version": "0.5.1-m4-family-sync",
   "type": "module",
   "scripts": {
     "dev": "vite",

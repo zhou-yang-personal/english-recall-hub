@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.5.0-m4-family-sync
+Version: 0.5.1-m4-family-sync
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev

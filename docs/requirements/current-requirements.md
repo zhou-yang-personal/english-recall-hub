@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.5.0-m4-family-sync`
+Version: `0.5.1-m4-family-sync`
 Updated: `2026-08-18`
 
 ## 1. Product Goal
@@ -46,7 +46,9 @@ choose/create LearnerProfile without login → sync cards
 - A user can select or create a local LearnerProfile without pairing.
 - A LearnerProfile owns settings and progress, references one ContentProfile, and may link to the configured FamilySpace for cloud sync.
 - A ContentProfile identifies a GitHub content path such as `manman`; it is not an account.
-- Local progress is isolated by LearnerProfile; remote progress is additionally isolated by authenticated user.
+- Local progress is isolated by LearnerProfile; remote progress is additionally constrained to the configured FamilySpace.
+- Creating the same normalized learner name for the same ContentProfile must return the existing family learner instead of creating another UUID.
+- Existing same-name LearnerProfiles must be shown as separate records and never merged/deleted without explicit confirmation.
 
 ### R4. Card manifest sync
 

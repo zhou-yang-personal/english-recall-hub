@@ -1,6 +1,6 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.5.0-m4-family-sync`
+Version: `0.5.1-m4-family-sync`
 Updated: `2026-08-18`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
@@ -132,6 +132,8 @@ ContentProfile   GitHub card source such as `manman`; not a login identity
 ```
 
 A LearnerProfile references one ContentProfile. Multiple learners can review the same ContentProfile without sharing progress.
+
+Create is idempotent on normalized display name plus ContentProfile. If historical duplicates already exist, the UI shows a short record suffix; it does not infer that two UUIDs have interchangeable progress.
 
 Domain chain:
 

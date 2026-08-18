@@ -1,5 +1,26 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.5.1-m4-family-sync｜2026-08-18
+
+### Fixed
+
+- Bound the injected browser `fetch` to `globalThis` so Safari/WebKit-style receivers no longer throw `Illegal invocation` during public card synchronization.
+- Made family learner creation idempotent by normalized display name and ContentProfile.
+- Rejected local-to-cloud linking when an independent same-name cloud learner already exists, preventing silent progress splitting.
+- Upserted a returned cloud learner in the Profiles page instead of appending the same UUID twice.
+- Added an explicit duplicate-record warning and short record suffix for pre-existing same-name learners; no record or progress is automatically deleted.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 41 passed in 13 files
+Hosted deployment: Worker version `6d6059a6-24f4-4a85-a206-18766d151fd3`
+Hosted same-name create: returned existing UUID; Profile count unchanged
+Dependencies: unchanged; lock file changed only for version synchronization
+```
+
 ## 0.5.0-m4-family-sync｜2026-08-18
 
 ### Changed

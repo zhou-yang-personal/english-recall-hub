@@ -15,7 +15,7 @@ export class GitHubCardSource implements CardContentSource {
       throw new Error(`拒绝访问卡片源之外的路径：${path}`);
     }
 
-    const response = await this.fetcher(new URL(path, this.baseUrl));
+    const response = await this.fetcher.call(globalThis, new URL(path, this.baseUrl));
 
     if (!response.ok) {
       throw new Error(`读取卡片内容失败（${response.status}）：${path}`);

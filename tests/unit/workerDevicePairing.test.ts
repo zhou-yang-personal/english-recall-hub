@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { handleApiRequest, type WorkerEnv } from '../../worker/index';
 
 function environment(): WorkerEnv {
@@ -13,6 +13,8 @@ function environment(): WorkerEnv {
 }
 
 describe('Worker device pairing', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
   it('rejects an incorrect pairing code without issuing a cookie', async () => {
     const response = await handleApiRequest(
       new Request('https://app.example/api/device/pair', {
@@ -62,5 +64,53 @@ describe('Worker device pairing', () => {
     );
 
     await expect(response.json()).resolves.toEqual({ paired: false });
+  });
+
+  it('returns an existing learner instead of creating a duplicate name', async () => {
+    const env = environment();
+    const pairResponse = await handleApiRequest(
+      new Request('https://app.example/api/device/pair', {
+        method: 'POST',
+        headers: { origin: 'https://app.example', 'content-type': 'application/json' },
+        body: JSON.stringify({ pairingCode: env.FAMILY_PAIRING_CODE }),
+      }),
+      env,
+    );
+    const cookie = pairResponse.headers.get('set-cookie')!.split(';')[0]!;
+    const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify([{
+      learner_profile_id: '22222222-2222-4222-8222-222222222222',
+      display_name: 'Zy',
+      content_profile_id: 'manman',
+      settings: {
+        uiLang: 'zh-CN',
+        nativeLang: 'zh-CN',
+        defaultLearningLang: 'en',
+        englishVoiceLocale: 'en-US',
+        spanishVoiceLocale: 'es-MX',
+        ttsRate: 1,
+        listeningModeDefault: false,
+        dailyNewCardLimit: 10,
+      },
+    }]), { headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetcher);
+
+    const response = await handleApiRequest(
+      new Request('https://app.example/api/profiles', {
+        method: 'POST',
+        headers: {
+          cookie,
+          origin: 'https://app.example',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ displayName: ' zy ', contentProfileId: 'manman' }),
+      }),
+      env,
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      profile: { learnerProfileId: '22222222-2222-4222-8222-222222222222' },
+    });
+    expect(fetcher).toHaveBeenCalledOnce();
   });
 });

@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.5.0-m4-family-sync`
+Version: `0.5.1-m4-family-sync`
 Updated: `2026-08-18`
 Branch: `dev`
 
@@ -60,6 +60,8 @@ ContentProfile   GitHub card path such as `manman`
 ```
 
 A LearnerProfile references one ContentProfile. ReviewState uses `learner_profile_id`; Note/Card content uses `content_profile_id`.
+
+Family learner creation is idempotent by normalized display name plus ContentProfile. Pre-existing same-name rows remain separate progress identities until the user explicitly chooses a merge/delete action; the client must label them and never delete one automatically.
 
 ## 5. Runtime Flows
 
