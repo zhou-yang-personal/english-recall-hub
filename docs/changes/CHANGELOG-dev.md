@@ -12,6 +12,7 @@
 - Added remote LearnerProfile list/create use cases and transactional Dexie cache replacement.
 - Added functional sign-in and LearnerProfile selection/creation UI.
 - Added runtime configuration and profile use-case unit tests.
+- Documented the REST fallback when `gh pr edit` is blocked by the Projects (classic) GraphQL deprecation.
 
 ### Hosted configuration
 

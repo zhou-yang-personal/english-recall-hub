@@ -82,6 +82,7 @@
 | `update_file` sha 冲突 | 重新读取文件和 sha 后再判断 |
 | `update_ref` 返回 not fast-forward | 不 force；除非用户明确要求且已说明风险 |
 | `search_branches` 对带 `/` 的分支返回空 | 不据此判断分支不存在；直接用 ref 读取或比较验证 |
+| `gh pr edit` 因 Projects (classic) GraphQL 字段弃用而失败 | 先回读确认 PR 未变化，再用 GitHub REST `PATCH /repos/{owner}/{repo}/pulls/{number}` 更新标题或正文 |
 | 平台 safety block | 停止当前整文件写入；可改为新增小模块或交给 Codex / 本地处理 |
 | 构建命令无法执行 | 明确写 `not run in ChatGPT GitHub connector environment` |
 | CI 未配置或无法读取 | 不声称 CI 通过 |
