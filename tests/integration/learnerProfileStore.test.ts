@@ -26,7 +26,43 @@ describe('DexieLearnerProfileStore', () => {
     );
 
     await expect(store.listAll()).resolves.toEqual([created]);
-    await expect(store.listByUser('cloud-user')).resolves.toEqual([]);
+    await expect(store.listCloudLinked()).resolves.toEqual([]);
+  });
+
+  it('migrates a legacy cloud account marker to the family cloud marker', async () => {
+    const databaseName = 'local-database-v2-family-upgrade-test';
+    const legacyDatabase = new Dexie(databaseName);
+    legacyDatabase.version(2).stores({
+      learnerProfiles: '&learnerProfileId, userId, contentProfileId',
+      notes: '&[contentProfileId+noteId], contentProfileId, [contentProfileId+status]',
+      cards: '&[contentProfileId+cardId], contentProfileId, [contentProfileId+noteId], [contentProfileId+status]',
+      reviewEvents: '&eventId, learnerProfileId, [learnerProfileId+cardId], [learnerProfileId+syncStatus], remoteSeq',
+      reviewStates: '&[learnerProfileId+cardId], [learnerProfileId+dueAt], [learnerProfileId+state]',
+      syncStates: '&learnerProfileId',
+      contentSyncStates: '&contentProfileId',
+    });
+    await legacyDatabase.table('learnerProfiles').put({
+      learnerProfileId: 'legacy-cloud-profile',
+      userId: 'legacy-user-id',
+      displayName: '已有云端学习者',
+      contentProfileId: 'manman',
+      uiLang: 'zh-CN',
+      nativeLang: 'zh-CN',
+      defaultLearningLang: 'en',
+      englishVoiceLocale: 'en-US',
+      spanishVoiceLocale: 'es-MX',
+      ttsRate: 1,
+      listeningModeDefault: false,
+      dailyNewCardLimit: 10,
+    });
+    legacyDatabase.close();
+
+    database = new RecallDatabase(databaseName);
+
+    await expect(database.learnerProfiles.get('legacy-cloud-profile')).resolves.toMatchObject({
+      cloudSyncId: 'family',
+    });
+    await expect(database.learnerProfiles.get('legacy-cloud-profile')).resolves.not.toHaveProperty('userId');
   });
 
   it('upgrades an existing v1 database without losing learner profiles', async () => {

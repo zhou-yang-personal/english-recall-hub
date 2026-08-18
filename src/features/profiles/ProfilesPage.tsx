@@ -6,17 +6,18 @@ import type { LearnerProfile } from '../../domain/profile';
 import {
   createLocalLearnerProfile,
   createLearnerProfile,
+  linkLocalLearnerProfile,
   listLocalLearnerProfiles,
   loadLearnerProfiles,
 } from './profileRepository';
 
 export function ProfilesPage() {
-  const { authStatus, session, selectLearnerProfile } = useApp();
+  const { cloudStatus, selectLearnerProfile } = useApp();
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<LearnerProfile[]>([]);
   const [displayName, setDisplayName] = useState('');
-  const [createInCloud, setCreateInCloud] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [linkingProfileId, setLinkingProfileId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -29,12 +30,8 @@ export function ProfilesPage() {
           setProfiles(result);
         }
 
-        if (session) {
-          await loadLearnerProfiles(
-            session.userId,
-            appServices.profiles,
-            appServices.localProfiles,
-          );
+        if (cloudStatus === 'paired') {
+          await loadLearnerProfiles(appServices.profiles, appServices.localProfiles);
           return listLocalLearnerProfiles(appServices.localProfiles);
         }
 
@@ -50,7 +47,7 @@ export function ProfilesPage() {
         if (active) {
           const detail = error instanceof Error ? error.message : '暂时不可用。';
           setMessage(
-            session
+            cloudStatus === 'paired'
               ? `云端同步失败，已保留本地学习者。${detail}`
               : `读取本机学习者失败。${detail}`,
           );
@@ -65,7 +62,7 @@ export function ProfilesPage() {
     return () => {
       active = false;
     };
-  }, [session]);
+  }, [cloudStatus]);
 
   async function createProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -74,10 +71,9 @@ export function ProfilesPage() {
     setMessage(null);
 
     try {
-      const profile = createInCloud && session
+      const profile = cloudStatus === 'paired'
         ? await createLearnerProfile(
             {
-              userId: session.userId,
               displayName,
               contentProfileId: 'manman',
             },
@@ -91,8 +87,8 @@ export function ProfilesPage() {
       setProfiles((current) => [...current, profile]);
       setDisplayName('');
       setMessage(
-        profile.userId
-          ? '学习者已创建，并保存到本机和云端。'
+        profile.cloudSyncId
+          ? '学习者已创建，并保存到本机和家庭云端。'
           : '学习者已创建并保存到本机，无需登录即可使用。',
       );
     } catch (error) {
@@ -107,32 +103,58 @@ export function ProfilesPage() {
     navigate('/');
   }
 
+  async function linkProfile(profile: LearnerProfile) {
+    setLinkingProfileId(profile.learnerProfileId);
+    setMessage(null);
+
+    try {
+      const linked = await linkLocalLearnerProfile(
+        profile,
+        appServices.profiles,
+        appServices.localProfiles,
+      );
+      setProfiles((current) => current.map((item) => (
+        item.learnerProfileId === linked.learnerProfileId ? linked : item
+      )));
+      setMessage(`${linked.displayName} 已加入家庭云端，现有本机进度会在联网时同步。`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '加入家庭云端失败。');
+    } finally {
+      setLinkingProfileId(null);
+    }
+  }
+
   return (
     <section className="page narrow">
       <p className="eyebrow">学习者</p>
       <h1>选择学习者</h1>
-      <p>直接选择或创建学习者即可开始。学习数据默认保存在本机，云同步是可选功能。</p>
+      <p>直接选择学习者即可开始。已配对设备会自动读取家庭学习者，不需要邮箱登录。</p>
 
       {loading ? <p role="status">正在读取学习者…</p> : null}
 
       <div className="profile-list">
         {profiles.map((profile) => (
-          <button
-            className="profile-card"
-            key={profile.learnerProfileId}
-            onClick={() => chooseProfile(profile)}
-            type="button"
-          >
-            <strong>{profile.displayName}</strong>
-            <span>
-              {profile.userId
-                ? session?.userId === profile.userId
-                  ? '云端已连接'
-                  : '本机可用 · 云同步暂停'
-                : '仅保存在本机'}
-              {' · '}内容：{profile.contentProfileId}
-            </span>
-          </button>
+          <div className="profile-card" key={profile.learnerProfileId}>
+            <button className="profile-card-main" onClick={() => chooseProfile(profile)} type="button">
+              <strong>{profile.displayName}</strong>
+              <span>
+                {profile.cloudSyncId
+                  ? cloudStatus === 'paired' ? '家庭云端已连接' : '本机可用 · 云同步暂停'
+                  : '仅保存在本机'}
+                {' · '}内容：{profile.contentProfileId}
+              </span>
+            </button>
+            {cloudStatus === 'paired' && !profile.cloudSyncId ? (
+              <button
+                className="secondary-action"
+                disabled={linkingProfileId === profile.learnerProfileId}
+                onClick={() => void linkProfile(profile)}
+                type="button"
+              >
+                {linkingProfileId === profile.learnerProfileId ? '正在加入…' : '加入家庭云端'}
+              </button>
+            ) : null}
+          </div>
         ))}
       </div>
 
@@ -150,24 +172,14 @@ export function ProfilesPage() {
           required
           value={displayName}
         />
-        {session ? (
-          <label className="check-row" htmlFor="create-in-cloud">
-            <input
-              checked={createInCloud}
-              disabled={loading}
-              id="create-in-cloud"
-              onChange={(event) => setCreateInCloud(event.target.checked)}
-              type="checkbox"
-            />
-            同时保存到云端（可选）
-          </label>
-        ) : null}
-        <button disabled={loading} type="submit">创建学习者</button>
+        <button disabled={loading} type="submit">
+          {cloudStatus === 'paired' ? '创建家庭学习者' : '创建本机学习者'}
+        </button>
       </form>
 
-      {authStatus === 'ready' && !session ? (
+      {cloudStatus !== 'paired' ? (
         <p className="cloud-option">
-          只在需要跨设备同步或恢复数据时，才需要 <Link to="/sign-in">开启云同步</Link>。
+          需要跨设备同步时，只需在本设备 <Link to="/pair-device">输入一次家庭同步码</Link>。
         </p>
       ) : null}
 

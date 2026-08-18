@@ -1,62 +1,64 @@
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react';
-import type { AuthSession } from '../features/auth/authClient';
+import type { DeviceAccessStatus } from '../features/sync-access/deviceAccessClient';
 
 const SELECTED_PROFILE_KEY = 'english-recall-hub:selected-profile';
 
 interface AppContextValue {
-  authStatus: 'loading' | 'ready';
-  session: AuthSession | null;
+  cloudStatus: DeviceAccessStatus;
   selectedLearnerProfileId: string | null;
   selectLearnerProfile: (learnerProfileId: string | null) => void;
-  signOut: () => Promise<void>;
+  pairDevice: (pairingCode: string) => Promise<void>;
+  refreshCloudStatus: () => Promise<void>;
+  unpairDevice: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [authStatus, setAuthStatus] = useState<AppContextValue['authStatus']>('loading');
-  const [session, setSession] = useState<AuthSession | null>(null);
+  const [cloudStatus, setCloudStatus] = useState<DeviceAccessStatus>('loading');
   const [selectedLearnerProfileId, setSelectedLearnerProfileId] = useState<string | null>(() =>
     localStorage.getItem(SELECTED_PROFILE_KEY),
   );
 
   useEffect(() => {
     let active = true;
-    let unsubscribe = () => {};
 
     void import('./services').then(async ({ appServices }) => {
-      if (!active) {
-        return;
-      }
-
-      unsubscribe = appServices.auth.onSessionChange((nextSession) => {
-        setSession(nextSession);
-        setAuthStatus('ready');
-      });
-
       try {
-        const nextSession = await appServices.auth.getSession();
+        const paired = await appServices.deviceAccess.getStatus();
 
         if (active) {
-          setSession(nextSession);
+          setCloudStatus(paired ? 'paired' : 'unpaired');
         }
-      } finally {
+      } catch {
         if (active) {
-          setAuthStatus('ready');
+          setCloudStatus('unavailable');
         }
       }
     });
 
     return () => {
       active = false;
-      unsubscribe();
     };
   }, []);
 
+  useEffect(() => {
+    if (cloudStatus !== 'paired' || !selectedLearnerProfileId) {
+      return;
+    }
+
+    const synchronize = () => {
+      void import('./services').then(({ appServices }) =>
+        appServices.progressSync.run(selectedLearnerProfileId).catch(() => undefined),
+      );
+    };
+    window.addEventListener('online', synchronize);
+    return () => window.removeEventListener('online', synchronize);
+  }, [cloudStatus, selectedLearnerProfileId]);
+
   const value = useMemo<AppContextValue>(
     () => ({
-      authStatus,
-      session,
+      cloudStatus,
       selectedLearnerProfileId,
       selectLearnerProfile: (learnerProfileId) => {
         setSelectedLearnerProfileId(learnerProfileId);
@@ -67,12 +69,33 @@ export function AppProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem(SELECTED_PROFILE_KEY);
         }
       },
-      signOut: async () => {
+      pairDevice: async (pairingCode) => {
         const { appServices } = await import('./services');
-        await appServices.auth.signOut();
+        await appServices.deviceAccess.pair(pairingCode);
+        setCloudStatus('paired');
+      },
+      refreshCloudStatus: async () => {
+        const { appServices } = await import('./services');
+
+        try {
+          const paired = await appServices.deviceAccess.getStatus();
+          setCloudStatus(paired ? 'paired' : 'unpaired');
+        } catch {
+          setCloudStatus('unavailable');
+        }
+      },
+      unpairDevice: async () => {
+        const { appServices } = await import('./services');
+
+        try {
+          await appServices.deviceAccess.unpair();
+          setCloudStatus('unpaired');
+        } catch {
+          setCloudStatus('unavailable');
+        }
       },
     }),
-    [authStatus, selectedLearnerProfileId, session],
+    [cloudStatus, selectedLearnerProfileId],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

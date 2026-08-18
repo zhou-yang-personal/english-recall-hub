@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.4.0-m3-content-review`
+Version: `0.5.0-m4-family-sync`
 Updated: `2026-08-18`
 Branch: `dev`
 
@@ -12,7 +12,7 @@ It is not a dictionary, course platform, public SaaS or general account system.
 
 ```text
 ChatGPT → DraftNote → Builder → formal Note/Card source
-→ Web/PWA local review → ReviewEvents → account progress sync
+→ Web/PWA local review → ReviewEvents → paired-family progress sync
 ```
 
 ## 2. MVP Architecture
@@ -24,17 +24,17 @@ Frontend/runtime
   Web Speech API
   vite-plugin-pwa
 
-Optional cloud progress
-  Supabase Auth email OTP
+Family cloud progress
+  Cloudflare Worker `/api` + signed device Cookie
   Supabase Postgres schema `english_recall`
-  Row Level Security
+  server-only secret key + Row Level Security defense-in-depth
 
 Content/deployment
   GitHub `card` public content
   Cloudflare Workers Static Assets
 ```
 
-The browser accesses Supabase with a publishable key and authenticated user JWT. There is no custom Cloudflare progress API in MVP and no privileged key in frontend JavaScript.
+The browser never accesses progress tables directly. A new device submits the family pairing code once to the same-origin Worker; the Worker issues a signed, one-year, HttpOnly/Secure/SameSite Cookie. The Worker stores the Supabase secret key and family owner UUID as Secrets and enforces that owner boundary on every profile/event request.
 
 ## 3. Data Ownership
 
@@ -42,7 +42,7 @@ The browser accesses Supabase with a publishable key and authenticated user JWT.
 draft branch       raw DraftNote inbox
 card branch        Builder-owned manifest, packs and templates
 IndexedDB          runtime Notes, Cards, events and materialized state
-Supabase           Account, LearnerProfile and synchronized ReviewEvents
+Supabase           family-owned LearnerProfile and synchronized ReviewEvents
 progress branch    reserved; not an MVP runtime database
 ```
 
@@ -53,8 +53,9 @@ ChatGPT writes DraftNote only. Builder owns formal content. The PWA reads `card`
 The previous design conflated three responsibilities. They are now explicit:
 
 ```text
-Account          optional authenticated Supabase user for cloud sync
-LearnerProfile   local-first progress/settings identity; may link to Account
+FamilySpace      server-configured cloud ownership boundary
+DeviceGrant      signed Worker Cookie created by one-time pairing
+LearnerProfile   local-first progress/settings identity; may link to FamilySpace
 ContentProfile   GitHub card path such as `manman`
 ```
 
@@ -65,11 +66,12 @@ A LearnerProfile references one ContentProfile. ReviewState uses `learner_profil
 ### 5.1 Local-first startup
 
 ```text
-choose/create LearnerProfile without login → render Home from IndexedDB
-→ optional email OTP once → link cloud account → background progress/content sync
+new device optionally enters family code once → signed device Cookie
+→ choose/create LearnerProfile directly → render Home from IndexedDB
+→ linked learners synchronize progress through Worker in the background
 ```
 
-Authentication is not required for local use. An expired session or cloud outage only pauses cloud synchronization; local review remains available and synchronization resumes after reauthentication/connectivity.
+No email/account login appears in the frontend. An unpaired device can remain local-only. An expired device grant or cloud outage only pauses cloud synchronization; local review remains available and pending events retry after pairing/connectivity recovers.
 
 ### 5.2 Content sync
 
@@ -144,8 +146,9 @@ Mature begins at 90 days. The scheduler is a pure function shared by live rating
 ## 9. Security Boundaries
 
 - RLS is enabled on every exposed Supabase table.
-- Local-only LearnerProfiles never require Supabase access; cloud rows are isolated with `auth.uid()`.
-- Frontend includes only Supabase URL/publishable key and public card URL.
+- Local-only LearnerProfiles never require cloud access; paired API requests are limited to the configured family owner UUID.
+- Frontend includes only the public card URL and same-origin API path.
+- Supabase remains protected from anonymous browser access by grants/RLS; the trusted Worker bypasses RLS and therefore repeats ownership validation in application code.
 - Supabase secret/service-role key, database password, GitHub PAT and Cloudflare token never enter frontend/Git/logs.
 - Failed content sync never clears content.
 - Failed progress sync never clears pending events/state.
@@ -174,6 +177,6 @@ docs/design/web-mvp-framework-design.md
 - Normal passwords/social login/public SaaS.
 - Family invitations/roles/admin site.
 - Real-time collaborative review or manual conflict UI.
-- Cloudflare progress API/D1/KV/R2.
+- D1/KV/R2, family invitation/role management or a general backend framework.
 - Advanced card types, cloud TTS and push notifications.
 - Payment, ads, analytics platform and community marketplace.

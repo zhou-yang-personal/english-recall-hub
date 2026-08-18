@@ -13,11 +13,13 @@ const emptySummary: ReviewSummary = {
 };
 
 export function HomePage() {
-  const { selectedLearnerProfileId } = useApp();
+  const { cloudStatus, selectedLearnerProfileId } = useApp();
   const { loading: profileLoading, profile } = useSelectedLearnerProfile();
   const [summary, setSummary] = useState<ReviewSummary>(emptySummary);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'ready' | 'failed'>('idle');
   const [syncMessage, setSyncMessage] = useState('尚未检查学习内容。');
+  const [progressStatus, setProgressStatus] = useState<'local' | 'syncing' | 'ready' | 'failed'>('local');
+  const [progressMessage, setProgressMessage] = useState('复习进度保存在本机。');
 
   useEffect(() => {
     if (!profile) {
@@ -41,6 +43,39 @@ export function HomePage() {
 
     const initialize = async () => {
       await refreshSummary();
+
+      if (cloudStatus === 'paired' && profile.cloudSyncId) {
+        if (active) {
+          setProgressStatus('syncing');
+          setProgressMessage('正在同步家庭学习进度…');
+        }
+
+        try {
+          const report = await appServices.progressSync.run(profile.learnerProfileId);
+          await refreshSummary();
+
+          if (active) {
+            setProgressStatus('ready');
+            setProgressMessage(
+              report.pushed + report.pulled > 0
+                ? `进度已同步：上传 ${report.pushed} 条，接收 ${report.pulled} 条。`
+                : '家庭学习进度已同步。',
+            );
+          }
+        } catch (error) {
+          if (active) {
+            setProgressStatus('failed');
+            setProgressMessage(`进度同步失败，本机记录会保留。${error instanceof Error ? error.message : ''}`);
+          }
+        }
+      } else if (active) {
+        setProgressStatus('local');
+        setProgressMessage(
+          profile.cloudSyncId
+            ? '此设备尚未配对，复习进度继续保存在本机。'
+            : '此学习者仅保存在本机，可在学习者页面加入家庭云端。',
+        );
+      }
 
       if (active) {
         setSyncStatus('syncing');
@@ -74,7 +109,7 @@ export function HomePage() {
     return () => {
       active = false;
     };
-  }, [profile]);
+  }, [cloudStatus, profile]);
 
   if (!selectedLearnerProfileId) {
     return <Navigate replace to="/profiles" />;
@@ -117,6 +152,27 @@ export function HomePage() {
     }
   }
 
+  async function manuallySyncProgress() {
+    setProgressStatus('syncing');
+    setProgressMessage('正在同步家庭学习进度…');
+
+    try {
+      const report = await appServices.progressSync.run(activeProfile.learnerProfileId);
+      const nextSummary = await getReviewSummary(
+        appServices.database,
+        activeProfile.learnerProfileId,
+        activeProfile.contentProfileId,
+        activeProfile.dailyNewCardLimit,
+      );
+      setSummary(nextSummary);
+      setProgressStatus('ready');
+      setProgressMessage(`进度已同步：上传 ${report.pushed} 条，接收 ${report.pulled} 条。`);
+    } catch (error) {
+      setProgressStatus('failed');
+      setProgressMessage(`进度同步失败，本机记录会保留。${error instanceof Error ? error.message : ''}`);
+    }
+  }
+
   return (
     <section className="page hero">
       <div>
@@ -134,6 +190,18 @@ export function HomePage() {
           >
             {syncStatus === 'syncing' ? '同步中…' : '同步学习内容'}
           </button>
+        </div>
+        <div className={`sync-panel ${progressStatus === 'failed' ? 'error' : ''}`}>
+          <span role="status">{progressMessage}</span>
+          {cloudStatus === 'paired' && activeProfile.cloudSyncId ? (
+            <button
+              disabled={progressStatus === 'syncing'}
+              onClick={() => void manuallySyncProgress()}
+              type="button"
+            >
+              {progressStatus === 'syncing' ? '同步中…' : '同步复习进度'}
+            </button>
+          ) : null}
         </div>
         {summary.due + summary.newCards > 0 ? (
           <Link className="primary-action" to="/review">开始复习</Link>

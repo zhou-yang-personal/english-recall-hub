@@ -65,9 +65,12 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .form-card button { background: #18392b; border: 0; border-radius: 0.65rem; color: #fffaf0; font-weight: 750; padding: 0.8rem 1rem; }
 .status-message { background: #e3eadc; border-radius: 0.7rem; padding: 0.8rem 1rem; }
 .profile-list { display: grid; gap: 0.8rem; margin-top: 2rem; }
-.profile-card { align-items: center; background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; color: inherit; display: flex; justify-content: space-between; padding: 1.1rem 1.3rem; text-align: left; }
+.profile-card { align-items: center; background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; color: inherit; display: flex; gap: 1rem; justify-content: space-between; padding: 0.6rem; text-align: left; }
 .profile-card:hover { border-color: #18392b; }
+.profile-card-main { align-items: flex-start; background: transparent; border: 0; color: inherit; display: flex; flex: 1; flex-direction: column; gap: 0.35rem; padding: 0.5rem 0.7rem; text-align: left; }
 .profile-card span { color: #65756f; font-size: 0.9rem; }
+.secondary-action { background: #e3eadc; border: 0; border-radius: 0.65rem; color: #173128; font-weight: 750; padding: 0.7rem 0.85rem; }
+.inline-button { background: transparent; border: 0; color: #ad4b2a; font-weight: 750; padding: 0; text-decoration: underline; }
 .empty-state { background: #fffaf0; border: 1px dashed #b8c2bc; border-radius: 0.8rem; margin-top: 1rem; padding: 1rem; }
 .check-row { align-items: center; display: flex; font-weight: 500 !important; gap: 0.55rem; }
 .check-row input { margin: 0; }

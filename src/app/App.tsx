@@ -9,8 +9,8 @@ const HomePage = lazy(() =>
 const ReviewPage = lazy(() =>
   import('../features/review/ReviewPage').then((module) => ({ default: module.ReviewPage })),
 );
-const SignInPage = lazy(() =>
-  import('../features/auth/SignInPage').then((module) => ({ default: module.SignInPage })),
+const PairDevicePage = lazy(() =>
+  import('../features/sync-access/PairDevicePage').then((module) => ({ default: module.PairDevicePage })),
 );
 const ProfilesPage = lazy(() =>
   import('../features/profiles/ProfilesPage').then((module) => ({ default: module.ProfilesPage })),
@@ -24,7 +24,7 @@ const navigation = [
 ] as const;
 
 export function App() {
-  const { authStatus, session, signOut } = useApp();
+  const { cloudStatus, unpairDevice } = useApp();
 
   return (
     <div className="app-shell">
@@ -47,12 +47,12 @@ export function App() {
               {item.label}
             </NavLink>
           ))}
-          {authStatus === 'ready' && !session ? (
-            <NavLink to="/sign-in">开启云同步</NavLink>
+          {cloudStatus === 'unpaired' || cloudStatus === 'unavailable' ? (
+            <NavLink to="/pair-device">配对云同步</NavLink>
           ) : null}
-          {session ? (
-            <button className="nav-button" onClick={() => void signOut()} type="button">
-              停止云同步
+          {cloudStatus === 'paired' ? (
+            <button className="nav-button" onClick={() => void unpairDevice()} type="button">
+              断开此设备
             </button>
           ) : null}
         </nav>
@@ -62,7 +62,8 @@ export function App() {
         <Suspense fallback={<p className="route-loading" role="status">正在加载…</p>}>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/sign-in" element={<SignInPage />} />
+            <Route path="/pair-device" element={<PairDevicePage />} />
+            <Route path="/sign-in" element={<Navigate replace to="/pair-device" />} />
             <Route path="/profiles" element={<ProfilesPage />} />
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/settings" element={<SettingsPage />} />

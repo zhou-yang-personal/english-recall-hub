@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.4.0-m3-content-review
+Version: 0.5.0-m4-family-sync
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev
@@ -15,24 +15,25 @@ PROGRESS_BRANCH=progress (reserved, not MVP runtime)
 Product flow:
 ChatGPT → DraftNote → Builder → GitHub card content
 → Web/PWA IndexedDB review → ReviewEvents
-→ optional Supabase account progress synchronization
+→ optional paired-family progress synchronization
 
 Product boundary:
 This is a personal/family multilingual recall tool, not a dictionary, course platform or public SaaS.
-Local LearnerProfile selection/creation requires no sign-in. Supabase email OTP is used only when cloud sync is enabled.
+LearnerProfile selection/creation requires no sign-in. A new cloud-enabled device enters one family pairing code and then remains authorized by a signed HttpOnly Cookie.
 After setup, local Home/Review remain usable offline.
 
 Approved stack:
 React + TypeScript + Vite + React Router
 Dexie + IndexedDB + Zod
 Web Speech API + vite-plugin-pwa
-Supabase Auth + Postgres + RLS
-Cloudflare Workers Static Assets
+Supabase Postgres + RLS
+Cloudflare Worker API + Static Assets
 GitHub public card branch
 
 Identity model:
-Account = optional authenticated Supabase user for cloud sync.
-LearnerProfile = local-first settings/progress identity that may link to Account.
+FamilySpace = Worker-configured cloud ownership boundary.
+DeviceGrant = signed Worker Cookie issued after one-time pairing.
+LearnerProfile = local-first settings/progress identity that may link to FamilySpace.
 ContentProfile = GitHub content path such as manman.
 Do not conflate these concepts.
 
@@ -65,19 +66,20 @@ Only real external boundaries get ports; no DI container, Redux/Zustand or custo
 
 Current implementation:
 M1 React/Vite/PWA shell, Dexie stores, Scheduler/replay and atomic rating writes exist.
-M2 local-first LearnerProfile selection/creation, Supabase migration/RLS and optional email cloud session exist.
+M2 local-first LearnerProfile selection/creation and Supabase migration/RLS exist.
 M3 real public card import, stable Card generation, Home counts, review queue and local atomic rating UI exist.
-TTS/listening and remote ReviewEvent synchronization remain subsequent milestones.
+M4 family-device pairing, Worker Profile/Event API and incremental ReviewEvent synchronization exist.
+TTS/listening remain subsequent milestones.
 
 MVP includes:
-no-login local LearnerProfile; optional email cloud session; public card sync
+no-login LearnerProfile; one-time family-device pairing; public card sync
 offline recognition/production; scheduler v1; multi-device event sync/replay
 English/Spanish TTS/listening; export/import; installable PWA; RLS tests
 
 MVP excludes:
 native apps; normal passwords/social login/public SaaS
 family invitation/role/admin system; real-time collaboration/manual conflicts
-Cloudflare progress API/D1/KV/R2; advanced Cards; cloud TTS/push
+D1/KV/R2/general backend framework; advanced Cards; cloud TTS/push
 payment/ads/analytics/community
 
 Never store:

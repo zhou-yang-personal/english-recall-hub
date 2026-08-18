@@ -1,5 +1,44 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.5.0-m4-family-sync｜2026-08-18
+
+### Changed
+
+- Replaced the user-facing Supabase email/Magic Link flow with one-time family-device pairing.
+- Changed the normal cloud experience to `pair new device once → directly select learner thereafter`.
+- Moved all Supabase progress access behind a same-origin Cloudflare Worker API.
+- Replaced the local `userId` account marker with `cloudSyncId: family`, including a Dexie v2-to-v3 migration.
+- Removed browser Supabase URL/key configuration and the unused `@supabase/supabase-js` dependency.
+
+### Added
+
+- Added HMAC-signed, one-year HttpOnly/Secure/SameSite device grants scoped to `/api`.
+- Added Worker endpoints for pairing status/pair/unpair, family Profile list/create, and ReviewEvent push/pull.
+- Added server-side family-owner checks before every Profile/Event operation; no D1/KV/R2 or backend framework is used.
+- Added local-only LearnerProfile linking that preserves the learner UUID and existing local progress.
+- Added bounded idempotent event upload, incremental `sync_seq` download, canonical replay and transactional cursor updates.
+- Added progress synchronization on Home, after review ratings, on reconnect and by manual action.
+- Added device-pairing, event-sync failure safety and legacy cloud-marker migration tests.
+
+### Security and operations
+
+- Supabase secret key, family owner UUID, pairing code and session signing secret are Worker-only configuration.
+- The pairing code is never stored by the frontend; a signed HttpOnly Cookie is the persisted device grant.
+- Anonymous browsers still cannot access Supabase tables directly; existing RLS remains defense-in-depth.
+- Hosted deployment requires configuring `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `FAMILY_OWNER_USER_ID`, `FAMILY_PAIRING_CODE` and `DEVICE_SESSION_SECRET` as Worker Secrets.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 39 passed in 12 files
+npm run build: passed; PWA generated
+npx wrangler deploy --dry-run: passed; Worker entry plus 16 static files discovered
+Dependencies: removed @supabase/supabase-js; package-lock updated
+Hosted family pairing/Profile/Event smoke test: not yet run
+```
+
 ## 0.4.0-m3-content-review｜2026-08-18
 
 ### Added

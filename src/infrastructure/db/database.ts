@@ -4,7 +4,7 @@ import type { LearnerProfile } from '../../domain/profile';
 import type { ReviewEvent, ReviewState } from '../../domain/review';
 
 export const DATABASE_NAME = 'english-recall-hub';
-export const DATABASE_VERSION = 2;
+export const DATABASE_VERSION = 3;
 
 export interface SyncState {
   learnerProfileId: string;
@@ -33,7 +33,7 @@ export class RecallDatabase extends Dexie {
   constructor(databaseName = DATABASE_NAME) {
     super(databaseName);
 
-    this.version(DATABASE_VERSION).stores({
+    this.version(2).stores({
       learnerProfiles: '&learnerProfileId, userId, contentProfileId',
       notes: '&[contentProfileId+noteId], contentProfileId, [contentProfileId+status]',
       cards:
@@ -44,6 +44,26 @@ export class RecallDatabase extends Dexie {
         '&[learnerProfileId+cardId], [learnerProfileId+dueAt], [learnerProfileId+state]',
       syncStates: '&learnerProfileId',
       contentSyncStates: '&contentProfileId',
+    });
+
+    this.version(DATABASE_VERSION).stores({
+      learnerProfiles: '&learnerProfileId, cloudSyncId, contentProfileId',
+      notes: '&[contentProfileId+noteId], contentProfileId, [contentProfileId+status]',
+      cards:
+        '&[contentProfileId+cardId], contentProfileId, [contentProfileId+noteId], [contentProfileId+status]',
+      reviewEvents:
+        '&eventId, learnerProfileId, [learnerProfileId+cardId], [learnerProfileId+syncStatus], remoteSeq',
+      reviewStates:
+        '&[learnerProfileId+cardId], [learnerProfileId+dueAt], [learnerProfileId+state]',
+      syncStates: '&learnerProfileId',
+      contentSyncStates: '&contentProfileId',
+    }).upgrade(async (transaction) => {
+      await transaction.table('learnerProfiles').toCollection().modify((profile: Record<string, unknown>) => {
+        if (typeof profile.userId === 'string') {
+          profile.cloudSyncId = 'family';
+          delete profile.userId;
+        }
+      });
     });
   }
 }

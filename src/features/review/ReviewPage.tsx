@@ -15,7 +15,7 @@ const ratingOptions: Array<{ rating: ReviewRating; label: string; detail: string
 ];
 
 export function ReviewPage() {
-  const { selectedLearnerProfileId } = useApp();
+  const { cloudStatus, selectedLearnerProfileId } = useApp();
   const { loading: profileLoading, profile } = useSelectedLearnerProfile();
   const [queue, setQueue] = useState<ReviewQueueItem[]>([]);
   const [index, setIndex] = useState(0);
@@ -108,6 +108,14 @@ export function ReviewPage() {
       });
       setIndex((currentIndex) => currentIndex + 1);
       setRevealed(false);
+
+      if (cloudStatus === 'paired' && activeProfile.cloudSyncId) {
+        void appServices.progressSync.run(activeProfile.learnerProfileId).catch((error: unknown) => {
+          setMessage(
+            `评分已保存到本机，云同步稍后重试。${error instanceof Error ? error.message : ''}`,
+          );
+        });
+      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '保存评分失败，请重试。');
     } finally {

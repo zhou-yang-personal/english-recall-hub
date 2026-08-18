@@ -1,7 +1,7 @@
 export interface LearnerProfile {
   learnerProfileId: string;
-  /** Present only when this learner is linked to a Supabase account. */
-  userId?: string;
+  /** Present only when this learner is linked to the family cloud space. */
+  cloudSyncId?: 'family';
   displayName: string;
   contentProfileId: string;
   uiLang: 'zh-CN';
@@ -25,5 +25,5 @@ export const DEFAULT_LEARNER_PROFILE_SETTINGS = {
   dailyNewCardLimit: 10,
 } as const satisfies Omit<
   LearnerProfile,
-  'learnerProfileId' | 'userId' | 'displayName' | 'contentProfileId'
+  'learnerProfileId' | 'cloudSyncId' | 'displayName' | 'contentProfileId'
 >;

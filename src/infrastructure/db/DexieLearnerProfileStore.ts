@@ -13,15 +13,15 @@ export class DexieLearnerProfileStore implements LearnerProfileLocalStore {
     return this.database.learnerProfiles.get(learnerProfileId);
   }
 
-  listByUser(userId: string): Promise<LearnerProfile[]> {
-    return this.database.learnerProfiles.where('userId').equals(userId).toArray();
+  listCloudLinked(): Promise<LearnerProfile[]> {
+    return this.database.learnerProfiles.where('cloudSyncId').equals('family').toArray();
   }
 
-  async replaceForUser(userId: string, profiles: readonly LearnerProfile[]): Promise<void> {
+  async replaceCloudLinked(profiles: readonly LearnerProfile[]): Promise<void> {
     await this.database.transaction('rw', this.database.learnerProfiles, async () => {
       const localIds = await this.database.learnerProfiles
-        .where('userId')
-        .equals(userId)
+        .where('cloudSyncId')
+        .equals('family')
         .primaryKeys();
       const remoteIds = new Set(profiles.map(({ learnerProfileId }) => learnerProfileId));
       const removedIds = localIds.filter((id) => !remoteIds.has(id));

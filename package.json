@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.4.0-m3-content-review",
+  "version": "0.5.0-m4-family-sync",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,6 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.112.3",
     "dexie": "^4.4.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

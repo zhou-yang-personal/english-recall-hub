@@ -4,12 +4,12 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.4.0-m3-content-review`
+- Version: `0.5.0-m4-family-sync`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
 - First platform: Web/PWA on iPhone, Android and desktop
-- Status: M3 public card import and the first real local review flow are implemented; TTS and remote ReviewEvent synchronization remain subsequent milestones
+- Status: M4 family-device pairing, Worker progress API and incremental ReviewEvent synchronization are implemented; TTS/listening remain subsequent milestones
 - Production URL: `https://english-recall-hub.zhou-yang-personal.workers.dev`
 
 ## Product flow
@@ -18,7 +18,7 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 ChatGPT Project → draft DraftNote → Builder validation/dedupe
 → card formal Notes/Templates → Web/PWA IndexedDB
 → recognition/production review → local ReviewEvents
-→ optional Supabase account progress synchronization
+→ paired-family progress synchronization
 ```
 
 ## MVP architecture
@@ -27,8 +27,8 @@ ChatGPT Project → draft DraftNote → Builder validation/dedupe
 React + TypeScript + Vite + React Router
 Dexie / IndexedDB + Zod
 Web Speech API + vite-plugin-pwa
-Supabase Auth (email OTP) + Postgres + RLS
-Cloudflare Workers Static Assets
+Supabase Postgres + RLS
+Cloudflare Worker API + Static Assets
 GitHub public `card` content
 ```
 
@@ -36,17 +36,18 @@ Core boundaries:
 
 - IndexedDB is the runtime source; review works offline after setup.
 - GitHub `card` is Builder-owned content and is read publicly.
-- IndexedDB stores local LearnerProfiles; Supabase optionally stores cloud-linked LearnerProfiles and append-only ReviewEvents.
+- IndexedDB stores local LearnerProfiles; Supabase stores family-linked LearnerProfiles and append-only ReviewEvents.
 - ReviewEvents synchronize incrementally; ReviewState is rebuilt locally.
-- Cloudflare serves the PWA; no custom progress Worker API is required in MVP.
-- Frontend contains no GitHub PAT, Supabase secret/service-role key or database password.
+- Cloudflare serves the PWA and a minimal same-origin progress API.
+- A new device enters one family pairing code once; normal use then opens directly to learner selection.
+- Supabase secret/service-role key is a Worker Secret and never enters frontend JavaScript, Git or logs.
 
 ## MVP scope
 
 Must have:
 
 1. LearnerProfile selection/creation without login.
-2. Optional email OTP account and persisted cloud-sync session.
+2. One-time family-device pairing with a long-lived signed HttpOnly Cookie; no email login UI.
 3. Current manifest/pack/template import without hardcoded counts.
 4. IndexedDB/offline recognition and production review.
 5. Unknown/fuzzy/known scheduler v1.
@@ -59,7 +60,7 @@ Not in MVP:
 
 - Native apps, normal passwords, social login or public SaaS.
 - Family invitation/role/admin system or real-time collaboration.
-- Cloudflare progress API, D1/KV/R2 or a custom backend framework.
+- D1/KV/R2 or a general backend/admin framework.
 - Advanced card types, cloud TTS, pronunciation scoring or push notifications.
 - Payment, ads, analytics platform or community decks.
 
@@ -93,6 +94,6 @@ npx supabase test db
 npm run deploy
 ```
 
-Copy `.env.example` to `.env.local` and provide only the public Supabase URL/publishable key and card repository URL. The linked Supabase project now has the `english_recall` schema, explicit grants and RLS; no privileged browser credential is required.
+Copy `.env.example` to `.env.local` for the public card repository URL. The browser calls same-origin `/api`; Supabase URL, secret key, family owner UUID, pairing code and device-session signing secret are configured only as Cloudflare Worker Secrets.
 
 The Supabase local stack and pgTAP database tests require Docker or another compatible container runtime.

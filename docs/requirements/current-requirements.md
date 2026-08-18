@@ -1,18 +1,18 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.4.0-m3-content-review`
+Version: `0.5.0-m4-family-sync`
 Updated: `2026-08-18`
 
 ## 1. Product Goal
 
-Build a personal/family Web/PWA that turns formal Notes from GitHub into fast daily active recall on iPhone, Android and desktop, works offline after setup, and synchronizes a learner's progress across devices through a lightweight account backend.
+Build a personal/family Web/PWA that turns formal Notes from GitHub into fast daily active recall on iPhone, Android and desktop, works offline after setup, and synchronizes a learner's progress across paired family devices through a tiny backend.
 
 Primary journey:
 
 ```text
 choose/create LearnerProfile without login → sync cards
 → review/listen offline → save locally
-→ optionally sign in to synchronize progress across devices
+→ optionally pair a new device once to synchronize progress across devices
 ```
 
 ## 2. Product Assumptions
@@ -21,7 +21,7 @@ choose/create LearnerProfile without login → sync cards
 - UI is Chinese; learning content is English-first and language-extensible.
 - This is not a public multi-tenant SaaS or course platform.
 - GitHub `card` is the formal content source.
-- IndexedDB is the runtime source; Supabase is the optional cloud account/progress source.
+- IndexedDB is the runtime source; Worker + Supabase are the optional family progress source.
 - Cloudflare hosts the static PWA.
 - One Supabase project may be shared with other personal apps through the isolated `english_recall` schema.
 
@@ -33,18 +33,18 @@ choose/create LearnerProfile without login → sync cards
 - Be installable to a mobile home screen.
 - Open the cached shell offline after one successful load.
 
-### R2. Local-first access and optional passwordless account
+### R2. Local-first access and one-time device pairing
 
 - Allow selecting and creating a local LearnerProfile without authentication or network access.
-- Offer email OTP through Supabase Auth only when the user explicitly enables cloud sync.
-- Persist the session so normal daily use does not repeatedly request login.
-- Allow offline review when a previously authenticated session cannot refresh.
+- Offer a family pairing-code screen only when a new device enables cloud sync.
+- Exchange the pairing code for a signed HttpOnly/Secure/SameSite device Cookie; never place the pairing code in localStorage.
+- Keep normal daily use login-free after pairing and allow offline review when the Worker is unavailable.
 - Never request a GitHub token, Supabase secret key or normal password.
 
 ### R3. Learner and content Profiles
 
-- A user can select or create a local LearnerProfile without an Account.
-- A LearnerProfile owns settings and progress, references one ContentProfile, and may optionally link to an Account for cloud sync.
+- A user can select or create a local LearnerProfile without pairing.
+- A LearnerProfile owns settings and progress, references one ContentProfile, and may link to the configured FamilySpace for cloud sync.
 - A ContentProfile identifies a GitHub content path such as `manman`; it is not an account.
 - Local progress is isolated by LearnerProfile; remote progress is additionally isolated by authenticated user.
 
@@ -123,7 +123,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 
 ### R11. New-device reconstruction
 
-- After the user enables cloud sync with the same account on a new device, load its cloud-linked LearnerProfiles.
+- After a new device enters the family pairing code, load its family-linked LearnerProfiles without email authentication.
 - Download content and paged ReviewEvents.
 - Rebuild ReviewState locally before showing synchronized completion.
 - Concurrent events from two devices must converge, not overwrite each other.
@@ -166,7 +166,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Native mobile packages or stores.
 - Normal passwords, social login or public registration workflow.
 - Manual conflict resolution or collaborative simultaneous sessions.
-- Custom account backend, Cloudflare progress API, D1/KV/R2.
+- D1/KV/R2, general account backend, family invitations/roles or an admin console.
 - Exact background scheduling or push notifications.
 - Cloud TTS, audio cache, IPA or pronunciation scoring.
 - Payment, advertisements, community decks or analytics platform.
@@ -183,9 +183,9 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 ### NFR2. Security
 
 - Every exposed Supabase table has explicit grants and RLS.
-- Unauthenticated clients can use IndexedDB but cannot read/write Supabase Profiles or ReviewEvents.
-- One authenticated user cannot access another user's rows.
-- Frontend contains only Supabase URL/publishable key and public content URL.
+- Browsers can use IndexedDB but cannot read/write Supabase Profiles or ReviewEvents directly.
+- Worker requests require a valid signed device Cookie and every Supabase operation is limited to the configured family owner UUID.
+- Frontend contains only the same-origin API path and public content URL.
 - Secret/service-role keys, database passwords and PATs are never committed or logged.
 
 ### NFR3. Performance
@@ -209,7 +209,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 |---|---|---|
 | UC01 | First open | User creates/selects a local LearnerProfile without login |
 | UC02 | Daily open | Selected LearnerProfile reaches local Home without login |
-| UC03 | Optional cloud connection | Email OTP creates a persisted cloud-sync session |
+| UC03 | New-device cloud connection | One family code entry creates a persisted signed device grant |
 | UC04 | First content sync | Current manifest-listed data imports with honest warnings |
 | UC05 | No-change content sync | Packs are not re-imported |
 | UC06 | Content failure | Last local Cards remain usable |
@@ -219,9 +219,9 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 | UC10 | Offline review | Ratings persist and remain pending offline |
 | UC11 | Reconnect | Pending events upload and progress becomes synchronized |
 | UC12 | Idempotent retry | Retried event creates one remote record |
-| UC13 | New device | Same account reconstructs matching ReviewState |
+| UC13 | New device | Family pairing reconstructs matching ReviewState |
 | UC14 | Concurrent devices | Interleaved events converge on both devices |
-| UC15 | User isolation | RLS blocks cross-user reads/writes |
+| UC15 | Cloud isolation | Direct anonymous access is denied and Worker queries stay within the configured family owner |
 | UC16 | English/Spanish TTS | Locale preference/fallback works |
 | UC17 | Listening mode | Target text remains hidden until reveal |
 | UC18 | Export/import | Progress round-trip succeeds without secrets |
@@ -231,7 +231,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 ## 8. Delivery Estimate
 
 ```text
-Full Web MVP with account progress sync: 13–15 working days
+Full Web MVP with family progress sync: 13–15 working days
 Production source estimate: 4,500–6,500 LOC
 Test estimate: 1,500–2,300 LOC
 ```
