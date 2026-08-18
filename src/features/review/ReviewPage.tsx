@@ -6,7 +6,7 @@ import type { ReviewRating } from '../../domain/review';
 import { useSelectedLearnerProfile } from '../profiles/useSelectedLearnerProfile';
 import { getOrCreateDeviceId } from './deviceId';
 import { recordRating } from './recordRating';
-import { buildReviewQueue, type ReviewQueueItem } from './reviewQueue';
+import { prepareReviewQueue, type ReviewQueueItem } from './reviewQueue';
 
 const ratingOptions: Array<{ rating: ReviewRating; label: string; detail: string }> = [
   { rating: 'unknown', label: '不认识', detail: '10 分钟后再看' },
@@ -32,11 +32,12 @@ export function ReviewPage() {
     let active = true;
     setLoading(true);
 
-    void buildReviewQueue(
+    void prepareReviewQueue(
       appServices.database,
       profile.learnerProfileId,
       profile.contentProfileId,
       profile.dailyNewCardLimit,
+      () => appServices.contentSync.run(profile.contentProfileId),
     )
       .then((nextQueue) => {
         if (active) {
@@ -83,7 +84,7 @@ export function ReviewPage() {
         <p>
           {queue.length > 0
             ? `已完成 ${queue.length} 张卡片，每次评分都已保存到本机。`
-            : '请先回到首页同步学习内容；如果内容已同步，则当前没有到期卡片或新卡名额。'}
+            : '已自动检查学习内容；当前没有到期卡片或新卡名额。'}
         </p>
         <Link className="primary-action" to="/">返回首页</Link>
         {message ? <p className="status-message" role="status">{message}</p> : null}

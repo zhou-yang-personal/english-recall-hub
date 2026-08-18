@@ -125,7 +125,7 @@ Estimated full MVP: `13–15 working days`.
 
 ```text
 Application typecheck/lint/build: passed
-Unit/integration: 30 passed across 10 test files
+Unit/integration: 31 passed across 10 test files
 Supabase remote migration/list/lint: passed
 Anonymous Data API read/write: blocked with HTTP 401 as intended
 Two-user pgTAP script: added; execution blocked because this environment cannot access Docker

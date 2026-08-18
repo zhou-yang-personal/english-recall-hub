@@ -2,32 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useApp } from '../../app/AppContext';
 import { appServices } from '../../app/services';
-import {
-  syncContent,
-  type ContentSyncReport,
-} from '../content-sync/syncContent';
 import { useSelectedLearnerProfile } from '../profiles/useSelectedLearnerProfile';
 import { getReviewSummary, type ReviewSummary } from '../review/reviewQueue';
-
-const inFlightContentSyncs = new Map<string, Promise<ContentSyncReport>>();
-
-function runContentSync(contentProfileId: string): Promise<ContentSyncReport> {
-  const existing = inFlightContentSyncs.get(contentProfileId);
-
-  if (existing) {
-    return existing;
-  }
-
-  const request = syncContent(
-    contentProfileId,
-    appServices.cardSource,
-    appServices.contentStore,
-  ).finally(() => {
-    inFlightContentSyncs.delete(contentProfileId);
-  });
-  inFlightContentSyncs.set(contentProfileId, request);
-  return request;
-}
 
 const emptySummary: ReviewSummary = {
   due: 0,
@@ -72,7 +48,7 @@ export function HomePage() {
       }
 
       try {
-        const report = await runContentSync(profile.contentProfileId);
+        const report = await appServices.contentSync.run(profile.contentProfileId);
         await refreshSummary();
 
         if (active) {
@@ -119,7 +95,7 @@ export function HomePage() {
     setSyncMessage('正在检查并导入学习内容…');
 
     try {
-      const report = await runContentSync(activeProfile.contentProfileId);
+      const report = await appServices.contentSync.run(activeProfile.contentProfileId);
       const nextSummary = await getReviewSummary(
         appServices.database,
         activeProfile.learnerProfileId,

@@ -11,6 +11,7 @@
 - Added Dexie v2 `contentSyncStates` and atomic Note/Card/content-version replacement.
 - Added automatic/manual Home content sync with real due, learning, new-card and total-card counts.
 - Added the prioritized local review queue, reveal interaction and unknown/fuzzy/known rating UI.
+- Made a direct Review-route visit synchronize content automatically when the local queue is empty.
 - Connected live ratings to the existing atomic pending ReviewEvent + ReviewState transaction.
 - Added unit/integration coverage for generation, import, unchanged/failure safety, content transactions, queue priority and v1-to-v2 database upgrade.
 
@@ -28,7 +29,7 @@
 ```text
 npm run typecheck: passed
 npm run lint: passed
-npm test: 30 passed in 10 files
+npm test: 31 passed in 10 files
 npm run build: passed; route chunks and PWA service worker generated
 npx wrangler deploy --dry-run: passed; 16 static files discovered
 Real card-source smoke: 27/27 packs, 137 valid Notes, 274 unique Cards, 0 skipped rows

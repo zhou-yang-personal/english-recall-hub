@@ -2,7 +2,11 @@ import 'fake-indexeddb/auto';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { CardRecord } from '../../src/domain/content';
 import type { ReviewState } from '../../src/domain/review';
-import { buildReviewQueue, getReviewSummary } from '../../src/features/review/reviewQueue';
+import {
+  buildReviewQueue,
+  getReviewSummary,
+  prepareReviewQueue,
+} from '../../src/features/review/reviewQueue';
 import { RecallDatabase } from '../../src/infrastructure/db/database';
 
 let database: RecallDatabase | undefined;
@@ -80,5 +84,25 @@ describe('review queue', () => {
         new Date('2026-08-18T00:00:00Z'),
       ),
     ).resolves.toEqual({ due: 3, learning: 2, newCards: 1, totalCards: 6 });
+  });
+
+  it('synchronizes content and rebuilds when a direct review visit has no local cards', async () => {
+    database = new RecallDatabase('review-queue-content-fallback-test');
+    let syncCalls = 0;
+
+    const queue = await prepareReviewQueue(
+      database,
+      'learner-1',
+      'manman',
+      10,
+      async () => {
+        syncCalls += 1;
+        await database!.cards.put(card('downloaded-card'));
+      },
+      new Date('2026-08-18T00:00:00Z'),
+    );
+
+    expect(syncCalls).toBe(1);
+    expect(queue.map(({ card: queueCard }) => queueCard.cardId)).toEqual(['downloaded-card']);
   });
 });

@@ -104,3 +104,33 @@ export async function buildReviewQueue(
 
   return [...dueItems, ...newItems];
 }
+
+export async function prepareReviewQueue(
+  database: RecallDatabase,
+  learnerProfileId: string,
+  contentProfileId: string,
+  dailyNewCardLimit: number,
+  synchronizeContent: () => Promise<unknown>,
+  now = new Date(),
+): Promise<ReviewQueueItem[]> {
+  const localQueue = await buildReviewQueue(
+    database,
+    learnerProfileId,
+    contentProfileId,
+    dailyNewCardLimit,
+    now,
+  );
+
+  if (localQueue.length > 0) {
+    return localQueue;
+  }
+
+  await synchronizeContent();
+  return buildReviewQueue(
+    database,
+    learnerProfileId,
+    contentProfileId,
+    dailyNewCardLimit,
+    now,
+  );
+}

@@ -8,12 +8,16 @@ import { SupabaseLearnerProfileRepository } from '../infrastructure/supabase/Sup
 import { getRuntimeConfig } from '../shared/runtimeConfig';
 
 const config = getRuntimeConfig();
+const cardSource = new GitHubCardSource(config.VITE_CARD_REPOSITORY_BASE_URL);
+const contentStore = new DexieContentStore(db);
 
 export const appServices = {
   auth: new SupabaseAuthClient(supabase),
   profiles: new SupabaseLearnerProfileRepository(supabase),
   localProfiles: new DexieLearnerProfileStore(db),
-  cardSource: new GitHubCardSource(config.VITE_CARD_REPOSITORY_BASE_URL),
-  contentStore: new DexieContentStore(db),
+  cardSource,
+  contentStore,
+  contentSync: new ContentSyncCoordinator(cardSource, contentStore),
   database: db,
 };
+import { ContentSyncCoordinator } from '../features/content-sync/ContentSyncCoordinator';
