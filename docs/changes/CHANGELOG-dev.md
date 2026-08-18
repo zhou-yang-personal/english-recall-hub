@@ -13,6 +13,7 @@
 - Added functional sign-in and LearnerProfile selection/creation UI.
 - Added runtime configuration and profile use-case unit tests.
 - Documented the REST fallback when `gh pr edit` is blocked by the Projects (classic) GraphQL deprecation.
+- Added a follow-up migration granting table-level LearnerProfile INSERT access required by the Data API; RLS continues to enforce account ownership.
 
 ### Hosted configuration
 
@@ -22,6 +23,7 @@
 - Configured the Cloudflare production/preview domains and corresponding Supabase Auth redirects without overwriting unrelated Auth settings.
 - Verified preview root, SPA routes, web manifest and service worker return HTTP 200.
 - Recorded that hosted numeric-template modification is unavailable on the free tier with Supabase default email delivery; hosted passwordless login currently uses its default one-time Magic Link.
+- Diagnosed hosted LearnerProfile creation through API logs: authenticated reads returned HTTP 200 while column-only INSERT grants caused POST requests to return HTTP 401.
 - Left Supabase secret/service-role keys, database passwords and access tokens outside Git/frontend configuration.
 
 ### Verification

@@ -101,6 +101,7 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 - M2: Remote LearnerProfile list/create plus transactional local Dexie cache replacement.
 - M2: Two-user pgTAP RLS acceptance script and unit tests for runtime config/profile use cases.
 - Remote migration `20260818020000` is applied and the schema is exposed through Data API.
+- Hosted smoke testing found that column-only LearnerProfile INSERT grants produced Data API HTTP 401; migration `20260818030000` adds the table-level INSERT grant while retaining RLS ownership checks.
 
 ## 7. Next Development Steps
 
@@ -108,11 +109,11 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 2. Activate the fixed production domain by deploying the configured production branch, then recheck Auth redirect behavior.
 3. Decide later whether numeric codes justify custom SMTP; default hosted Magic Link is sufficient for passwordless MVP access.
 4. Run the two-user RLS script where Docker/pg_prove is available.
-3. Implement real current-card import, Zod validation and Card generation.
-4. Connect Home/Review UI and TTS to IndexedDB.
-5. Implement ReviewEvent push/pull/replay and sync cursor transactions.
-6. Add offline/update/export/import behavior.
-7. Add browser E2E, deploy to Cloudflare and perform device acceptance.
+5. Implement real current-card import, Zod validation and Card generation.
+6. Connect Home/Review UI and TTS to IndexedDB.
+7. Implement ReviewEvent push/pull/replay and sync cursor transactions.
+8. Add offline/update/export/import behavior.
+9. Add browser E2E, deploy to Cloudflare and perform device acceptance.
 
 Estimated full MVP: `13–15 working days`.
 

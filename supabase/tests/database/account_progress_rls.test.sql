@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(10);
+select plan(11);
 
 insert into auth.users (id, email)
 values
@@ -69,6 +69,11 @@ values
 
 set local role authenticated;
 set local request.jwt.claim.sub = '11111111-1111-4111-8111-111111111111';
+
+select ok(
+  has_table_privilege('authenticated', 'english_recall.learner_profiles', 'INSERT'),
+  'Authenticated users can reach LearnerProfile INSERT through the Data API'
+);
 
 select results_eq(
   'select count(*) from english_recall.learner_profiles',
