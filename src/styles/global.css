@@ -10,6 +10,8 @@
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 a { color: inherit; }
 button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: 0.65; }
 
 .app-shell { min-height: 100vh; }
 .app-header {
@@ -36,6 +38,8 @@ button, input { font: inherit; }
 nav { display: flex; gap: 0.35rem; }
 nav a { border-radius: 999px; padding: 0.55rem 0.85rem; text-decoration: none; }
 nav a:hover, nav a.active { background: #e3eadc; }
+.nav-button { background: transparent; border: 0; border-radius: 999px; color: inherit; padding: 0.55rem 0.85rem; }
+.nav-button:hover { background: #e3eadc; }
 .page { margin: 0 auto; max-width: 72rem; padding: clamp(3rem, 9vw, 8rem) clamp(1rem, 5vw, 4rem); }
 .narrow { max-width: 50rem; }
 .hero { display: grid; gap: 4rem; grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.8fr); }
@@ -47,6 +51,17 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .metric-grid article { align-items: baseline; background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: flex; justify-content: space-between; padding: 1.2rem 1.4rem; }
 .metric-grid strong { font-family: Georgia, serif; font-size: 2rem; }
 .metric-grid span { color: #65756f; }
+.form-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.7rem; margin-top: 2rem; padding: 1.3rem; }
+.secondary-form { margin-top: 1rem; }
+.form-card label { font-size: 0.86rem; font-weight: 750; }
+.form-card input { background: white; border: 1px solid #b8c2bc; border-radius: 0.65rem; color: inherit; padding: 0.8rem; }
+.form-card button { background: #18392b; border: 0; border-radius: 0.65rem; color: #fffaf0; font-weight: 750; padding: 0.8rem 1rem; }
+.status-message { background: #e3eadc; border-radius: 0.7rem; padding: 0.8rem 1rem; }
+.profile-list { display: grid; gap: 0.8rem; margin-top: 2rem; }
+.profile-card { align-items: center; background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; color: inherit; display: flex; justify-content: space-between; padding: 1.1rem 1.3rem; text-align: left; }
+.profile-card:hover { border-color: #18392b; }
+.profile-card span { color: #65756f; font-size: 0.9rem; }
+.route-loading { color: #65756f; padding: 2rem; text-align: center; }
 
 @media (max-width: 760px) {
   .app-header { align-items: flex-start; gap: 1rem; }

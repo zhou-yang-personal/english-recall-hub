@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.3.1-m1-foundation",
+  "version": "0.3.2-m2-account-foundation",
   "type": "module",
   "scripts": {
     "dev": "vite",

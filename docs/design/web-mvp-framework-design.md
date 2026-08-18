@@ -1,7 +1,7 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.3.1-m1-foundation`
-Updated: `2026-08-17`
+Version: `0.3.2-m2-account-foundation`
+Updated: `2026-08-18`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
 
@@ -381,6 +381,7 @@ review_events (
   card_id text not null,
   rating text not null,
   reviewed_at timestamptz not null,
+  effective_at timestamptz not null,
   device_id text not null,
   scheduler_version smallint not null,
   created_at timestamptz not null default now()

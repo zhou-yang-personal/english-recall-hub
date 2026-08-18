@@ -4,12 +4,12 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.3.1-m1-foundation`
+- Version: `0.3.2-m2-account-foundation`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
 - First platform: Web/PWA on iPhone, Android and desktop
-- Status: M1 foundation implemented; account/content synchronization is not yet connected
+- Status: M2 account foundation implemented; content and ReviewEvent synchronization remain subsequent milestones
 
 ## Product flow
 
@@ -87,7 +87,11 @@ npm run dev
 npm run build
 npm run typecheck
 npm run test
+npx supabase start
+npx supabase test db
 npm run deploy
 ```
 
-Copy `.env.example` to `.env.local` only when M2 Supabase integration begins. The current M1 shell, scheduler, replay and local database tests require no cloud account.
+Copy `.env.example` to `.env.local` and provide only the public Supabase URL/publishable key and card repository URL. The linked Supabase project now has the `english_recall` schema, explicit grants and RLS; no privileged browser credential is required.
+
+The Supabase local stack and pgTAP database tests require Docker or another compatible container runtime.

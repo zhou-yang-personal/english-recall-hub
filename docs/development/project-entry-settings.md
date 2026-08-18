@@ -1,7 +1,7 @@
 # English Recall Hub｜External Entry Settings
 
-Version: `0.3.1-m1-foundation`
-Updated: `2026-08-17`
+Version: `0.3.2-m2-account-foundation`
+Updated: `2026-08-18`
 
 This document records configuration outside the repository.
 
@@ -28,7 +28,7 @@ Use only:
 docs/development/English-Recall-Hub-Project-Source.txt
 ```
 
-The `0.3.1` source states Web/PWA + IndexedDB + Supabase account/event sync and records the implemented M1 application foundation.
+The `0.3.2` source states Web/PWA + IndexedDB + Supabase account/event sync and records the implemented M2 account foundation.
 
 ## 3. Development Session Opener
 
@@ -68,3 +68,14 @@ personal credentials
 ```
 
 Account creation, email verification, CAPTCHA, 2FA and payment confirmation remain user-owned actions. After the user completes CLI login, development agents may apply reviewed migrations/configuration and deploy within the authorized project.
+
+## 6. Current Hosted State
+
+Observed/configured on `2026-08-18`:
+
+- Supabase project is linked to the repository CLI project.
+- Migration `20260818020000_create_account_progress.sql` is applied.
+- Data API exposes `english_recall`; anonymous reads and writes are denied.
+- Hosted Auth still needs final Site URL/redirect allow-list values after Cloudflare deployment.
+- For a numeric email OTP, the hosted Magic Link template must contain `{{ .Token }}`; the Supabase default otherwise sends a Magic Link.
+- Cloudflare deployment and Git integration are not yet completed.

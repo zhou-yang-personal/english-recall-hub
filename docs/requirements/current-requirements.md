@@ -1,7 +1,7 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.3.1-m1-foundation`
-Updated: `2026-08-17`
+Version: `0.3.2-m2-account-foundation`
+Updated: `2026-08-18`
 
 ## 1. Product Goal
 

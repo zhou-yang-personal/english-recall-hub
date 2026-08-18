@@ -1,5 +1,42 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.3.2-m2-account-foundation｜2026-08-18
+
+### Added
+
+- Initialized the Supabase CLI project and added the versioned `english_recall` database migration.
+- Added LearnerProfile and append-only ReviewEvent tables with explicit grants, constraints, indexes and RLS.
+- Added a two-user pgTAP acceptance script for cross-account isolation and append-only event permissions.
+- Added browser-safe runtime configuration validation and a persisted Supabase client.
+- Added email passwordless request/verification, session observation and sign-out.
+- Added remote LearnerProfile list/create use cases and transactional Dexie cache replacement.
+- Added functional sign-in and LearnerProfile selection/creation UI.
+- Added runtime configuration and profile use-case unit tests.
+
+### Hosted configuration
+
+- Linked the Supabase project and applied migration `20260818020000`.
+- Exposed `english_recall` through Data API.
+- Confirmed anonymous GET and POST are both denied with HTTP 401.
+- Left Supabase secret/service-role keys, database passwords and access tokens outside Git/frontend configuration.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 18 passed in 5 files
+npm run build: passed; PWA service worker generated
+npx wrangler deploy --dry-run: passed; 13 static files discovered
+npm audit: 0 vulnerabilities
+supabase migration list: local/remote migration aligned
+supabase db lint --linked --schema english_recall: no schema errors
+supabase test db --linked: not run; Docker socket unavailable to pg_prove
+Hosted OTP/Profile smoke test: pending email-template and final redirect configuration
+Cloudflare deployment: pending
+Dependencies: unchanged; lock file changed only for project version synchronization
+```
+
 ## 0.3.1-m1-foundation｜2026-08-17
 
 ### Added
