@@ -105,15 +105,14 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 
 ## 7. Next Development Steps
 
-1. Run one hosted passwordless-email/Profile smoke test against the verified Cloudflare preview.
-2. Activate the fixed production domain by deploying the configured production branch, then recheck Auth redirect behavior.
-3. Decide later whether numeric codes justify custom SMTP; default hosted Magic Link is sufficient for passwordless MVP access.
-4. Run the two-user RLS script where Docker/pg_prove is available.
-5. Implement real current-card import, Zod validation and Card generation.
-6. Connect Home/Review UI and TTS to IndexedDB.
-7. Implement ReviewEvent push/pull/replay and sync cursor transactions.
-8. Add offline/update/export/import behavior.
-9. Add browser E2E, deploy to Cloudflare and perform device acceptance.
+1. Activate the fixed production domain by deploying the configured production branch, then recheck Auth redirect behavior.
+2. Decide later whether numeric codes justify custom SMTP; default hosted Magic Link is sufficient for passwordless MVP access.
+3. Run the two-user RLS script where Docker/pg_prove is available.
+4. Implement real current-card import, Zod validation and Card generation.
+5. Connect Home/Review UI and TTS to IndexedDB.
+6. Implement ReviewEvent push/pull/replay and sync cursor transactions.
+7. Add offline/update/export/import behavior.
+8. Add browser E2E and perform device acceptance.
 
 Estimated full MVP: `13–15 working days`.
 
@@ -128,7 +127,7 @@ Two-user pgTAP script: added; execution blocked because this environment cannot 
 Wrangler deploy --dry-run: passed; 13 static files discovered
 E2E: not configured
 CI: not configured
-Supabase: provisioned, linked and migrated; Auth URLs configured; hosted Magic Link smoke test remains
+Supabase: provisioned, linked and migrated; hosted Magic Link and LearnerProfile cloud/local persistence smoke test passed
 Cloudflare: preview routes/PWA assets return HTTP 200; fixed production domain awaits production-branch deployment
 Dependencies unchanged; npm audit reported 0 vulnerabilities
 ```

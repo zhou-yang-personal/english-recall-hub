@@ -24,6 +24,7 @@
 - Verified preview root, SPA routes, web manifest and service worker return HTTP 200.
 - Recorded that hosted numeric-template modification is unavailable on the free tier with Supabase default email delivery; hosted passwordless login currently uses its default one-time Magic Link.
 - Diagnosed hosted LearnerProfile creation through API logs: authenticated reads returned HTTP 200 while column-only INSERT grants caused POST requests to return HTTP 401.
+- Verified the repaired hosted flow: LearnerProfile POST returned HTTP 201, one remote row exists and the UI confirmed local persistence.
 - Left Supabase secret/service-role keys, database passwords and access tokens outside Git/frontend configuration.
 
 ### Verification
@@ -38,7 +39,7 @@ npm audit: 0 vulnerabilities
 supabase migration list: local/remote migration aligned
 supabase db lint --linked --schema english_recall: no schema errors
 supabase test db --linked: not run; Docker socket unavailable to pg_prove
-Hosted passwordless-email/Profile smoke test: pending user email-link confirmation
+Hosted passwordless-email/Profile smoke test: passed; remote POST HTTP 201 and local persistence confirmed
 Cloudflare deployment: preview verified; fixed production domain awaits production-branch deployment
 Dependencies: unchanged; lock file changed only for project version synchronization
 ```
