@@ -116,7 +116,7 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 
 ## 7. Next Development Steps
 
-1. Configure the five Worker Secrets and perform hosted pair/Profile/Event smoke testing.
+1. Perform a real user rating on one paired browser and confirm hosted Event push/pull on a second paired device.
 2. Run the two-user RLS script where Docker/pg_prove is available.
 3. Add Web Speech TTS, voice fallback and listening mode to the live Review UI.
 4. Add offline update UX plus progress export/import behavior.
@@ -138,7 +138,11 @@ CI: not configured
 Supabase: provisioned, linked and migrated; prior hosted LearnerProfile persistence smoke test passed
 Cloudflare: preview routes/PWA assets and fixed production domain return HTTP 200
 Real card-source smoke test: 27/27 packs, 137 valid Notes, 274 unique Cards, 0 skipped rows
-Worker Secrets/hosted family pairing: not configured or smoke-tested yet
+Cloudflare production: version `d0b47e8c-f4d8-4987-bd66-ff2e156601c6` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
+Worker Secrets: all five required names configured as `secret_text`; Supabase/signing values were not printed, and the pairing code was returned once to the operator
+Hosted family pairing: wrong code denied; valid code issued a device grant; paired status and unpair passed
+Hosted family Profile/Event reads: one existing family Profile loaded; ReviewEvent page returned HTTP 200
+Hosted ReviewEvent write: not smoke-tested to avoid inserting a fabricated learner rating
 ```
 
 This handoff describes an implemented M4 family-sync foundation, not a completed MVP.

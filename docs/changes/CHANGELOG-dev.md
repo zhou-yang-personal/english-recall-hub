@@ -36,7 +36,8 @@ npm test: 39 passed in 12 files
 npm run build: passed; PWA generated
 npx wrangler deploy --dry-run: passed; Worker entry plus 16 static files discovered
 Dependencies: removed @supabase/supabase-js; package-lock updated
-Hosted family pairing/Profile/Event smoke test: not yet run
+Hosted deployment: Worker version `d0b47e8c-f4d8-4987-bd66-ff2e156601c6`
+Hosted pairing/Profile/Event-read smoke: passed; fabricated Event write intentionally not performed
 ```
 
 ## 0.4.0-m3-content-review｜2026-08-18
