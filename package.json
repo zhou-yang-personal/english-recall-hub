@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.3.3-m2-local-first-profiles",
+  "version": "0.4.0-m3-content-review",
   "type": "module",
   "scripts": {
     "dev": "vite",

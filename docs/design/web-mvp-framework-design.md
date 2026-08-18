@@ -1,6 +1,6 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.3.3-m2-local-first-profiles`
+Version: `0.4.0-m3-content-review`
 Updated: `2026-08-18`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
@@ -56,7 +56,7 @@ Supabase Realtime and Edge Functions are not required unless a later concrete re
 
 ## 2. Current Reality
 
-The M1 application shell, local database, scheduler/replay and atomic rating transaction are implemented. M2 adds local-first LearnerProfile selection/creation, optional persisted email cloud sessions, Supabase migration/RLS and cloud Profile cache. Content import, ReviewEvent remote synchronization, TTS, browser E2E and CI remain subsequent work.
+The M1 application shell, local database, scheduler/replay and atomic rating transaction are implemented. M2 adds local-first LearnerProfile selection/creation, optional persisted email cloud sessions, Supabase migration/RLS and cloud Profile cache. M3 now imports the real public Manifest/Templates/Packs into IndexedDB, generates stable recognition/production Cards and connects Home counts, queue ordering and atomic rating UI. TTS/listening, remote ReviewEvent synchronization, browser E2E and CI remain subsequent work.
 
 Observed `card/profiles/manman/manifest.json` on `2026-08-17`:
 
@@ -352,7 +352,7 @@ type ReviewState = {
 
 ReviewState is derived and is not the cloud synchronization authority.
 
-Suggested Dexie v1 schema:
+Current Dexie v2 schema:
 
 ```ts
 learnerProfiles: '&learnerProfileId, userId, contentProfileId'
@@ -361,6 +361,7 @@ cards: '&[contentProfileId+cardId], contentProfileId, [contentProfileId+noteId],
 reviewEvents: '&eventId, learnerProfileId, [learnerProfileId+cardId], [learnerProfileId+syncStatus], remoteSeq'
 reviewStates: '&[learnerProfileId+cardId], [learnerProfileId+dueAt], [learnerProfileId+state]'
 syncStates: '&learnerProfileId'
+contentSyncStates: '&contentProfileId'
 ```
 
 Review queries use `learnerProfileId`; content queries use `contentProfileId`.

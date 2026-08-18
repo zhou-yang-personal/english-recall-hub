@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.3.3-m2-local-first-profiles`
+Version: `0.4.0-m3-content-review`
 Updated: `2026-08-18`
 
 ## 1. Product Goal

@@ -4,12 +4,12 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.3.3-m2-local-first-profiles`
+- Version: `0.4.0-m3-content-review`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
 - First platform: Web/PWA on iPhone, Android and desktop
-- Status: M2 local-first learner flow and optional account foundation implemented; content and ReviewEvent synchronization remain subsequent milestones
+- Status: M3 public card import and the first real local review flow are implemented; TTS and remote ReviewEvent synchronization remain subsequent milestones
 - Production URL: `https://english-recall-hub.zhou-yang-personal.workers.dev`
 
 ## Product flow

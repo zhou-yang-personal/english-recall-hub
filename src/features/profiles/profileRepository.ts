@@ -16,6 +16,7 @@ export interface LearnerProfileRepository {
 
 export interface LearnerProfileLocalStore {
   listAll(): Promise<LearnerProfile[]>;
+  getById(learnerProfileId: string): Promise<LearnerProfile | undefined>;
   listByUser(userId: string): Promise<LearnerProfile[]>;
   replaceForUser(userId: string, profiles: readonly LearnerProfile[]): Promise<void>;
   put(profile: LearnerProfile): Promise<void>;

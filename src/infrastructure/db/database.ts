@@ -4,13 +4,21 @@ import type { LearnerProfile } from '../../domain/profile';
 import type { ReviewEvent, ReviewState } from '../../domain/review';
 
 export const DATABASE_NAME = 'english-recall-hub';
-export const DATABASE_VERSION = 1;
+export const DATABASE_VERSION = 2;
 
 export interface SyncState {
   learnerProfileId: string;
   lastRemoteSeq: number;
   lastContentVersion?: string;
   lastProgressSyncAt?: string;
+}
+
+export interface ContentSyncState {
+  contentProfileId: string;
+  manifestUpdatedAt: string;
+  importedAt: string;
+  noteCount: number;
+  cardCount: number;
 }
 
 export class RecallDatabase extends Dexie {
@@ -20,6 +28,7 @@ export class RecallDatabase extends Dexie {
   reviewEvents!: Table<ReviewEvent, string>;
   reviewStates!: Table<ReviewState, [string, string]>;
   syncStates!: Table<SyncState, string>;
+  contentSyncStates!: Table<ContentSyncState, string>;
 
   constructor(databaseName = DATABASE_NAME) {
     super(databaseName);
@@ -34,6 +43,7 @@ export class RecallDatabase extends Dexie {
       reviewStates:
         '&[learnerProfileId+cardId], [learnerProfileId+dueAt], [learnerProfileId+state]',
       syncStates: '&learnerProfileId',
+      contentSyncStates: '&contentProfileId',
     });
   }
 }

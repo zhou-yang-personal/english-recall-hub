@@ -32,6 +32,7 @@ function dependencies() {
   };
   const local: LearnerProfileLocalStore = {
     listAll: vi.fn().mockResolvedValue([profile]),
+    getById: vi.fn().mockResolvedValue(profile),
     listByUser: vi.fn().mockResolvedValue([profile]),
     replaceForUser: vi.fn().mockResolvedValue(undefined),
     put: vi.fn().mockResolvedValue(undefined),

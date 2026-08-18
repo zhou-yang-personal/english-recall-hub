@@ -1,6 +1,6 @@
 # English Recall Hub｜External Entry Settings
 
-Version: `0.3.3-m2-local-first-profiles`
+Version: `0.4.0-m3-content-review`
 Updated: `2026-08-18`
 
 This document records configuration outside the repository.
@@ -28,7 +28,7 @@ Use only:
 docs/development/English-Recall-Hub-Project-Source.txt
 ```
 
-The `0.3.3` source states local-first Web/PWA + IndexedDB + optional Supabase account/event sync and records the implemented M2 learner/account foundation.
+The `0.4.0` source states local-first Web/PWA + IndexedDB + optional Supabase account/event sync and records the implemented M3 card import/local review foundation.
 
 ## 3. Development Session Opener
 

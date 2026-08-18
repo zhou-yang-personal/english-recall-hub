@@ -1,5 +1,40 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.4.0-m3-content-review｜2026-08-18
+
+### Added
+
+- Added a public GitHub CardSource adapter using the configured `card` branch base URL and native `fetch`.
+- Added Zod validation for Manifest, Templates and formal Notes, including safe repository paths.
+- Added bounded-concurrency Template/Pack retrieval and JSONL parsing that accepts a final record without a newline.
+- Added stable SHA-256 recognition/production Card generation from real templates.
+- Added Dexie v2 `contentSyncStates` and atomic Note/Card/content-version replacement.
+- Added automatic/manual Home content sync with real due, learning, new-card and total-card counts.
+- Added the prioritized local review queue, reveal interaction and unknown/fuzzy/known rating UI.
+- Connected live ratings to the existing atomic pending ReviewEvent + ReviewState transaction.
+- Added unit/integration coverage for generation, import, unchanged/failure safety, content transactions, queue priority and v1-to-v2 database upgrade.
+
+### Data safety and compatibility
+
+- A failed required fetch, invalid Manifest or zero-valid-Note import leaves the previous local dataset unchanged.
+- Removed/unsupported Cards do not delete historical ReviewEvents or ReviewStates.
+- Null Pack hashes are reported honestly; `manifest.updated_at` remains the current change detector.
+- Invalid Note rows are skipped and reported while valid rows continue importing.
+- Existing v1 IndexedDB LearnerProfiles survive the v2 schema upgrade.
+- No Supabase schema, migration or RLS policy changed.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 30 passed in 10 files
+npm run build: passed; route chunks and PWA service worker generated
+npx wrangler deploy --dry-run: passed; 16 static files discovered
+Real card-source smoke: 27/27 packs, 137 valid Notes, 274 unique Cards, 0 skipped rows
+Dependencies: unchanged; lock file changed only for project version synchronization
+```
+
 ## 0.3.3-m2-local-first-profiles｜2026-08-18
 
 ### Changed

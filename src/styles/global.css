@@ -51,6 +51,13 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .metric-grid article { align-items: baseline; background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: flex; justify-content: space-between; padding: 1.2rem 1.4rem; }
 .metric-grid strong { font-family: Georgia, serif; font-size: 2rem; }
 .metric-grid span { color: #65756f; }
+.card-total { color: #65756f; margin: 0.4rem 0 0; text-align: right; }
+.sync-panel { align-items: center; background: #fffaf0; border: 1px solid #e4dccd; border-radius: 0.9rem; display: flex; gap: 1rem; justify-content: space-between; margin: 2rem 0 1rem; padding: 1rem; }
+.sync-panel.error { border-color: #c87a61; }
+.sync-panel span { color: #52635c; line-height: 1.5; }
+.sync-panel button, .primary-action, .reveal-button { background: #18392b; border: 0; border-radius: 0.7rem; color: #fffaf0; display: inline-block; font-weight: 750; padding: 0.8rem 1rem; text-decoration: none; }
+.sync-panel button { flex: 0 0 auto; }
+.primary-action { margin-top: 0.4rem; }
 .form-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.7rem; margin-top: 2rem; padding: 1.3rem; }
 .secondary-form { margin-top: 1rem; }
 .form-card label { font-size: 0.86rem; font-weight: 750; }
@@ -68,6 +75,20 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .cloud-option a, .setting-card a { color: #ad4b2a; font-weight: 750; }
 .setting-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.6rem; margin-top: 2rem; padding: 1.3rem; }
 .setting-card span { color: #65756f; }
+.review-page { padding-top: clamp(2rem, 5vw, 4rem); }
+.review-progress { color: #65756f; display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.review-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1.4rem; min-height: 25rem; padding: clamp(1.5rem, 5vw, 3rem); }
+.review-card h1 { font-size: clamp(1.8rem, 4vw, 3.5rem); line-height: 1.2; margin-top: 1.4rem; overflow-wrap: anywhere; }
+.card-kind { background: #e3eadc; border-radius: 999px; color: #52635c; display: inline-block; font-size: 0.8rem; font-weight: 800; padding: 0.35rem 0.65rem; }
+.answer-panel { border-top: 1px solid #e4dccd; display: grid; gap: 0.7rem; margin-top: 2rem; padding-top: 1.5rem; }
+.answer-panel span { color: #ad4b2a; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.12em; }
+.answer-panel strong { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1.35; overflow-wrap: anywhere; }
+.reveal-button { margin-top: 2rem; width: 100%; }
+.rating-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(3, 1fr); margin-top: 1rem; }
+.rating-grid button { background: #fffaf0; border: 1px solid #b8c2bc; border-radius: 0.9rem; color: inherit; display: grid; gap: 0.35rem; padding: 1rem; }
+.rating-grid button:hover { border-color: #18392b; }
+.rating-grid span { color: #65756f; font-size: 0.82rem; }
+.completion-card .primary-action { margin-top: 1rem; }
 .route-loading { color: #65756f; padding: 2rem; text-align: center; }
 
 @media (max-width: 760px) {
@@ -77,4 +98,6 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
   nav a { font-size: 0.9rem; padding: 0.45rem 0.65rem; }
   .hero { grid-template-columns: 1fr; }
   .profile-card { align-items: flex-start; flex-direction: column; gap: 0.45rem; }
+  .sync-panel { align-items: stretch; flex-direction: column; }
+  .rating-grid { grid-template-columns: 1fr; }
 }

@@ -9,6 +9,10 @@ export class DexieLearnerProfileStore implements LearnerProfileLocalStore {
     return this.database.learnerProfiles.toArray();
   }
 
+  getById(learnerProfileId: string): Promise<LearnerProfile | undefined> {
+    return this.database.learnerProfiles.get(learnerProfileId);
+  }
+
   listByUser(userId: string): Promise<LearnerProfile[]> {
     return this.database.learnerProfiles.where('userId').equals(userId).toArray();
   }

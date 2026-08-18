@@ -1,10 +1,14 @@
 import { lazy, Suspense } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import { HomePage } from '../features/home/HomePage';
-import { ReviewPage } from '../features/review/ReviewPage';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { useApp } from './AppContext';
 
+const HomePage = lazy(() =>
+  import('../features/home/HomePage').then((module) => ({ default: module.HomePage })),
+);
+const ReviewPage = lazy(() =>
+  import('../features/review/ReviewPage').then((module) => ({ default: module.ReviewPage })),
+);
 const SignInPage = lazy(() =>
   import('../features/auth/SignInPage').then((module) => ({ default: module.SignInPage })),
 );
