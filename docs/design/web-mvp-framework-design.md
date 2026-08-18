@@ -57,7 +57,7 @@ Supabase Realtime and Edge Functions are not required unless a later concrete re
 
 ## 2. Current Reality
 
-There is no application code, package manifest, build configuration, test suite or CI yet.
+The M1 application shell, local database, scheduler/replay and atomic rating transaction are implemented. M2 adds the Supabase migration/RLS, persisted email passwordless session and LearnerProfile selection/cache. Content import, ReviewEvent remote synchronization, TTS, browser E2E and CI remain subsequent work.
 
 Observed `card/profiles/manman/manifest.json` on `2026-08-17`:
 

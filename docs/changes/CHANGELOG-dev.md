@@ -19,6 +19,7 @@
 - Linked the Supabase project and applied migration `20260818020000`.
 - Exposed `english_recall` through Data API.
 - Confirmed anonymous GET and POST are both denied with HTTP 401.
+- Configured the Cloudflare production/preview domains and corresponding Supabase Auth redirects.
 - Left Supabase secret/service-role keys, database passwords and access tokens outside Git/frontend configuration.
 
 ### Verification

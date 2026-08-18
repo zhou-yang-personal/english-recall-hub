@@ -76,6 +76,7 @@ Observed/configured on `2026-08-18`:
 - Supabase project is linked to the repository CLI project.
 - Migration `20260818020000_create_account_progress.sql` is applied.
 - Data API exposes `english_recall`; anonymous reads and writes are denied.
-- Hosted Auth still needs final Site URL/redirect allow-list values after Cloudflare deployment.
+- Cloudflare production URL is `https://english-recall-hub.zhou-yang-personal.workers.dev` with preview hosts matching `*-english-recall-hub.zhou-yang-personal.workers.dev`.
+- Hosted Auth Site URL and redirect allow-list are managed from `supabase/config.toml` and need a successful `supabase config push` after URL changes.
 - For a numeric email OTP, the hosted Magic Link template must contain `{{ .Token }}`; the Supabase default otherwise sends a Magic Link.
-- Cloudflare deployment and Git integration are not yet completed.
+- Cloudflare Git integration and the first production deployment are configured; hosted smoke testing remains.

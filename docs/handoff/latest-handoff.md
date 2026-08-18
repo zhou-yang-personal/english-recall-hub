@@ -104,8 +104,8 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 
 ## 7. Next Development Steps
 
-1. Configure the hosted Magic Link/OTP email template with `{{ .Token }}` and set the final Cloudflare redirect URLs.
-2. Run the two-user RLS script where Docker/pg_prove is available and perform one hosted OTP/Profile smoke test.
+1. Push the final Cloudflare Site URL, redirect allow-list and hosted OTP template through Supabase configuration.
+2. Run one hosted OTP/Profile smoke test and the two-user RLS script where Docker/pg_prove is available.
 3. Implement real current-card import, Zod validation and Card generation.
 4. Connect Home/Review UI and TTS to IndexedDB.
 5. Implement ReviewEvent push/pull/replay and sync cursor transactions.
@@ -126,7 +126,7 @@ Wrangler deploy --dry-run: passed; 13 static files discovered
 E2E: not configured
 CI: not configured
 Supabase: provisioned, linked and migrated; hosted OTP template smoke test remains
-Cloudflare: not deployed; Git integration/dashboard setup remains
+Cloudflare: production/preview domains configured; hosted response verification remains
 Dependencies unchanged; npm audit reported 0 vulnerabilities
 ```
 

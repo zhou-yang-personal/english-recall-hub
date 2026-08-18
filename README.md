@@ -10,6 +10,7 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 - Data branches: `draft`, `card`, `progress`
 - First platform: Web/PWA on iPhone, Android and desktop
 - Status: M2 account foundation implemented; content and ReviewEvent synchronization remain subsequent milestones
+- Production URL: `https://english-recall-hub.zhou-yang-personal.workers.dev`
 
 ## Product flow
 
