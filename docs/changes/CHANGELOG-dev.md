@@ -19,7 +19,9 @@
 - Linked the Supabase project and applied migration `20260818020000`.
 - Exposed `english_recall` through Data API.
 - Confirmed anonymous GET and POST are both denied with HTTP 401.
-- Configured the Cloudflare production/preview domains and corresponding Supabase Auth redirects.
+- Configured the Cloudflare production/preview domains and corresponding Supabase Auth redirects without overwriting unrelated Auth settings.
+- Verified preview root, SPA routes, web manifest and service worker return HTTP 200.
+- Recorded that hosted numeric-template modification is unavailable on the free tier with Supabase default email delivery; hosted passwordless login currently uses its default one-time Magic Link.
 - Left Supabase secret/service-role keys, database passwords and access tokens outside Git/frontend configuration.
 
 ### Verification
@@ -34,8 +36,8 @@ npm audit: 0 vulnerabilities
 supabase migration list: local/remote migration aligned
 supabase db lint --linked --schema english_recall: no schema errors
 supabase test db --linked: not run; Docker socket unavailable to pg_prove
-Hosted OTP/Profile smoke test: pending email-template and final redirect configuration
-Cloudflare deployment: pending
+Hosted passwordless-email/Profile smoke test: pending user email-link confirmation
+Cloudflare deployment: preview verified; fixed production domain awaits production-branch deployment
 Dependencies: unchanged; lock file changed only for project version synchronization
 ```
 

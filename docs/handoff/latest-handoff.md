@@ -104,8 +104,10 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 
 ## 7. Next Development Steps
 
-1. Push the final Cloudflare Site URL, redirect allow-list and hosted OTP template through Supabase configuration.
-2. Run one hosted OTP/Profile smoke test and the two-user RLS script where Docker/pg_prove is available.
+1. Run one hosted passwordless-email/Profile smoke test against the verified Cloudflare preview.
+2. Activate the fixed production domain by deploying the configured production branch, then recheck Auth redirect behavior.
+3. Decide later whether numeric codes justify custom SMTP; default hosted Magic Link is sufficient for passwordless MVP access.
+4. Run the two-user RLS script where Docker/pg_prove is available.
 3. Implement real current-card import, Zod validation and Card generation.
 4. Connect Home/Review UI and TTS to IndexedDB.
 5. Implement ReviewEvent push/pull/replay and sync cursor transactions.
@@ -125,8 +127,8 @@ Two-user pgTAP script: added; execution blocked because this environment cannot 
 Wrangler deploy --dry-run: passed; 13 static files discovered
 E2E: not configured
 CI: not configured
-Supabase: provisioned, linked and migrated; hosted OTP template smoke test remains
-Cloudflare: production/preview domains configured; hosted response verification remains
+Supabase: provisioned, linked and migrated; Auth URLs configured; hosted Magic Link smoke test remains
+Cloudflare: preview routes/PWA assets return HTTP 200; fixed production domain awaits production-branch deployment
 Dependencies unchanged; npm audit reported 0 vulnerabilities
 ```
 

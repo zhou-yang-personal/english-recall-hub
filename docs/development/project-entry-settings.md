@@ -77,6 +77,6 @@ Observed/configured on `2026-08-18`:
 - Migration `20260818020000_create_account_progress.sql` is applied.
 - Data API exposes `english_recall`; anonymous reads and writes are denied.
 - Cloudflare production URL is `https://english-recall-hub.zhou-yang-personal.workers.dev` with preview hosts matching `*-english-recall-hub.zhou-yang-personal.workers.dev`.
-- Hosted Auth Site URL and redirect allow-list are managed from `supabase/config.toml` and need a successful `supabase config push` after URL changes.
-- For a numeric email OTP, the hosted Magic Link template must contain `{{ .Token }}`; the Supabase default otherwise sends a Magic Link.
-- Cloudflare Git integration and the first production deployment are configured; hosted smoke testing remains.
+- Hosted Auth Site URL and redirect allow-list are synchronized from `supabase/config.toml`; hosted URL-only changes use a targeted Management API update so unrelated Auth settings remain unchanged.
+- The local numeric OTP template contains `{{ .Token }}`. On the hosted free project, Supabase rejected template modification while using its default email provider; hosted login therefore uses the default one-time Magic Link until custom SMTP or a paid plan is configured.
+- Cloudflare Git integration is configured. Preview deployment is verified; the fixed production domain remains inactive until the configured production branch deploys.
