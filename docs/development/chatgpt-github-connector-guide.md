@@ -18,6 +18,7 @@
 - `get_repo`：读取仓库元信息、默认分支、权限和状态。
 - `fetch_file`：按仓库路径读取 UTF-8 文本文件，并获取当前文件 sha。
 - `search`：在仓库内搜索文件、函数、错误文本或关键字。
+- `compare_commits`：比较目标分支和任务分支。
 - `get_pr_info` / `fetch_pr_patch`：读取 PR 元信息和 patch。
 
 写入能力：
@@ -26,6 +27,7 @@
 - `update_file`：基于当前 sha 替换已有 UTF-8 文本文件。
 - `delete_file`：基于当前 sha 删除已有文件。
 - `create_branch`：从指定 base ref 或 commit 创建任务分支。
+- `create_pull_request`：创建 PR。
 
 不适合作为常规手段的能力：
 
@@ -36,23 +38,24 @@
 ## 3. 推荐流程
 
 1. 用 `get_repo` 确认仓库、默认分支、权限和 archived / fork 状态。
-2. 如需判断带 `/` 的分支是否存在，优先直接用 `fetch_file(ref=<branch>)` 或比较指定 ref 验证，不依赖 `search_branches` 空结果。
-3. 用 `fetch_file` 读取 `AGENTS.md`、`AGENTS.common.md`、`AGENTS.project.md`、README、handoff、设计文档、目标文件和 sha。
-4. 更新已有文本文件：先 `fetch_file` 获取 sha，再 `update_file`。
-5. 新增小文本文件：使用 `create_file`。
-6. 删除文件：先确认文件职责和当前 sha，再用 `delete_file`。
-7. 每次写入后，必须 `fetch_file` 回读关键片段。
-8. 多文件修改必须串行执行，不并发写同一路径。
-9. sha 冲突时，重新 `fetch_file` 获取最新内容，重新判断是否继续；不得盲目覆盖。
-10. 创建 PR 后，不自动 merge，除非用户明确要求。
+2. 用 `compare_commits` 检查目标分支差异。
+3. 如需判断带 `/` 的分支是否存在，优先直接用 `fetch_file(ref=<branch>)` 或比较指定 ref 验证，不依赖 `search_branches` 空结果。
+4. 用 `fetch_file` 读取 `AGENTS.md`、`AGENTS.common.md`、`AGENTS.project.md`、README、handoff、设计文档、目标文件和 sha。
+5. 更新已有文本文件：先 `fetch_file` 获取 sha，再 `update_file`。
+6. 新增小文本文件：使用 `create_file`。
+7. 删除文件：先确认文件职责和当前 sha，再用 `delete_file`。
+8. 每次写入后，必须 `fetch_file` 回读关键片段。
+9. 多文件修改必须串行执行，不并发写同一路径。
+10. sha 冲突时，重新 `fetch_file` 获取最新内容，重新判断是否继续；不得盲目覆盖。
+11. 创建 PR 后，不自动 merge，除非用户明确要求。
 
 ## 4. 文件类型规则
 
 | 文件类型 | 推荐操作 | 注意事项 |
 |---|---|---|
 | Markdown | `fetch_file` + `update_file` / `create_file` | 适合 connector 直接操作；长文改动优先小步提交 |
-| TypeScript / TSX | `fetch_file` + `update_file` | 修改后提示运行前端构建 |
-| JSON 配置 | 优先最小修改 | 整文件写入可能触发平台拦截；失败后停止说明，不盲试 |
+| TypeScript / TSX | `fetch_file` + `update_file` | 修改后提示运行 typecheck/build/test |
+| JSON / JSONC 配置 | 优先最小修改 | 整文件写入可能触发平台拦截；失败后停止说明，不盲试 |
 | PR 模板 | `create_file` / `update_file` | 只放确认清单，不复制 AGENTS 全文 |
 | lock 文件 | 默认不改 | 只有新增、删除、升级依赖时才改 |
 | 大文件 | 优先交给 Codex / 本地 | connector 不适合反复整文件重写 |
@@ -60,11 +63,15 @@
 
 ## 5. English Recall Hub 项目补充
 
-- `draft`、`card`、`progress` 是数据分支；ChatGPT connector 日常开发优先操作 `dev`，不要误写数据分支。
-- 如果需要写 draft，默认只写 DraftNote JSONL，不写正式 Note/Card。
-- `card` 分支正式内容应由 Builder 生成；ChatGPT 不直接绕过 Builder 修改正式 pack。
-- `progress` 分支只保存近期备份快照；不要把手机 SQLite、音频缓存、安装包或大文件写入仓库。
-- 任何 GitHub token、Project 私密配置、设备私钥都不得写入仓库。
+- `dev` 是应用代码和项目文档的 source-of-truth。
+- `draft`、`card`、`progress` 是数据分支，不得混用。
+- 需要写 draft 时，只写 DraftNote JSONL，不写正式 Note/Card。
+- `card` 分支正式内容由 Builder 生成；ChatGPT 不直接绕过 Builder 修改正式 pack。
+- Web/PWA 从公开 `card` 分支读取内容；浏览器不直接写 GitHub。
+- MVP 账号和进度同步由 Supabase Auth/Postgres/RLS 承担；`progress` 分支不作为运行时数据库。
+- 前端只允许使用 Supabase publishable key，不得持有 GitHub PAT、Supabase secret/service-role key 或数据库密码。
+- 不把 IndexedDB 导出、auth token、浏览器缓存、音频、日志、安装包或构建产物写入仓库。
+- 任何 GitHub token、Cloudflare/Supabase Secret、Project 私密配置或设备私钥都不得写入仓库。
 
 ## 6. 常见失败与处理方式
 
@@ -75,6 +82,7 @@
 | `update_file` sha 冲突 | 重新读取文件和 sha 后再判断 |
 | `update_ref` 返回 not fast-forward | 不 force；除非用户明确要求且已说明风险 |
 | `search_branches` 对带 `/` 的分支返回空 | 不据此判断分支不存在；直接用 ref 读取或比较验证 |
+| `gh pr edit` 因 Projects (classic) GraphQL 字段弃用而失败 | 先回读确认 PR 未变化，再用 GitHub REST `PATCH /repos/{owner}/{repo}/pulls/{number}` 更新标题或正文 |
 | 平台 safety block | 停止当前整文件写入；可改为新增小模块或交给 Codex / 本地处理 |
 | 构建命令无法执行 | 明确写 `not run in ChatGPT GitHub connector environment` |
 | CI 未配置或无法读取 | 不声称 CI 通过 |

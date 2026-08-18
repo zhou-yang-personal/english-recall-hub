@@ -1,0 +1,96 @@
+English Recall Hub Project Source
+Version: 0.3.2-m2-account-foundation
+
+Repository: zhou-yang-personal/english-recall-hub
+Development branch: dev
+Default content profile: manman
+
+Content branches:
+DRAFT_BRANCH=draft
+DRAFT_PATH=profiles/manman/inbox
+CARD_BRANCH=card
+CARD_PATH=profiles/manman
+PROGRESS_BRANCH=progress (reserved, not MVP runtime)
+
+Product flow:
+ChatGPT → DraftNote → Builder → GitHub card content
+→ Web/PWA IndexedDB review → ReviewEvents
+→ Supabase account progress synchronization
+
+Product boundary:
+This is a personal/family multilingual recall tool, not a dictionary, course platform or public SaaS.
+First sign-in uses Supabase email OTP. Later use reuses the persisted session.
+After setup, local Home/Review remain usable offline.
+
+Approved stack:
+React + TypeScript + Vite + React Router
+Dexie + IndexedDB + Zod
+Web Speech API + vite-plugin-pwa
+Supabase Auth + Postgres + RLS
+Cloudflare Workers Static Assets
+GitHub public card branch
+
+Identity model:
+Account = authenticated Supabase user.
+LearnerProfile = settings/progress identity owned by Account.
+ContentProfile = GitHub content path such as manman.
+Do not conflate these concepts.
+
+Progress model:
+Every rating writes a pending ReviewEvent and materialized ReviewState in one Dexie transaction.
+ReviewEvent is the synchronized fact; ReviewState is rebuilt locally.
+Events use UUID idempotency keys and server sync_seq ordering.
+Sync uploads pending events, pulls newer events, replays affected Cards and then advances the cursor.
+Failure retains local events and state.
+
+Content model:
+ChatGPT writes DraftNote only; Builder owns formal content.
+One Note is one knowledge point; one Note can generate multiple Cards.
+MVP Card types are recognition and production.
+Stable Card ID is lowercase SHA-256 of note_id|template_id|card_type.
+The client follows manifest counts and paths; it never hardcodes Note counts.
+Null pack hashes are not treated as verified checksums.
+The JSONL parser accepts a final record without a trailing newline.
+
+TTS/PWA:
+Use browser Web Speech API with en-US/en-GB and es-MX/es-US/es-ES fallback.
+Rates are 0.75, 1.0 and 1.25.
+No cloud TTS/audio files/IPA/pronunciation scoring.
+Service worker caches the shell; business data remains in IndexedDB.
+
+Code design:
+Use feature-first lightweight Ports and Adapters.
+Domain scheduling, Card generation and event replay stay pure TypeScript.
+Only real external boundaries get ports; no DI container, Redux/Zustand or custom backend framework.
+
+Current implementation:
+M1 React/Vite/PWA shell, Dexie stores, Scheduler/replay and atomic rating writes exist.
+M2 Supabase migration/RLS, email passwordless client and LearnerProfile selection/cache exist.
+Card-content and remote ReviewEvent synchronization remain subsequent milestones.
+
+MVP includes:
+email OTP/persisted session; LearnerProfile isolation; public card sync
+offline recognition/production; scheduler v1; multi-device event sync/replay
+English/Spanish TTS/listening; export/import; installable PWA; RLS tests
+
+MVP excludes:
+native apps; normal passwords/social login/public SaaS
+family invitation/role/admin system; real-time collaboration/manual conflicts
+Cloudflare progress API/D1/KV/R2; advanced Cards; cloud TTS/push
+payment/ads/analytics/community
+
+Never store:
+Supabase access/secret/service-role keys; database password
+Cloudflare API token; GitHub PAT; personal credentials
+auth tokens; IndexedDB exports; runtime progress; logs/build artifacts
+
+Authoritative files:
+AGENTS.md
+AGENTS.common.md
+AGENTS.project.md
+README.md
+docs/design/current-core-design.md
+docs/design/web-mvp-framework-design.md
+docs/requirements/current-requirements.md
+docs/handoff/latest-handoff.md
+docs/changes/CHANGELOG-dev.md
