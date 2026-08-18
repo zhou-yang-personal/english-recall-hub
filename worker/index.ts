@@ -306,11 +306,7 @@ async function createProfile(request: Request, env: WorkerEnv): Promise<Response
   });
   const existingResponse = await supabaseRequest(env, `learner_profiles?${existingQuery}`);
   const existingRows = await existingResponse.json() as RemoteProfileRow[];
-  const normalizedName = displayName.toLocaleLowerCase();
-  const matchingProfile = existingRows.find((row) =>
-    row.content_profile_id === contentProfileId
-    && row.display_name.trim().toLocaleLowerCase() === normalizedName,
-  );
+  const matchingProfile = existingRows.find((row) => row.content_profile_id === contentProfileId);
 
   if (matchingProfile) {
     if (!requestedProfileId || matchingProfile.learner_profile_id === requestedProfileId) {
@@ -319,8 +315,8 @@ async function createProfile(request: Request, env: WorkerEnv): Promise<Response
 
     return apiError(
       409,
-      'PROFILE_NAME_CONFLICT',
-      '家庭云端已有同名学习者；为避免拆分进度，请先选择现有学习者。',
+      'CONTENT_PROFILE_CONFLICT',
+      '该 GitHub 学习者已有家庭云端进度，请直接选择现有进度。',
     );
   }
 

@@ -4,7 +4,7 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.5.1-m4-family-sync`
+- Version: `0.6.0-m4-github-profiles`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
@@ -36,7 +36,7 @@ Core boundaries:
 
 - IndexedDB is the runtime source; review works offline after setup.
 - GitHub `card` is Builder-owned content and is read publicly.
-- IndexedDB stores local LearnerProfiles; Supabase stores family-linked LearnerProfiles and append-only ReviewEvents.
+- GitHub `card/profiles/*` is the visible learner directory; IndexedDB/Supabase store its internal progress identities and ReviewEvents.
 - ReviewEvents synchronize incrementally; ReviewState is rebuilt locally.
 - Cloudflare serves the PWA and a minimal same-origin progress API.
 - A new device enters one family pairing code once; normal use then opens directly to learner selection.
@@ -46,7 +46,7 @@ Core boundaries:
 
 Must have:
 
-1. LearnerProfile selection/creation without login.
+1. Direct GitHub learner selection without login; progress identity is prepared automatically.
 2. One-time family-device pairing with a long-lived signed HttpOnly Cookie; no email login UI.
 3. Current manifest/pack/template import without hardcoded counts.
 4. IndexedDB/offline recognition and production review.

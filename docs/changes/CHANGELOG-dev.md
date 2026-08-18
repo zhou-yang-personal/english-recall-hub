@@ -1,5 +1,28 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.6.0-m4-github-profiles｜2026-08-18
+
+### Changed
+
+- Made public GitHub `card/profiles/*` the visible learner catalog; the frontend no longer asks users to create a second learner record.
+- Selecting a GitHub ContentProfile now automatically reuses or creates its internal local/family progress identity.
+- Changed family progress identity creation to be idempotent by ContentProfile and to return the oldest existing row.
+- Collapsed historical duplicate LearnerProfile rows into one visible ContentProfile choice without automatically deleting any data.
+- Added cached-profile fallback when the public GitHub catalog cannot be reached.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 44 passed in 14 files
+npm run build: passed; PWA generated
+Hosted deployment: Worker version `bbd620e1-89ac-439f-b577-e0ceda2e8b3d`
+Hosted Profiles route/new asset/GitHub catalog CORS: passed
+Unauthenticated progress API request: denied with HTTP 401 as intended
+Dependencies: unchanged; lock file unchanged.
+```
+
 ## 0.5.1-m4-family-sync｜2026-08-18
 
 ### Fixed

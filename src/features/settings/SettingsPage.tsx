@@ -15,7 +15,7 @@ export function SettingsPage() {
           {cloudStatus === 'paired' ? (
             <span>此设备已配对。日常打开可直接选择学习者，无需登录。</span>
           ) : (
-            <span>此设备尚未配对，不影响本机选择学习者和保存进度。</span>
+            <span>此设备尚未配对，不影响选择 GitHub 学习者和在本机保存进度。</span>
           )}
           {cloudStatus === 'paired' ? (
             <button className="secondary-action" onClick={() => void unpairDevice()} type="button">断开此设备</button>

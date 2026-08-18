@@ -3,6 +3,7 @@ import type { LearnerProfile } from '../../src/domain/profile';
 import {
   createLocalLearnerProfile,
   createLearnerProfile,
+  findLearnerProfileForContent,
   linkLocalLearnerProfile,
   listLocalLearnerProfiles,
   loadCachedLearnerProfiles,
@@ -43,6 +44,14 @@ function dependencies() {
 }
 
 describe('LearnerProfile use cases', () => {
+  it('resolves one progress identity for a GitHub content profile', () => {
+    const older = { ...profile, learnerProfileId: 'older' };
+    const preferred = { ...profile, learnerProfileId: 'preferred' };
+
+    expect(findLearnerProfileForContent([older, preferred], 'manman', 'preferred')).toEqual(preferred);
+    expect(findLearnerProfileForContent([older, preferred], 'other')).toBeUndefined();
+  });
+
   it('lists every locally available learner without an account', async () => {
     const { local } = dependencies();
 

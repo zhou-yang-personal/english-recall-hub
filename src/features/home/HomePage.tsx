@@ -176,7 +176,7 @@ export function HomePage() {
   return (
     <section className="page hero">
       <div>
-        <p className="eyebrow">{activeProfile.displayName} · 今日复习</p>
+        <p className="eyebrow">{activeProfile.contentProfileId} · 今日复习</p>
         <h1>把学过的内容，真正记住。</h1>
         <p className="lead">
           卡片和复习进度保存在本机。联网时会检查公开学习内容，断网后仍可使用已导入的卡片。

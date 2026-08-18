@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.5.1-m4-family-sync`
+Version: `0.6.0-m4-github-profiles`
 Updated: `2026-08-18`
 
 ## 1. Product Goal
@@ -10,7 +10,7 @@ Build a personal/family Web/PWA that turns formal Notes from GitHub into fast da
 Primary journey:
 
 ```text
-choose/create LearnerProfile without login → sync cards
+read and choose a GitHub ContentProfile without login → prepare progress identity → sync cards
 → review/listen offline → save locally
 → optionally pair a new device once to synchronize progress across devices
 ```
@@ -35,7 +35,8 @@ choose/create LearnerProfile without login → sync cards
 
 ### R2. Local-first access and one-time device pairing
 
-- Allow selecting and creating a local LearnerProfile without authentication or network access.
+- Read the visible learner choices from public GitHub `card/profiles/*`; if offline, use choices derivable from locally cached progress identities.
+- Do not expose manual LearnerProfile creation; selecting a ContentProfile automatically reuses or creates its internal progress identity.
 - Offer a family pairing-code screen only when a new device enables cloud sync.
 - Exchange the pairing code for a signed HttpOnly/Secure/SameSite device Cookie; never place the pairing code in localStorage.
 - Keep normal daily use login-free after pairing and allow offline review when the Worker is unavailable.
@@ -43,12 +44,12 @@ choose/create LearnerProfile without login → sync cards
 
 ### R3. Learner and content Profiles
 
-- A user can select or create a local LearnerProfile without pairing.
-- A LearnerProfile owns settings and progress, references one ContentProfile, and may link to the configured FamilySpace for cloud sync.
-- A ContentProfile identifies a GitHub content path such as `manman`; it is not an account.
+- A user directly selects a ContentProfile discovered under GitHub `card/profiles/*` without pairing or login.
+- A ContentProfile identifies the visible learner and GitHub content path such as `manman`; it is not an account.
+- A LearnerProfile is an internal settings/progress identity created or reused automatically for one ContentProfile, and may link to the configured FamilySpace for cloud sync.
 - Local progress is isolated by LearnerProfile; remote progress is additionally constrained to the configured FamilySpace.
-- Creating the same normalized learner name for the same ContentProfile must return the existing family learner instead of creating another UUID.
-- Existing same-name LearnerProfiles must be shown as separate records and never merged/deleted without explicit confirmation.
+- The same FamilySpace and ContentProfile must reuse the oldest existing LearnerProfile instead of creating another UUID.
+- Historical duplicate LearnerProfiles are not separate visible choices and must not be deleted automatically; migration/deletion requires explicit data-safety handling.
 
 ### R4. Card manifest sync
 
@@ -141,7 +142,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 
 ### R13. Settings and status
 
-- Store display name, language, voice, speed, listening default and daily new limit per LearnerProfile.
+- Store language, voice, speed, listening default and daily new limit per LearnerProfile; the visible learner name comes from ContentProfile.
 - Distinguish content sync from progress sync.
 - Show: local ready, local changes pending, syncing, synchronized, content unchanged/updated, and content/progress failure with local data retained.
 - Never report success before confirmed persistence.
@@ -209,7 +210,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 
 | ID | Use case | Acceptance result |
 |---|---|---|
-| UC01 | First open | User creates/selects a local LearnerProfile without login |
+| UC01 | First open | User directly selects a GitHub ContentProfile without login; progress identity is prepared automatically |
 | UC02 | Daily open | Selected LearnerProfile reaches local Home without login |
 | UC03 | New-device cloud connection | One family code entry creates a persisted signed device grant |
 | UC04 | First content sync | Current manifest-listed data imports with honest warnings |

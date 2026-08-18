@@ -1,6 +1,6 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.5.1-m4-family-sync`
+Version: `0.6.0-m4-github-profiles`
 Updated: `2026-08-18`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
@@ -127,13 +127,13 @@ Identity and content are different concepts:
 ```text
 FamilySpace      server-configured ownership boundary for this small family
 DeviceGrant      signed Worker Cookie created after one-time pairing
-LearnerProfile   local-first settings/progress identity; may link to FamilySpace
-ContentProfile   GitHub card source such as `manman`; not a login identity
+LearnerProfile   internal local-first settings/progress identity; may link to FamilySpace
+ContentProfile   visible learner and GitHub card source such as `manman`; not a login identity
 ```
 
-A LearnerProfile references one ContentProfile. Multiple learners can review the same ContentProfile without sharing progress.
+A LearnerProfile references one ContentProfile. In this family deployment each GitHub ContentProfile is one visible learner and has one canonical family progress identity.
 
-Create is idempotent on normalized display name plus ContentProfile. If historical duplicates already exist, the UI shows a short record suffix; it does not infer that two UUIDs have interchangeable progress.
+The visible catalog is discovered from GitHub `card/profiles/*`; the UI has no manual LearnerProfile form. Internal creation is idempotent on ContentProfile and returns its oldest identity. Historical duplicates remain untouched but do not create duplicate visible choices.
 
 Domain chain:
 
@@ -150,7 +150,7 @@ Feature modules:
 
 ```text
 sync-access   device pairing/status/unpair
-profiles      local-first LearnerProfile create/select and cloud cache
+profiles      GitHub ContentProfile discovery/selection and automatic progress identity cache
 content-sync  GitHub manifest/template/pack import
 review        queue, UI, rating and scheduler
 progress-sync pending push, remote pull and replay
@@ -174,8 +174,8 @@ Domain code never imports React, Dexie, Supabase or browser globals.
 
 ```text
 1. Render cached shell and open Dexie.
-2. Load local LearnerProfiles; when none is selected, show ProfilesPage.
-3. Create/select a LearnerProfile without waiting for auth or network.
+2. Load the GitHub ContentProfile catalog, falling back to locally cached identities when offline.
+3. Select a ContentProfile and automatically obtain its LearnerProfile without waiting for normal account authentication.
 4. Check the persisted device grant through same-origin `/api` without blocking local UI.
 5. When paired, refresh family-linked Profiles and synchronize progress in the background.
 6. Check the public card manifest independently of cloud state.
@@ -300,6 +300,7 @@ Frontend configuration:
 
 ```text
 VITE_CARD_REPOSITORY_BASE_URL
+VITE_CARD_PROFILE_CATALOG_URL
 VITE_PROGRESS_API_BASE_URL (optional; empty means same origin)
 ```
 
@@ -467,7 +468,7 @@ P0 routes:
 
 ```text
 /pair-device  one-time family device pairing
-/profiles  default select/create LearnerProfile route; no login required
+/profiles  direct GitHub ContentProfile selection; internal LearnerProfile preparation is automatic
 /          Home
 /review    review session
 /settings  preferences and both sync controls
@@ -501,7 +502,7 @@ The service worker caches only the app shell and versioned assets. Business data
 
 | Need | Modules | Minimum proof |
 |---|---|---|
-| Local-first learner | profiles, db | create/select persists without account/network |
+| Direct learner selection | profiles, GitHub, db | catalog selection automatically reuses/creates progress identity; cached selection works offline |
 | One-time device pairing | sync-access, Worker | invalid code denied; signed Cookie persists |
 | Family boundary | profiles, Worker, RLS | every Profile/Event operation filtered by owner UUID |
 | Existing cards | content-sync | current manifest/templates/packs fixture import |

@@ -4,6 +4,7 @@ import { DexieContentStore } from '../infrastructure/db/DexieContentStore';
 import { DexieLearnerProfileStore } from '../infrastructure/db/DexieLearnerProfileStore';
 import { db } from '../infrastructure/db/database';
 import { GitHubCardSource } from '../infrastructure/github/GitHubCardSource';
+import { GitHubContentProfileCatalog } from '../infrastructure/github/GitHubContentProfileCatalog';
 import { WorkerApiClient } from '../infrastructure/worker/WorkerApiClient';
 import { WorkerDeviceAccessClient } from '../infrastructure/worker/WorkerDeviceAccessClient';
 import { WorkerLearnerProfileRepository } from '../infrastructure/worker/WorkerLearnerProfileRepository';
@@ -20,6 +21,7 @@ export const appServices = {
   deviceAccess: new WorkerDeviceAccessClient(workerApi),
   profiles: new WorkerLearnerProfileRepository(workerApi),
   localProfiles: new DexieLearnerProfileStore(db),
+  contentProfiles: new GitHubContentProfileCatalog(config.VITE_CARD_PROFILE_CATALOG_URL),
   cardSource,
   contentStore,
   contentSync: new ContentSyncCoordinator(cardSource, contentStore),

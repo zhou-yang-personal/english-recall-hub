@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.5.1-m4-family-sync`
+Version: `0.6.0-m4-github-profiles`
 Updated: `2026-08-18`
 Branch: `dev`
 
@@ -55,13 +55,13 @@ The previous design conflated three responsibilities. They are now explicit:
 ```text
 FamilySpace      server-configured cloud ownership boundary
 DeviceGrant      signed Worker Cookie created by one-time pairing
-LearnerProfile   local-first progress/settings identity; may link to FamilySpace
-ContentProfile   GitHub card path such as `manman`
+LearnerProfile   internal local-first progress/settings identity; may link to FamilySpace
+ContentProfile   visible learner and GitHub card path such as `manman`
 ```
 
-A LearnerProfile references one ContentProfile. ReviewState uses `learner_profile_id`; Note/Card content uses `content_profile_id`.
+A LearnerProfile references one ContentProfile. ReviewState uses `learner_profile_id`; Note/Card content and the visible selection use `content_profile_id`.
 
-Family learner creation is idempotent by normalized display name plus ContentProfile. Pre-existing same-name rows remain separate progress identities until the user explicitly chooses a merge/delete action; the client must label them and never delete one automatically.
+The frontend lists public directories under GitHub `card/profiles/*` and does not expose LearnerProfile creation. Selecting a ContentProfile automatically reuses or creates one progress identity. Family creation is idempotent by ContentProfile and returns the oldest existing identity. Historical duplicate rows are hidden from the choice list but are never deleted automatically.
 
 ## 5. Runtime Flows
 
@@ -69,7 +69,7 @@ Family learner creation is idempotent by normalized display name plus ContentPro
 
 ```text
 new device optionally enters family code once → signed device Cookie
-→ choose/create LearnerProfile directly → render Home from IndexedDB
+→ read/choose GitHub ContentProfile → automatically prepare progress identity → render Home from IndexedDB
 → linked learners synchronize progress through Worker in the background
 ```
 

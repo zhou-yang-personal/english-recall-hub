@@ -27,6 +27,17 @@ export interface CreateLocalLearnerProfileInput {
   contentProfileId: string;
 }
 
+export function findLearnerProfileForContent(
+  profiles: readonly LearnerProfile[],
+  contentProfileId: string,
+  preferredLearnerProfileId?: string | null,
+): LearnerProfile | undefined {
+  const matching = profiles.filter((profile) => profile.contentProfileId === contentProfileId);
+  return matching.find((profile) => profile.learnerProfileId === preferredLearnerProfileId)
+    ?? matching.find((profile) => profile.cloudSyncId === 'family')
+    ?? matching[0];
+}
+
 export function listLocalLearnerProfiles(
   local: LearnerProfileLocalStore,
 ): Promise<LearnerProfile[]> {

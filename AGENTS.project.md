@@ -6,7 +6,7 @@
 
 - [ ] 项目名称：`English Recall Hub`。
 - [ ] 仓库：`zhou-yang-personal/english-recall-hub`。
-- [ ] 当前版本：`0.5.1-m4-family-sync`。
+- [ ] 当前版本：`0.6.0-m4-github-profiles`。
 - [ ] 产品定位：面向个人和家庭的多语言主动回忆工具，把 ChatGPT 学习记录转为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和账号进度同步。
 - [ ] 第一版平台：iPhone、Android、PC 浏览器；可安装为 PWA，不开发原生 iOS/Android App。
 - [ ] 第一版技术栈：`React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Worker API/Static Assets + Supabase Postgres/RLS`。
@@ -51,7 +51,7 @@
 - [ ] Web App local-first：IndexedDB 是运行时数据源；GitHub 只负责内容同步和进度备份。
 - [ ] 默认流程无需登录；新设备仅首次输入家庭同步码换取长期 HttpOnly 设备 Cookie，之后前台直接选择学习者。
 - [ ] 日常打开复用已持久化会话；云端暂不可用时，已初始化设备仍可离线复习并保留待同步事件。
-- [ ] 必须区分后台 `FamilySpace/DeviceGrant`、前台 `LearnerProfile` 与 GitHub `ContentProfile`；平台凭据只属于 Worker。
+- [ ] 必须区分后台 `FamilySpace/DeviceGrant`、内部进度身份 `LearnerProfile` 与 GitHub `ContentProfile`；前台直接把 `card/profiles/*` 的 ContentProfile 作为学习者目录，平台凭据只属于 Worker。
 - [ ] Supabase secret/service-role key、数据库密码、GitHub PAT 和 Cloudflare token 不进入浏览器、仓库或日志。
 - [ ] Pack 是物理存储分片；Collection/Tag 才是学习范围。
 - [ ] UI 第一版为中文，但数据模型必须支持 `learning_lang=en/es/...`。
@@ -60,7 +60,7 @@
 
 必须实现：
 
-1. 免登录的 LearnerProfile 选择/创建，以及新设备一次性家庭同步码配对。
+1. 免登录地直接选择 GitHub ContentProfile；LearnerProfile 由系统自动取得/创建，以及新设备一次性家庭同步码配对。
 2. 读取公开 `card` 分支的 manifest、pack 和 template。
 3. Dexie/IndexedDB 本地保存 Note、Card、复习状态和同步状态。
 4. Recognition / Production 两种卡片。

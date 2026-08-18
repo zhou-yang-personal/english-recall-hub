@@ -66,7 +66,7 @@ describe('Worker device pairing', () => {
     await expect(response.json()).resolves.toEqual({ paired: false });
   });
 
-  it('returns an existing learner instead of creating a duplicate name', async () => {
+  it('returns the existing progress identity for the same GitHub profile', async () => {
     const env = environment();
     const pairResponse = await handleApiRequest(
       new Request('https://app.example/api/device/pair', {
@@ -102,7 +102,7 @@ describe('Worker device pairing', () => {
           origin: 'https://app.example',
           'content-type': 'application/json',
         },
-        body: JSON.stringify({ displayName: ' zy ', contentProfileId: 'manman' }),
+        body: JSON.stringify({ displayName: 'a different label', contentProfileId: 'manman' }),
       }),
       env,
     );

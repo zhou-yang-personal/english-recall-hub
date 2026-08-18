@@ -1,6 +1,6 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.5.1-m4-family-sync`
+Version: `0.6.0-m4-github-profiles`
 Updated: `2026-08-18`
 Source-of-truth branch: `dev`
 
@@ -21,7 +21,7 @@ Normal experience:
 
 ```text
 new device optionally enters one family code → signed device Cookie
-→ choose/create LearnerProfile directly → review offline → save locally
+→ directly choose a GitHub ContentProfile → automatically prepare progress identity → review offline → save locally
 → synchronize ReviewEvents across paired devices
 ```
 
@@ -39,7 +39,7 @@ FamilySpace + paired DeviceGrant
 → deterministic local ReviewState replay
 ```
 
-`FamilySpace/DeviceGrant`, `LearnerProfile` and GitHub `ContentProfile` are separate concepts. GitHub `progress` is no longer an MVP runtime database.
+`FamilySpace/DeviceGrant`, internal `LearnerProfile` and visible GitHub `ContentProfile` are separate concepts. The frontend discovers `card/profiles/*`, shows each ContentProfile once and prepares progress identity automatically. GitHub `progress` is no longer an MVP runtime database.
 
 ## 3. Five-view Development Baseline
 
@@ -71,7 +71,7 @@ Counts are not hardcoded. Recognition/production are enabled; unsupported templa
 Must implement:
 
 ```text
-local LearnerProfile selection/creation without login
+direct GitHub ContentProfile selection without login and automatic LearnerProfile preparation
 one-time family pairing and persisted signed device grant
 LearnerProfile/ContentProfile separation
 public card sync and IndexedDB
@@ -128,7 +128,7 @@ Estimated full MVP: `13–15 working days`.
 
 ```text
 Application typecheck/lint/build: passed
-Unit/integration: 41 passed across 13 test files
+Unit/integration: 44 passed across 14 test files
 Supabase remote migration/list/lint: passed
 Anonymous Data API read/write: blocked with HTTP 401 as intended
 Two-user pgTAP script: added; execution blocked because this environment cannot access Docker
@@ -138,12 +138,13 @@ CI: not configured
 Supabase: provisioned, linked and migrated; prior hosted LearnerProfile persistence smoke test passed
 Cloudflare: preview routes/PWA assets and fixed production domain return HTTP 200
 Real card-source smoke test: 27/27 packs, 137 valid Notes, 274 unique Cards, 0 skipped rows
-Cloudflare production: version `6d6059a6-24f4-4a85-a206-18766d151fd3` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
+Cloudflare production: version `bbd620e1-89ac-439f-b577-e0ceda2e8b3d` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
 Worker Secrets: all five required names configured as `secret_text`; Supabase/signing values were not printed, and the pairing code was returned once to the operator
 Hosted family pairing: wrong code denied; valid code issued a device grant; paired status and unpair passed
 Hosted family Profile/Event reads: one existing family Profile loaded; ReviewEvent page returned HTTP 200
 Hosted ReviewEvent write: not smoke-tested to avoid inserting a fabricated learner rating
 Hosted `0.5.1` hotfix: same-name create returned the existing UUID and kept the Profile count unchanged; one accidental smoke-test row was removed after confirming it had zero events
+Hosted `0.6.0` catalog flow: Profiles route/new asset returned HTTP 200, GitHub catalog CORS passed and listed `manman`; no ReviewEvent was written
 ```
 
 This handoff describes an implemented M4 family-sync foundation, not a completed MVP.

@@ -126,7 +126,7 @@ export function ReviewPage() {
   return (
     <section className="page narrow review-page">
       <div className="review-progress">
-        <span>{activeProfile.displayName}</span>
+        <span>{activeProfile.contentProfileId}</span>
         <span>{index + 1} / {queue.length}</span>
       </div>
       <article className="review-card">

@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.5.1-m4-family-sync
+Version: 0.6.0-m4-github-profiles
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev
@@ -19,7 +19,7 @@ ChatGPT → DraftNote → Builder → GitHub card content
 
 Product boundary:
 This is a personal/family multilingual recall tool, not a dictionary, course platform or public SaaS.
-LearnerProfile selection/creation requires no sign-in. A new cloud-enabled device enters one family pairing code and then remains authorized by a signed HttpOnly Cookie.
+ContentProfile selection requires no sign-in and the internal LearnerProfile is prepared automatically. A new cloud-enabled device enters one family pairing code and then remains authorized by a signed HttpOnly Cookie.
 After setup, local Home/Review remain usable offline.
 
 Approved stack:
@@ -33,8 +33,8 @@ GitHub public card branch
 Identity model:
 FamilySpace = Worker-configured cloud ownership boundary.
 DeviceGrant = signed Worker Cookie issued after one-time pairing.
-LearnerProfile = local-first settings/progress identity that may link to FamilySpace.
-ContentProfile = GitHub content path such as manman.
+LearnerProfile = internal local-first settings/progress identity that may link to FamilySpace.
+ContentProfile = visible learner and GitHub content path such as manman.
 Do not conflate these concepts.
 
 Progress model:

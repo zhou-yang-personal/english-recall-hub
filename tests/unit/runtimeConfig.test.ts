@@ -3,6 +3,7 @@ import { parseRuntimeConfig } from '../../src/shared/runtimeConfig';
 
 const validConfig = {
   VITE_CARD_REPOSITORY_BASE_URL: 'https://raw.githubusercontent.com/example/repo/card',
+  VITE_CARD_PROFILE_CATALOG_URL: 'https://api.github.com/repos/example/repo/contents/profiles?ref=card',
   VITE_PROGRESS_API_BASE_URL: '',
 };
 
