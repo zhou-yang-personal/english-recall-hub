@@ -1,6 +1,6 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.3.2-m2-account-foundation`
+Version: `0.3.3-m2-local-first-profiles`
 Updated: `2026-08-18`
 Source-of-truth branch: `dev`
 
@@ -20,8 +20,8 @@ Web Speech API
 Normal experience:
 
 ```text
-sign in once → choose LearnerProfile → review offline
-→ save locally → synchronize ReviewEvents across devices
+choose/create LearnerProfile without login → review offline → save locally
+→ optionally connect an email account → synchronize ReviewEvents across devices
 ```
 
 ## 2. Important Design Correction
@@ -70,7 +70,8 @@ Counts are not hardcoded. Recognition/production are enabled; unsupported templa
 Must implement:
 
 ```text
-email OTP and persisted session
+local LearnerProfile selection/creation without login
+optional email OTP and persisted cloud session
 LearnerProfile/ContentProfile separation
 public card sync and IndexedDB
 recognition/production + scheduler v1
@@ -99,20 +100,20 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 - M2: Browser-safe runtime config and Supabase client with persisted auth session.
 - M2: Email passwordless request/verification, sign-out and auth-aware navigation.
 - M2: Remote LearnerProfile list/create plus transactional local Dexie cache replacement.
-- M2: Two-user pgTAP RLS acceptance script and unit tests for runtime config/profile use cases.
+- M2: Local-only LearnerProfile create/select, default Profiles routing and optional cloud-sync UI.
+- M2: Two-user pgTAP RLS acceptance script plus unit/integration tests for runtime config/profile use cases.
 - Remote migration `20260818020000` is applied and the schema is exposed through Data API.
 - Hosted smoke testing found that column-only LearnerProfile INSERT grants produced Data API HTTP 401; migration `20260818030000` adds the table-level INSERT grant while retaining RLS ownership checks.
 
 ## 7. Next Development Steps
 
-1. Activate the fixed production domain by deploying the configured production branch, then recheck Auth redirect behavior.
-2. Decide later whether numeric codes justify custom SMTP; default hosted Magic Link is sufficient for passwordless MVP access.
-3. Run the two-user RLS script where Docker/pg_prove is available.
-4. Implement real current-card import, Zod validation and Card generation.
-5. Connect Home/Review UI and TTS to IndexedDB.
-6. Implement ReviewEvent push/pull/replay and sync cursor transactions.
-7. Add offline/update/export/import behavior.
-8. Add browser E2E and perform device acceptance.
+1. Run the two-user RLS script where Docker/pg_prove is available.
+2. Implement real current-card import, Zod validation and Card generation.
+3. Connect Home/Review UI and TTS to IndexedDB.
+4. Implement ReviewEvent push/pull/replay and sync cursor transactions for cloud-linked learners.
+5. Add explicit local-to-cloud learner linking before claiming cross-device progress sync.
+6. Add offline/update/export/import behavior.
+7. Add browser E2E and perform device acceptance.
 
 Estimated full MVP: `13–15 working days`.
 
@@ -120,7 +121,7 @@ Estimated full MVP: `13–15 working days`.
 
 ```text
 Application typecheck/lint/build: passed
-Unit/integration: 18 passed across 5 test files
+Unit/integration: 21 passed across 6 test files
 Supabase remote migration/list/lint: passed
 Anonymous Data API read/write: blocked with HTTP 401 as intended
 Two-user pgTAP script: added; execution blocked because this environment cannot access Docker
@@ -128,8 +129,8 @@ Wrangler deploy --dry-run: passed; 13 static files discovered
 E2E: not configured
 CI: not configured
 Supabase: provisioned, linked and migrated; hosted Magic Link and LearnerProfile cloud/local persistence smoke test passed
-Cloudflare: preview routes/PWA assets return HTTP 200; fixed production domain awaits production-branch deployment
+Cloudflare: preview routes/PWA assets and fixed production domain return HTTP 200
 Dependencies unchanged; npm audit reported 0 vulnerabilities
 ```
 
-This handoff describes an implemented M2 account foundation, not a completed MVP.
+This handoff describes an implemented M2 local-first learner/account foundation, not a completed MVP.

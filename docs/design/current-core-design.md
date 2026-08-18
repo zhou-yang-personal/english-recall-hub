@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.3.2-m2-account-foundation`
+Version: `0.3.3-m2-local-first-profiles`
 Updated: `2026-08-18`
 Branch: `dev`
 
@@ -24,7 +24,7 @@ Frontend/runtime
   Web Speech API
   vite-plugin-pwa
 
-Account/progress
+Optional cloud progress
   Supabase Auth email OTP
   Supabase Postgres schema `english_recall`
   Row Level Security
@@ -53,8 +53,8 @@ ChatGPT writes DraftNote only. Builder owns formal content. The PWA reads `card`
 The previous design conflated three responsibilities. They are now explicit:
 
 ```text
-Account          authenticated Supabase user
-LearnerProfile   progress/settings identity owned by Account
+Account          optional authenticated Supabase user for cloud sync
+LearnerProfile   local-first progress/settings identity; may link to Account
 ContentProfile   GitHub card path such as `manman`
 ```
 
@@ -62,14 +62,14 @@ A LearnerProfile references one ContentProfile. ReviewState uses `learner_profil
 
 ## 5. Runtime Flows
 
-### 5.1 Sign-in and startup
+### 5.1 Local-first startup
 
 ```text
-email OTP once → persisted session → choose LearnerProfile
-→ render Home from IndexedDB → background progress/content sync
+choose/create LearnerProfile without login → render Home from IndexedDB
+→ optional email OTP once → link cloud account → background progress/content sync
 ```
 
-An expired session or cloud outage does not block already-initialized offline review. Synchronization resumes after reauthentication/connectivity.
+Authentication is not required for local use. An expired session or cloud outage only pauses cloud synchronization; local review remains available and synchronization resumes after reauthentication/connectivity.
 
 ### 5.2 Content sync
 
@@ -144,7 +144,7 @@ Mature begins at 90 days. The scheduler is a pure function shared by live rating
 ## 9. Security Boundaries
 
 - RLS is enabled on every exposed Supabase table.
-- Account rows are isolated with `auth.uid()`.
+- Local-only LearnerProfiles never require Supabase access; cloud rows are isolated with `auth.uid()`.
 - Frontend includes only Supabase URL/publishable key and public card URL.
 - Supabase secret/service-role key, database password, GitHub PAT and Cloudflare token never enter frontend/Git/logs.
 - Failed content sync never clears content.

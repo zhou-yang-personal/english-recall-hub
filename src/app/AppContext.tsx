@@ -70,8 +70,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       signOut: async () => {
         const { appServices } = await import('./services');
         await appServices.auth.signOut();
-        setSelectedLearnerProfileId(null);
-        localStorage.removeItem(SELECTED_PROFILE_KEY);
       },
     }),
     [authStatus, selectedLearnerProfileId, session],

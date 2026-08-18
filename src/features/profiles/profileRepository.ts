@@ -1,4 +1,7 @@
-import type { LearnerProfile } from '../../domain/profile';
+import {
+  DEFAULT_LEARNER_PROFILE_SETTINGS,
+  type LearnerProfile,
+} from '../../domain/profile';
 
 export interface CreateLearnerProfileInput {
   userId: string;
@@ -12,9 +15,21 @@ export interface LearnerProfileRepository {
 }
 
 export interface LearnerProfileLocalStore {
+  listAll(): Promise<LearnerProfile[]>;
   listByUser(userId: string): Promise<LearnerProfile[]>;
   replaceForUser(userId: string, profiles: readonly LearnerProfile[]): Promise<void>;
   put(profile: LearnerProfile): Promise<void>;
+}
+
+export interface CreateLocalLearnerProfileInput {
+  displayName: string;
+  contentProfileId: string;
+}
+
+export function listLocalLearnerProfiles(
+  local: LearnerProfileLocalStore,
+): Promise<LearnerProfile[]> {
+  return local.listAll();
 }
 
 export function loadCachedLearnerProfiles(
@@ -40,6 +55,28 @@ export async function createLearnerProfile(
   local: LearnerProfileLocalStore,
 ): Promise<LearnerProfile> {
   const profile = await remote.create(input);
+  await local.put(profile);
+  return profile;
+}
+
+export async function createLocalLearnerProfile(
+  input: CreateLocalLearnerProfileInput,
+  local: LearnerProfileLocalStore,
+  createId: () => string = () => crypto.randomUUID(),
+): Promise<LearnerProfile> {
+  const displayName = input.displayName.trim();
+
+  if (!displayName) {
+    throw new Error('请输入学习者名称。');
+  }
+
+  const profile: LearnerProfile = {
+    learnerProfileId: createId(),
+    displayName,
+    contentProfileId: input.contentProfileId,
+    ...DEFAULT_LEARNER_PROFILE_SETTINGS,
+  };
+
   await local.put(profile);
   return profile;
 }

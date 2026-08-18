@@ -1,6 +1,6 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.3.2-m2-account-foundation`
+Version: `0.3.3-m2-local-first-profiles`
 Updated: `2026-08-18`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
@@ -13,11 +13,10 @@ Real first-version need:
 
 ```text
 personal/family use
-→ sign in once without a normal password
-→ choose a learner Profile
+→ choose/create a learner Profile without login
 → sync formal cards from GitHub
 → review and listen offline
-→ synchronize progress across the user's devices
+→ optionally connect an email account for cross-device progress
 ```
 
 Selected stack:
@@ -37,11 +36,11 @@ Key decisions:
 |---|---|
 | IndexedDB is the runtime source | Review must be immediate and offline |
 | GitHub `card` is the content source | Existing Builder/Note pipeline remains valid |
-| Supabase stores accounts and progress | Account sync needs queryable user-isolated cloud state |
+| Supabase optionally stores cloud progress | Cross-device sync needs queryable user-isolated cloud state |
 | Review events are synchronized | Idempotent events converge more safely than whole-snapshot replacement |
 | Browser accesses Supabase directly | Auth JWT + RLS avoid a custom progress backend |
 | Cloudflare serves static assets only | No server-only MVP use case remains |
-| Email OTP is the only MVP sign-in | Passwordless and simple on mobile |
+| Email OTP is optional and only for cloud sync | Daily local use stays direct while cloud access remains passwordless |
 
 Explicit non-goals:
 
@@ -57,7 +56,7 @@ Supabase Realtime and Edge Functions are not required unless a later concrete re
 
 ## 2. Current Reality
 
-The M1 application shell, local database, scheduler/replay and atomic rating transaction are implemented. M2 adds the Supabase migration/RLS, persisted email passwordless session and LearnerProfile selection/cache. Content import, ReviewEvent remote synchronization, TTS, browser E2E and CI remain subsequent work.
+The M1 application shell, local database, scheduler/replay and atomic rating transaction are implemented. M2 adds local-first LearnerProfile selection/creation, optional persisted email cloud sessions, Supabase migration/RLS and cloud Profile cache. Content import, ReviewEvent remote synchronization, TTS, browser E2E and CI remain subsequent work.
 
 Observed `card/profiles/manman/manifest.json` on `2026-08-17`:
 
@@ -72,14 +71,21 @@ The count is a snapshot, never a client constant. The client follows the manifes
 
 ## 3. Scenario View (+1)
 
-### S1. First sign-in
+### S1. First local use
 
 ```text
-open PWA → enter email → enter OTP → persist Supabase session
-→ load/create LearnerProfile → sync cards/progress → Home
+open PWA → choose/create local LearnerProfile without login
+→ persist in IndexedDB → sync public cards → Home
 ```
 
-No GitHub token, Supabase secret key or normal password appears in the UI.
+No email, GitHub token, Supabase secret key or normal password is required for local use.
+
+### S1b. Optional cloud connection
+
+```text
+choose “开启云同步” → enter email → follow Magic Link/OTP
+→ persist Supabase session → load cloud-linked LearnerProfiles
+```
 
 ### S2. Daily/offline review
 
@@ -118,8 +124,8 @@ Supabase unavailable or session expired
 Identity and content are different concepts:
 
 ```text
-Account          Supabase authenticated user
-LearnerProfile   learner settings/progress identity; belongs to one Account
+Account          optional Supabase authenticated user for cloud sync
+LearnerProfile   local-first settings/progress identity; may belong to an Account
 ContentProfile   GitHub card source such as `manman`; not a login identity
 ```
 
@@ -139,8 +145,8 @@ LearnerProfile + Card → ReviewEvent → materialized ReviewState
 Feature modules:
 
 ```text
-auth          email OTP session
-profiles      LearnerProfile create/select
+auth          optional email OTP cloud session
+profiles      local-first LearnerProfile create/select and cloud cache
 content-sync  GitHub manifest/template/pack import
 review        queue, UI, rating and scheduler
 progress-sync pending push, remote pull and replay
@@ -164,10 +170,11 @@ Domain code never imports React, Dexie, Supabase or browser globals.
 
 ```text
 1. Render cached shell and open Dexie.
-2. Load persisted Supabase session.
-3. Show SignInPage when no session exists.
-4. Load local Profiles and render Home from local data.
-5. In background, sync progress and check the card manifest.
+2. Load local LearnerProfiles; when none is selected, show ProfilesPage.
+3. Create/select a LearnerProfile without waiting for auth or network.
+4. Load any persisted Supabase session without blocking local UI.
+5. When authenticated, refresh cloud-linked Profiles and synchronize progress in the background.
+6. Check the public card manifest independently of account state.
 ```
 
 Startup does not wait for network after local initialization.
@@ -304,7 +311,7 @@ Key types:
 ```ts
 type LearnerProfile = {
   learnerProfileId: string; // UUID
-  userId: string;
+  userId?: string; // present only when linked to a cloud Account
   displayName: string;
   contentProfileId: string;
   uiLang: 'zh-CN';
@@ -432,8 +439,8 @@ overdue relearning → overdue learning → due review/mature → new within lim
 P0 routes:
 
 ```text
-/sign-in   email/OTP
-/profiles  select/create LearnerProfile
+/sign-in   optional cloud email/OTP
+/profiles  default select/create LearnerProfile route; no login required
 /          Home
 /review    review session
 /settings  preferences and both sync controls
@@ -466,7 +473,8 @@ The service worker caches only the app shell and versioned assets. Business data
 
 | Need | Modules | Minimum proof |
 |---|---|---|
-| Passwordless account | auth | OTP success/failure and persisted session |
+| Local-first learner | profiles, db | create/select persists without account/network |
+| Optional passwordless account | auth | OTP success/failure and persisted session |
 | Profile isolation | profiles, db, RLS | two-user and two-profile isolation |
 | Existing cards | content-sync | current manifest/templates/packs fixture import |
 | Offline review | review, db, PWA | rating persists with network disabled |
@@ -495,8 +503,8 @@ Estimated total: `13–15 working days`. It is a planning range, not a code-volu
 
 ## 15. Acceptance Gate
 
-1. Email OTP works and daily use does not repeatedly request login.
-2. The same Account loads its LearnerProfile on a second device.
+1. First use and daily use can select a LearnerProfile without login.
+2. Optional email OTP works without blocking local use, and the same Account loads cloud-linked LearnerProfiles on a second device.
 3. Current card data imports without hardcoded Note counts.
 4. Recognition and Production work.
 5. Every rating persists before UI navigation.

@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { LearnerProfile } from '../../src/domain/profile';
 import {
+  createLocalLearnerProfile,
   createLearnerProfile,
+  listLocalLearnerProfiles,
   loadCachedLearnerProfiles,
   loadLearnerProfiles,
   type LearnerProfileLocalStore,
@@ -29,6 +31,7 @@ function dependencies() {
     create: vi.fn().mockResolvedValue(profile),
   };
   const local: LearnerProfileLocalStore = {
+    listAll: vi.fn().mockResolvedValue([profile]),
     listByUser: vi.fn().mockResolvedValue([profile]),
     replaceForUser: vi.fn().mockResolvedValue(undefined),
     put: vi.fn().mockResolvedValue(undefined),
@@ -38,6 +41,13 @@ function dependencies() {
 }
 
 describe('LearnerProfile use cases', () => {
+  it('lists every locally available learner without an account', async () => {
+    const { local } = dependencies();
+
+    await expect(listLocalLearnerProfiles(local)).resolves.toEqual([profile]);
+    expect(local.listAll).toHaveBeenCalledOnce();
+  });
+
   it('loads cached profiles without requiring the remote repository', async () => {
     const { local } = dependencies();
 
@@ -59,5 +69,24 @@ describe('LearnerProfile use cases', () => {
     await expect(createLearnerProfile(input, remote, local)).resolves.toEqual(profile);
     expect(remote.create).toHaveBeenCalledWith(input);
     expect(local.put).toHaveBeenCalledWith(profile);
+  });
+
+  it('creates a local-only learner without an account identifier', async () => {
+    const { local } = dependencies();
+
+    const created = await createLocalLearnerProfile(
+      { displayName: '  本机学习者  ', contentProfileId: 'manman' },
+      local,
+      () => 'local-profile-1',
+    );
+
+    expect(created).toMatchObject({
+      learnerProfileId: 'local-profile-1',
+      displayName: '本机学习者',
+      contentProfileId: 'manman',
+      dailyNewCardLimit: 10,
+    });
+    expect(created).not.toHaveProperty('userId');
+    expect(local.put).toHaveBeenCalledWith(created);
   });
 });

@@ -1,5 +1,5 @@
-import { type FormEvent, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { type FormEvent, useEffect, useState } from 'react';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useApp } from '../../app/AppContext';
 import { appServices } from '../../app/services';
 
@@ -10,7 +10,20 @@ export function SignInPage() {
   const [token, setToken] = useState('');
   const [requestSent, setRequestSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (cooldown === 0) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setCooldown((current) => Math.max(0, current - 1));
+    }, 1_000);
+
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
 
   if (authStatus === 'ready' && session) {
     return <Navigate replace to="/profiles" />;
@@ -24,7 +37,8 @@ export function SignInPage() {
     try {
       await appServices.auth.requestEmailOtp(email.trim(), `${window.location.origin}/profiles`);
       setRequestSent(true);
-      setMessage('邮件已发送。可点击邮件链接，或输入邮件中的验证码。');
+      setCooldown(60);
+      setMessage('邮件已发送。请点击最新邮件中的登录链接；如果邮件显示验证码，也可在下方输入。');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '发送失败，请稍后再试。');
     } finally {
@@ -49,9 +63,9 @@ export function SignInPage() {
 
   return (
     <section className="page narrow">
-      <p className="eyebrow">账号</p>
-      <h1>邮箱验证码登录</h1>
-      <p>首次登录会创建账号；之后浏览器会安全复用登录会话。</p>
+      <p className="eyebrow">可选功能</p>
+      <h1>开启云同步</h1>
+      <p>日常学习不需要登录。仅在需要跨设备同步或恢复云端学习者时连接邮箱账号。</p>
 
       <form className="form-card" onSubmit={requestOtp}>
         <label htmlFor="email">邮箱</label>
@@ -64,7 +78,9 @@ export function SignInPage() {
           type="email"
           value={email}
         />
-        <button disabled={busy} type="submit">{busy ? '发送中…' : '发送登录邮件'}</button>
+        <button disabled={busy || cooldown > 0} type="submit">
+          {busy ? '发送中…' : cooldown > 0 ? `${cooldown} 秒后可重发` : '发送登录邮件'}
+        </button>
       </form>
 
       {requestSent ? (
@@ -85,6 +101,7 @@ export function SignInPage() {
       ) : null}
 
       {message ? <p className="status-message" role="status">{message}</p> : null}
+      <p className="cloud-option"><Link to="/profiles">不登录，返回选择学习者</Link></p>
     </section>
   );
 }

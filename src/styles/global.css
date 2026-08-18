@@ -61,6 +61,13 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .profile-card { align-items: center; background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; color: inherit; display: flex; justify-content: space-between; padding: 1.1rem 1.3rem; text-align: left; }
 .profile-card:hover { border-color: #18392b; }
 .profile-card span { color: #65756f; font-size: 0.9rem; }
+.empty-state { background: #fffaf0; border: 1px dashed #b8c2bc; border-radius: 0.8rem; margin-top: 1rem; padding: 1rem; }
+.check-row { align-items: center; display: flex; font-weight: 500 !important; gap: 0.55rem; }
+.check-row input { margin: 0; }
+.cloud-option { color: #65756f; font-size: 0.95rem !important; margin-top: 1rem; }
+.cloud-option a, .setting-card a { color: #ad4b2a; font-weight: 750; }
+.setting-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.6rem; margin-top: 2rem; padding: 1.3rem; }
+.setting-card span { color: #65756f; }
 .route-loading { color: #65756f; padding: 2rem; text-align: center; }
 
 @media (max-width: 760px) {
@@ -69,4 +76,5 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
   nav { flex-wrap: wrap; justify-content: flex-end; }
   nav a { font-size: 0.9rem; padding: 0.45rem 0.65rem; }
   .hero { grid-template-columns: 1fr; }
+  .profile-card { align-items: flex-start; flex-direction: column; gap: 0.45rem; }
 }

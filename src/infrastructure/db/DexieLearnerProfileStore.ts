@@ -5,6 +5,10 @@ import type { RecallDatabase } from './database';
 export class DexieLearnerProfileStore implements LearnerProfileLocalStore {
   constructor(private readonly database: RecallDatabase) {}
 
+  listAll(): Promise<LearnerProfile[]> {
+    return this.database.learnerProfiles.toArray();
+  }
+
   listByUser(userId: string): Promise<LearnerProfile[]> {
     return this.database.learnerProfiles.where('userId').equals(userId).toArray();
   }

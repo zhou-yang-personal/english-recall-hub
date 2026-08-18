@@ -43,10 +43,12 @@ export function App() {
               {item.label}
             </NavLink>
           ))}
-          {authStatus === 'ready' && !session ? <NavLink to="/sign-in">登录</NavLink> : null}
+          {authStatus === 'ready' && !session ? (
+            <NavLink to="/sign-in">开启云同步</NavLink>
+          ) : null}
           {session ? (
             <button className="nav-button" onClick={() => void signOut()} type="button">
-              退出
+              停止云同步
             </button>
           ) : null}
         </nav>

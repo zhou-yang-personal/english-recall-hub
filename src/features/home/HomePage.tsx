@@ -1,4 +1,13 @@
+import { Navigate } from 'react-router-dom';
+import { useApp } from '../../app/AppContext';
+
 export function HomePage() {
+  const { selectedLearnerProfileId } = useApp();
+
+  if (!selectedLearnerProfileId) {
+    return <Navigate replace to="/profiles" />;
+  }
+
   return (
     <section className="page hero">
       <div>

@@ -1,5 +1,38 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.3.3-m2-local-first-profiles｜2026-08-18
+
+### Changed
+
+- Made LearnerProfile selection and creation available without authentication or network access.
+- Redirected the first local Home visit to the learner selector when no learner is selected.
+- Kept previously cached cloud LearnerProfiles locally usable while cloud sync is disconnected.
+- Changed email authentication from the default entry gate to the optional “开启云同步” flow.
+- Preserved the selected local learner when stopping cloud sync.
+- Added a 60-second login-email resend cooldown to reduce accidental Supabase rate-limit exhaustion.
+- Centralized default learner settings for both local and cloud Profile creation.
+- Updated the 4+1 design, requirements, project source and handoff to make local-first access authoritative.
+
+### Added
+
+- Added local-only LearnerProfile creation with no fabricated Account identifier.
+- Added an IndexedDB integration test proving local-only learners persist and remain independent of cloud-user queries.
+- Added local/cloud status labels and an explicit optional cloud checkbox when creating a learner while connected.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 21 passed in 6 files
+npm run build: passed; PWA service worker generated
+npx wrangler deploy --dry-run: passed; 13 static files discovered
+Local production preview: /, /profiles, /sign-in, /settings, manifest and service worker returned HTTP 200
+Database migration: not changed
+Dependencies: unchanged; lock file changed only for project version synchronization
+E2E/browser interaction: not configured; no browser executable was available in this environment
+```
+
 ## 0.3.2-m2-account-foundation｜2026-08-18
 
 ### Added

@@ -1,5 +1,8 @@
 import { z } from 'zod';
-import type { LearnerProfile } from '../../domain/profile';
+import {
+  DEFAULT_LEARNER_PROFILE_SETTINGS,
+  type LearnerProfile,
+} from '../../domain/profile';
 import type {
   CreateLearnerProfileInput,
   LearnerProfileRepository,
@@ -26,17 +29,6 @@ const remoteProfileSchema = z.object({
   content_profile_id: z.string(),
   settings: settingsSchema,
 });
-
-const defaultSettings = {
-  uiLang: 'zh-CN',
-  nativeLang: 'zh-CN',
-  defaultLearningLang: 'en',
-  englishVoiceLocale: 'en-US',
-  spanishVoiceLocale: 'es-MX',
-  ttsRate: 1,
-  listeningModeDefault: false,
-  dailyNewCardLimit: 10,
-} as const;
 
 function toLearnerProfile(value: unknown): LearnerProfile {
   const row = remoteProfileSchema.parse(value);
@@ -75,7 +67,7 @@ export class SupabaseLearnerProfileRepository implements LearnerProfileRepositor
         user_id: input.userId,
         display_name: input.displayName.trim(),
         content_profile_id: input.contentProfileId,
-        settings: defaultSettings,
+        settings: DEFAULT_LEARNER_PROFILE_SETTINGS,
       })
       .select('learner_profile_id,user_id,display_name,content_profile_id,settings')
       .single();

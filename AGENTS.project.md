@@ -6,7 +6,7 @@
 
 - [ ] 项目名称：`English Recall Hub`。
 - [ ] 仓库：`zhou-yang-personal/english-recall-hub`。
-- [ ] 当前版本：`0.3.2-m2-account-foundation`。
+- [ ] 当前版本：`0.3.3-m2-local-first-profiles`。
 - [ ] 产品定位：面向个人和家庭的多语言主动回忆工具，把 ChatGPT 学习记录转为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和账号进度同步。
 - [ ] 第一版平台：iPhone、Android、PC 浏览器；可安装为 PWA，不开发原生 iOS/Android App。
 - [ ] 第一版技术栈：`React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Supabase Auth/Postgres/RLS + Cloudflare Workers Static Assets`。
@@ -49,7 +49,7 @@
 - [ ] 核心链路保持：`ChatGPT Project → draft → Builder → card → Web/PWA IndexedDB → SRS → Supabase ReviewEvents`。
 - [ ] ChatGPT 只生成 DraftNote，不直接绕过 Builder 修改正式 Note/Card。
 - [ ] Web App local-first：IndexedDB 是运行时数据源；GitHub 只负责内容同步和进度备份。
-- [ ] 第一版使用 Supabase email OTP 轻量账号；无普通密码、GitHub OAuth 或前端 GitHub token。
+- [ ] 默认流程无需登录；学习者及进度先保存在本机，Supabase email OTP 只用于用户主动开启的云同步。
 - [ ] 日常打开复用已持久化会话；云端暂不可用时，已初始化设备仍可离线复习并保留待同步事件。
 - [ ] 必须区分 `Account`、`LearnerProfile` 与 GitHub `ContentProfile`，不得再用一个 Profile 同时承担身份、内容路径和备份凭据。
 - [ ] Supabase secret/service-role key、数据库密码、GitHub PAT 和 Cloudflare token 不进入浏览器、仓库或日志。
@@ -60,7 +60,7 @@
 
 必须实现：
 
-1. Supabase email OTP 登录、会话持久化和 LearnerProfile 隔离。
+1. 免登录的本地 LearnerProfile 选择/创建，以及可选的 Supabase email OTP 云同步会话。
 2. 读取公开 `card` 分支的 manifest、pack 和 template。
 3. Dexie/IndexedDB 本地保存 Note、Card、复习状态和同步状态。
 4. Recognition / Production 两种卡片。
@@ -113,7 +113,7 @@
 - [ ] 同步顺序为：上传 pending 事件、按 `sync_seq` 分页拉取、幂等 upsert、本地重放、事务更新 cursor。
 - [ ] PWA 不承诺精确后台执行；同步触发为应用打开、联网恢复、复习完成、手动操作和前台防抖。
 - [ ] Supabase 使用独立 `english_recall` schema；所有暴露表必须显式授权并启用 RLS。
-- [ ] 未认证用户不得读取/写入 Profile 或 ReviewEvent；用户之间必须通过 `auth.uid()` 隔离。
+- [ ] 未认证用户可以使用本机 LearnerProfile，但不得读取/写入 Supabase Profile 或 ReviewEvent；云端用户之间必须通过 `auth.uid()` 隔离。
 - [ ] `progress` 分支不再作为 MVP 运行时数据库，只保留未来冷备份可能性。
 
 ## B8. 工程与模块约束

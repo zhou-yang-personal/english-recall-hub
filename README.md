@@ -4,13 +4,13 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.3.2-m2-account-foundation`
+- Version: `0.3.3-m2-local-first-profiles`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
 - First platform: Web/PWA on iPhone, Android and desktop
-- Status: M2 account foundation implemented; content and ReviewEvent synchronization remain subsequent milestones
-- Reserved production URL: `https://english-recall-hub.zhou-yang-personal.workers.dev` (activates after the production branch deploys)
+- Status: M2 local-first learner flow and optional account foundation implemented; content and ReviewEvent synchronization remain subsequent milestones
+- Production URL: `https://english-recall-hub.zhou-yang-personal.workers.dev`
 
 ## Product flow
 
@@ -18,7 +18,7 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 ChatGPT Project → draft DraftNote → Builder validation/dedupe
 → card formal Notes/Templates → Web/PWA IndexedDB
 → recognition/production review → local ReviewEvents
-→ Supabase account progress synchronization
+→ optional Supabase account progress synchronization
 ```
 
 ## MVP architecture
@@ -36,7 +36,7 @@ Core boundaries:
 
 - IndexedDB is the runtime source; review works offline after setup.
 - GitHub `card` is Builder-owned content and is read publicly.
-- Supabase stores Account, LearnerProfile and append-only ReviewEvents.
+- IndexedDB stores local LearnerProfiles; Supabase optionally stores cloud-linked LearnerProfiles and append-only ReviewEvents.
 - ReviewEvents synchronize incrementally; ReviewState is rebuilt locally.
 - Cloudflare serves the PWA; no custom progress Worker API is required in MVP.
 - Frontend contains no GitHub PAT, Supabase secret/service-role key or database password.
@@ -45,8 +45,8 @@ Core boundaries:
 
 Must have:
 
-1. Email OTP account and persisted session.
-2. LearnerProfile selection and isolation from ContentProfile paths.
+1. LearnerProfile selection/creation without login.
+2. Optional email OTP account and persisted cloud-sync session.
 3. Current manifest/pack/template import without hardcoded counts.
 4. IndexedDB/offline recognition and production review.
 5. Unknown/fuzzy/known scheduler v1.
