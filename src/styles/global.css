@@ -89,6 +89,8 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .setting-card > div:first-child { display: grid; gap: 0.25rem; }
 .settings-form { display: grid; gap: 1rem; }
 .settings-form .setting-card { margin-top: 0; }
+.app-update-card p { color: #52635c; line-height: 1.55; margin: 0.35rem 0; }
+.app-update-card .secondary-action { justify-self: start; }
 .toggle-row { align-items: center; border-top: 1px solid #e4dccd; display: flex; gap: 1rem; justify-content: space-between; padding-top: 0.9rem; }
 .toggle-row > span { display: grid; gap: 0.2rem; }
 .toggle-row small { color: #65756f; font-weight: 400; line-height: 1.4; }

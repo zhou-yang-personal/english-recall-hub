@@ -1,7 +1,7 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.7.0-m5-learning-experience`
-Updated: `2026-08-18`
+Version: `0.7.1-m5-pwa-refresh`
+Updated: `2026-08-21`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
 
@@ -56,7 +56,7 @@ Supabase Realtime and Edge Functions are not required unless a later concrete re
 
 ## 2. Current Reality
 
-M1 implements the application shell, local database, scheduler/replay and atomic rating transaction. M2 adds local-first LearnerProfile selection/creation plus Supabase migration/RLS. M3 imports real public content and connects Home/Review. M4 replaces the mistaken email-account UI with one-time family-device pairing, a minimal Worker API, family Profile loading/linking and incremental ReviewEvent synchronization/replay. M5 adds Web Speech pronunciation/listening, schedule previews, per-Note progress insights and a mobile-first review/navigation pass. Browser E2E and CI remain subsequent work.
+M1 implements the application shell, local database, scheduler/replay and atomic rating transaction. M2 adds local-first LearnerProfile selection/creation plus Supabase migration/RLS. M3 imports real public content and connects Home/Review. M4 replaces the mistaken email-account UI with one-time family-device pairing, a minimal Worker API, family Profile loading/linking and incremental ReviewEvent synchronization/replay. M5 adds Web Speech pronunciation/listening, schedule previews, per-Note progress insights and a mobile-first review/navigation pass. M5.1 adds a narrow PWA resource-recovery action that preserves all IndexedDB and device-grant state. Browser E2E and CI remain subsequent work.
 
 Observed `card/profiles/manman/manifest.json` on `2026-08-17`:
 
@@ -120,6 +120,15 @@ Worker/Supabase unavailable or device grant expired
 → retry after connectivity/pairing recovery
 ```
 
+### S6. Stale application shell
+
+```text
+open Settings → choose “reload latest version”
+→ unregister current Service Worker + delete Cache Storage
+→ cache-busted reload → generated registration installs the current Worker
+→ IndexedDB progress and the device-grant Cookie remain intact
+```
+
 ## 4. Logical View
 
 Identity and content are different concepts:
@@ -157,6 +166,7 @@ progress      local progress aggregation and per-Note insights
 progress-sync pending push, remote pull and replay
 tts           voice resolution/playback
 settings      learner preferences
+app-update    application-shell cache reset and cache-busted reload
 local-store   Dexie schema/transactions
 ```
 
@@ -229,6 +239,10 @@ fetch/validate manifest → return unchanged when timestamp matches
 
 A missing required pack preserves the previous dataset. Invalid rows are skipped and reported without discarding valid rows.
 
+### 5.5 Application-resource recovery
+
+The manual recovery action only unregisters Service Workers and deletes Cache Storage for the current origin, then replaces the current URL with one cache-busting query marker. It does not open or delete IndexedDB, localStorage, cookies, Profiles, Cards, ReviewEvents, ReviewStates or sync cursors. Cleanup failures degrade to the cache-busted reload.
+
 ## 6. Development View
 
 Use lightweight Ports and Adapters inside feature folders. Create a port only for a real external boundary that needs a production adapter and a test fake:
@@ -251,6 +265,7 @@ src/
 │  ├─ review/
 │  ├─ progress/
 │  ├─ progress-sync/
+│  ├─ app-update/
 │  ├─ settings/
 │  └─ tts/
 ├─ domain/                 models, cardGenerator, scheduler, replay
@@ -491,6 +506,8 @@ English locales are en-US/en-GB; Spanish locales are es-MX/es-US/es-ES; rates ar
 
 The service worker caches only the app shell and versioned assets. Business data remains in IndexedDB. Updates never interrupt an in-flight rating transaction.
 
+Settings shows the package version and a manual “reload latest version” recovery action. This is an application-shell operation, not content sync, progress sync, sign-out or local-data reset.
+
 ## 12. Security and Recovery
 
 - RLS remains enabled and anonymous direct table access is denied.
@@ -519,6 +536,7 @@ The service worker caches only the app shell and versioned assets. Business data
 | TTS/listening | tts, review | fallback and hidden-before-reveal tests |
 | Review transparency | scheduler, review | rating previews equal committed state; next due is visible |
 | Progress insights | progress, db | Note grouping, stage counts, recent activity and mature estimate |
+| PWA resource recovery | app-update, settings | unregister/delete/reload is invoked while IndexedDB and device-grant APIs are absent from the operation |
 | Installable PWA | app, deployment | E2E plus iPhone/Android acceptance |
 
 Test layers: unit domain tests; Dexie/Supabase/RLS integration tests; component tests; critical E2E flows; manual device/TTS acceptance.
@@ -532,7 +550,7 @@ Test layers: unit domain tests; Dexie/Supabase/RLS integration tests; component 
 | M3 | Manifest/packs/templates, validation, Card generation | 2 days |
 | M4 | Family pairing, Worker API and Event push/pull/replay | 2 days |
 | M5 | TTS/listening, schedule transparency, progress insights and mobile Review UI | 3–4 days |
-| M6 | Offline/update, export/import, Cloudflare deploy | 1.5 days |
+| M6 | Offline/update recovery, export/import, Cloudflare deploy | 1.5 days; update recovery is implemented |
 | M7 | Automated tests and device fixes | 2–3 days |
 
 Estimated total: `13–15 working days`. It is a planning range, not a code-volume target.
@@ -551,7 +569,8 @@ Estimated total: `13–15 working days`. It is a planning range, not a code-volu
 10. English/Spanish TTS fallback works.
 11. Export/import round-trips without secrets.
 12. PWA installation is verified on iPhone and Android.
-13. Build, typecheck and test results are reported honestly.
+13. A stale shell can reload current resources without clearing IndexedDB or the device grant.
+14. Build, typecheck and test results are reported honestly.
 
 ## 16. Upgrade Triggers
 

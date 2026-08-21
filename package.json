@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.7.0-m5-learning-experience",
+  "version": "0.7.1-m5-pwa-refresh",
   "type": "module",
   "scripts": {
     "dev": "vite",

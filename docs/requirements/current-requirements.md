@@ -1,7 +1,7 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.7.0-m5-learning-experience`
-Updated: `2026-08-18`
+Version: `0.7.1-m5-pwa-refresh`
+Updated: `2026-08-21`
 
 ## 1. Product Goal
 
@@ -32,6 +32,8 @@ read and choose a GitHub ContentProfile without login → prepare progress ident
 - Run in current iOS Safari, Android Chrome and desktop Chrome/Edge.
 - Be installable to a mobile home screen.
 - Open the cached shell offline after one successful load.
+- Provide a one-click “reload latest version” action that resets only Service Worker/Cache Storage resources and performs a cache-busted reload.
+- Never delete IndexedDB learning data, pending ReviewEvents, local selection or the device-grant Cookie during an application-resource refresh.
 
 ### R2. Local-first access and one-time device pairing
 
@@ -149,6 +151,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Show: local ready, local changes pending, syncing, synchronized, content unchanged/updated, and content/progress failure with local data retained.
 - Never report success before confirmed persistence.
 - Allow editing automatic pronunciation, listening default, locale, speech rate and daily new-card limit; paired Profiles persist these settings through the Worker.
+- Show the current application version and keep application-resource update status separate from content/progress synchronization.
 
 ### R13a. Review transparency and progress insights
 
@@ -243,6 +246,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 | UC18 | Export/import | Progress round-trip succeeds without secrets |
 | UC19 | Sign-out | Session clears without silently deleting local progress |
 | UC20 | PWA install | Home-screen install works on target mobile browsers |
+| UC21 | PWA resource recovery | One action loads current shell resources without deleting IndexedDB progress or device pairing |
 
 ## 8. Delivery Estimate
 

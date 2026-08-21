@@ -1,6 +1,6 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.7.0-m5-learning-experience`
+Version: `0.7.1-m5-pwa-refresh`
 Updated: `2026-08-21`
 Source-of-truth branch: `dev`
 
@@ -117,6 +117,7 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 - M5: Each Card shows its stage, due time, interval, review/lapse counts and a clearly labeled minimum all-`known` estimate to reach the 90-day mature threshold.
 - M5: Review-first Home actions and a four-item mobile bottom navigation improve one-handed daily use.
 - M5: Content projection version 2 adds Note/Card display and pronunciation fields while retaining stable Card identifiers and existing progress.
+- M5.1: Settings shows the package version and can reset only Service Worker/Cache Storage resources before a cache-busted reload; IndexedDB progress and the paired-device Cookie are preserved.
 - Remote migration `20260818020000` is applied and the schema is exposed through Data API.
 - Hosted smoke testing found that column-only LearnerProfile INSERT grants produced Data API HTTP 401; migration `20260818030000` adds the table-level INSERT grant while retaining RLS ownership checks.
 
@@ -124,7 +125,7 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 
 1. Perform a real user rating on one paired browser and confirm hosted Event push/pull on a second paired device.
 2. Run the two-user RLS script where Docker/pg_prove is available.
-3. Add offline update UX plus progress export/import behavior.
+3. Add progress export/import behavior; the manual application-resource recovery action is implemented.
 4. Add browser E2E and perform iPhone/Android device acceptance, especially iOS Web Speech gesture/fallback behavior.
 5. Consider incremental ProgressEvent paging only if real household data volume makes local aggregation observably slow.
 
@@ -134,17 +135,17 @@ Estimated full MVP: `13–15 working days`.
 
 ```text
 Application typecheck/lint/build: passed
-Unit/integration: 53 passed across 17 test files
+Unit/integration: 56 passed across 18 test files
 Supabase remote migration/list/lint: passed
 Anonymous Data API read/write: blocked with HTTP 401 as intended
 Two-user pgTAP script: added; execution blocked because this environment cannot access Docker
-Wrangler deploy --dry-run: passed; Worker entry plus 16 static files discovered
+Wrangler deploy --dry-run: passed; Worker entry plus 17 static files discovered
 E2E: not configured
 CI: not configured
 Supabase: provisioned, linked and migrated; prior hosted LearnerProfile persistence smoke test passed
 Cloudflare: preview routes/PWA assets and fixed production domain return HTTP 200
 Real card-source smoke test: 27/27 packs, 137 valid Notes, 274 unique Cards, 0 skipped rows
-Cloudflare production: version `2b4ffec9-b522-4f71-9726-7505d4281079` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
+Cloudflare production: version `a73bd97d-572d-4fa7-a143-105c79b3e250` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
 Worker Secrets: all five required names configured as `secret_text`; Supabase/signing values were not printed, and the pairing code was returned once to the operator
 Hosted family pairing: wrong code denied; valid code issued a device grant; paired status and unpair passed
 Hosted family Profile/Event reads: one existing family Profile loaded; ReviewEvent page returned HTTP 200
@@ -152,6 +153,7 @@ Hosted ReviewEvent write: not smoke-tested to avoid inserting a fabricated learn
 Hosted `0.5.1` hotfix: same-name create returned the existing UUID and kept the Profile count unchanged; one accidental smoke-test row was removed after confirming it had zero events
 Hosted `0.6.0` catalog flow: Profiles route/new asset returned HTTP 200, GitHub catalog CORS passed and listed `manman`; no ReviewEvent was written
 Hosted `0.7.0` learning-experience flow: Home/Review/Progress/Settings routes, current hashed assets, PWA assets and GitHub profile catalog returned HTTP 200; an unpaired Profile settings PATCH was denied with HTTP 401 as intended
+Hosted `0.7.1` PWA refresh flow: current HTML and hashed assets returned HTTP 200, HTML retained `max-age=0, must-revalidate`, and the entry asset contained the release version, refresh marker and action label
 ```
 
 This handoff describes implemented M1–M5 foundations; offline update UX, export/import and device/browser acceptance remain before the full MVP is complete.

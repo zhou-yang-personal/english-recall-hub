@@ -1,7 +1,7 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.7.0-m5-learning-experience`
-Updated: `2026-08-18`
+Version: `0.7.1-m5-pwa-refresh`
+Updated: `2026-08-21`
 Branch: `dev`
 
 ## 1. Product Positioning
@@ -140,6 +140,8 @@ Mature begins at 90 days. The scheduler is a pure function shared by live rating
 
 - Service worker caches the app shell/assets.
 - IndexedDB holds business data.
+- Settings provides a one-click application-resource reset that unregisters the current Service Worker, deletes Cache Storage and reloads with a cache-busting URL.
+- Application-resource reset never deletes IndexedDB, local profile selection, pending ReviewEvents or the paired-device Cookie.
 - After first successful content sync, Home/Review work offline.
 - Web Speech supports English and Spanish locale fallback at 0.75/1.0/1.25 speed.
 - Listening mode hides target text until reveal and reuses normal progress.

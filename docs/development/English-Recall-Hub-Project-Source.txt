@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.7.0-m5-learning-experience
+Version: 0.7.1-m5-pwa-refresh
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev
@@ -58,6 +58,7 @@ Use browser Web Speech API with en-US/en-GB and es-MX/es-US/es-ES fallback.
 Rates are 0.75, 1.0 and 1.25.
 No cloud TTS/audio files/IPA/pronunciation scoring.
 Service worker caches the shell; business data remains in IndexedDB.
+Settings can reset only Service Worker/Cache Storage resources and reload the latest version; this never deletes IndexedDB progress or the device-grant Cookie.
 
 Code design:
 Use feature-first lightweight Ports and Adapters.
@@ -69,7 +70,7 @@ M1 React/Vite/PWA shell, Dexie stores, Scheduler/replay and atomic rating writes
 M2 local-first LearnerProfile selection/creation and Supabase migration/RLS exist.
 M3 real public card import, stable Card generation, Home counts, review queue and local atomic rating UI exist.
 M4 family-device pairing, Worker Profile/Event API and incremental ReviewEvent synchronization exist.
-TTS/listening remain subsequent milestones.
+M5 TTS/listening, schedule transparency, progress insights and safe PWA resource refresh exist.
 
 MVP includes:
 no-login LearnerProfile; one-time family-device pairing; public card sync

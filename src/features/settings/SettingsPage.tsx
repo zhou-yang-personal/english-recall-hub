@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { useApp } from '../../app/AppContext';
 import { appServices } from '../../app/services';
 import type { LearnerProfile } from '../../domain/profile';
+import { resetAppResources } from '../app-update/resetAppResources';
 import {
   type LearnerProfileSettings,
   updateLearnerProfileSettings,
@@ -28,6 +29,7 @@ export function SettingsPage() {
   const { loading, profile } = useSelectedLearnerProfile();
   const [settings, setSettings] = useState<LearnerProfileSettings>();
   const [saving, setSaving] = useState(false);
+  const [reloading, setReloading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,6 +73,18 @@ export function SettingsPage() {
       });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '语音播放失败。');
+    }
+  }
+
+  async function reloadLatestResources() {
+    setReloading(true);
+    setMessage('正在清理旧版 Web 资源并重新加载…');
+
+    try {
+      await resetAppResources();
+    } catch (error) {
+      setReloading(false);
+      setMessage(error instanceof Error ? error.message : '重新加载最新版失败，请稍后重试。');
     }
   }
 
@@ -154,6 +168,19 @@ export function SettingsPage() {
         ) : (
           <Link to="/pair-device">输入家庭同步码</Link>
         )}
+      </section>
+
+      <section className="setting-card app-update-card">
+        <div><strong>应用更新</strong><span>当前版本：{__APP_VERSION__}</span></div>
+        <p>清除旧的 Web/PWA 资源缓存并重新加载当前页面，不会删除学习者、卡片、复习进度、待同步事件或家庭配对。</p>
+        <button
+          className="secondary-action"
+          disabled={reloading}
+          onClick={() => void reloadLatestResources()}
+          type="button"
+        >
+          {reloading ? '正在重新加载…' : '重新加载最新版'}
+        </button>
       </section>
 
       {message ? <p className="status-message" role="status">{message}</p> : null}

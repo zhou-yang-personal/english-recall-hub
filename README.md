@@ -4,12 +4,12 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.7.0-m5-learning-experience`
+- Version: `0.7.1-m5-pwa-refresh`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
 - First platform: Web/PWA on iPhone, Android and desktop
-- Status: M5 pronunciation/listening, transparent scheduling, progress insights and mobile review UX are implemented on top of the M4 family sync
+- Status: M5 learning experience plus safe one-click PWA resource refresh are implemented on top of the M4 family sync
 - Production URL: `https://english-recall-hub.zhou-yang-personal.workers.dev`
 
 ## Product flow
@@ -55,7 +55,7 @@ Must have:
 7. English/Spanish browser TTS, automatic pronunciation and listening mode.
 8. Per-item next-review details, review history summary and transparent scheduler explanations.
 9. Progress JSON export/import.
-10. Installable mobile-first PWA.
+10. Installable mobile-first PWA with a safe one-click reload of the latest Web resources.
 
 Not in MVP:
 

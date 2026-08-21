@@ -6,7 +6,7 @@
 
 - [ ] 项目名称：`English Recall Hub`。
 - [ ] 仓库：`zhou-yang-personal/english-recall-hub`。
-- [ ] 当前版本：`0.7.0-m5-learning-experience`。
+- [ ] 当前版本：`0.7.1-m5-pwa-refresh`。
 - [ ] 产品定位：面向个人和家庭的多语言主动回忆工具，把 ChatGPT 学习记录转为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和账号进度同步。
 - [ ] 第一版平台：iPhone、Android、PC 浏览器；可安装为 PWA，不开发原生 iOS/Android App。
 - [ ] 第一版技术栈：`React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Worker API/Static Assets + Supabase Postgres/RLS`。
@@ -73,6 +73,7 @@
 11. 本地 progress JSON 导出/导入兜底。
 12. PWA 安装与移动端适配。
 13. 复习机制说明、单条目下次复习/次数/遗忘/阶段信息和本地进度统计视图。
+14. 可从设置页一键重置应用资源缓存并加载最新版，不删除 IndexedDB 学习数据、待同步事件或设备配对 Cookie。
 
 第一版明确不做：
 
@@ -113,6 +114,7 @@
 - [ ] 每次评分在一个 Dexie 事务中写入 pending ReviewEvent 和 ReviewState，提交后才能进入下一张卡。
 - [ ] 同步顺序为：上传 pending 事件、按 `sync_seq` 分页拉取、幂等 upsert、本地重放、事务更新 cursor。
 - [ ] PWA 不承诺精确后台执行；同步触发为应用打开、联网恢复、复习完成、手动操作和前台防抖。
+- [ ] 应用资源更新必须与 IndexedDB 业务数据、同步状态和设备授权分离；不得把“清空全部站点数据”作为常规更新方式。
 - [ ] Supabase 使用独立 `english_recall` schema；所有暴露表必须显式授权并启用 RLS。
 - [ ] 浏览器不得直连 Supabase 进度表；Worker 验证签名设备 Cookie 后以服务端密钥访问，并对每次查询/写入强制限定 `FAMILY_OWNER_USER_ID`。
 - [ ] `progress` 分支不再作为 MVP 运行时数据库，只保留未来冷备份可能性。

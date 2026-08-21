@@ -1,5 +1,34 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.7.1-m5-pwa-refresh｜2026-08-21
+
+### Added
+
+- Added a Settings action that unregisters current Service Workers, deletes Cache Storage and reloads the current route with a cache-busting marker.
+- Added the package version to Settings so stale installations can be diagnosed directly.
+- Added unit coverage for route preservation, resource cleanup and cleanup-failure fallback.
+
+### Data safety
+
+- Application-resource refresh does not access or delete IndexedDB, local selection, pending ReviewEvents, sync cursors or the paired-device Cookie.
+- The operation is separate from public content sync, progress sync, learner switching and sign-out.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test -- --run: 56 passed across 18 test files
+npm run build: passed; route chunks and PWA service worker generated
+npx wrangler deploy --dry-run: passed; Worker entry plus 17 static files discovered
+Local production root/Review/Progress/Settings-with-refresh-marker/PWA assets: HTTP 200
+Hosted deployment: Worker version `a73bd97d-572d-4fa7-a143-105c79b3e250`
+Hosted current HTML/hashes/PWA assets: HTTP 200; HTML remains `max-age=0, must-revalidate`
+Hosted entry asset contains version `0.7.1-m5-pwa-refresh`, refresh marker and action label
+Dependencies: unchanged; lock file unchanged.
+Database schema: unchanged.
+```
+
 ## 0.7.0-m5-learning-experience｜2026-08-21
 
 ### Added
