@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.3.2-m2-account-foundation
+Version: 0.7.1-m5-pwa-refresh
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev
@@ -15,25 +15,26 @@ PROGRESS_BRANCH=progress (reserved, not MVP runtime)
 Product flow:
 ChatGPT → DraftNote → Builder → GitHub card content
 → Web/PWA IndexedDB review → ReviewEvents
-→ Supabase account progress synchronization
+→ optional paired-family progress synchronization
 
 Product boundary:
 This is a personal/family multilingual recall tool, not a dictionary, course platform or public SaaS.
-First sign-in uses Supabase email OTP. Later use reuses the persisted session.
+ContentProfile selection requires no sign-in and the internal LearnerProfile is prepared automatically. A new cloud-enabled device enters one family pairing code and then remains authorized by a signed HttpOnly Cookie.
 After setup, local Home/Review remain usable offline.
 
 Approved stack:
 React + TypeScript + Vite + React Router
 Dexie + IndexedDB + Zod
 Web Speech API + vite-plugin-pwa
-Supabase Auth + Postgres + RLS
-Cloudflare Workers Static Assets
+Supabase Postgres + RLS
+Cloudflare Worker API + Static Assets
 GitHub public card branch
 
 Identity model:
-Account = authenticated Supabase user.
-LearnerProfile = settings/progress identity owned by Account.
-ContentProfile = GitHub content path such as manman.
+FamilySpace = Worker-configured cloud ownership boundary.
+DeviceGrant = signed Worker Cookie issued after one-time pairing.
+LearnerProfile = internal local-first settings/progress identity that may link to FamilySpace.
+ContentProfile = visible learner and GitHub content path such as manman.
 Do not conflate these concepts.
 
 Progress model:
@@ -57,6 +58,7 @@ Use browser Web Speech API with en-US/en-GB and es-MX/es-US/es-ES fallback.
 Rates are 0.75, 1.0 and 1.25.
 No cloud TTS/audio files/IPA/pronunciation scoring.
 Service worker caches the shell; business data remains in IndexedDB.
+Settings can reset only Service Worker/Cache Storage resources and reload the latest version; this never deletes IndexedDB progress or the device-grant Cookie.
 
 Code design:
 Use feature-first lightweight Ports and Adapters.
@@ -65,18 +67,20 @@ Only real external boundaries get ports; no DI container, Redux/Zustand or custo
 
 Current implementation:
 M1 React/Vite/PWA shell, Dexie stores, Scheduler/replay and atomic rating writes exist.
-M2 Supabase migration/RLS, email passwordless client and LearnerProfile selection/cache exist.
-Card-content and remote ReviewEvent synchronization remain subsequent milestones.
+M2 local-first LearnerProfile selection/creation and Supabase migration/RLS exist.
+M3 real public card import, stable Card generation, Home counts, review queue and local atomic rating UI exist.
+M4 family-device pairing, Worker Profile/Event API and incremental ReviewEvent synchronization exist.
+M5 TTS/listening, schedule transparency, progress insights and safe PWA resource refresh exist.
 
 MVP includes:
-email OTP/persisted session; LearnerProfile isolation; public card sync
+no-login LearnerProfile; one-time family-device pairing; public card sync
 offline recognition/production; scheduler v1; multi-device event sync/replay
 English/Spanish TTS/listening; export/import; installable PWA; RLS tests
 
 MVP excludes:
 native apps; normal passwords/social login/public SaaS
 family invitation/role/admin system; real-time collaboration/manual conflicts
-Cloudflare progress API/D1/KV/R2; advanced Cards; cloud TTS/push
+D1/KV/R2/general backend framework; advanced Cards; cloud TTS/push
 payment/ads/analytics/community
 
 Never store:

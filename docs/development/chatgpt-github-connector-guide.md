@@ -68,8 +68,8 @@
 - 需要写 draft 时，只写 DraftNote JSONL，不写正式 Note/Card。
 - `card` 分支正式内容由 Builder 生成；ChatGPT 不直接绕过 Builder 修改正式 pack。
 - Web/PWA 从公开 `card` 分支读取内容；浏览器不直接写 GitHub。
-- MVP 账号和进度同步由 Supabase Auth/Postgres/RLS 承担；`progress` 分支不作为运行时数据库。
-- 前端只允许使用 Supabase publishable key，不得持有 GitHub PAT、Supabase secret/service-role key 或数据库密码。
+- MVP 进度同步由 Cloudflare Worker 设备配对/API 与 Supabase Postgres/RLS 承担；`progress` 分支不作为运行时数据库。
+- 前端不持有 Supabase URL/API key；Supabase secret、家庭 Owner UUID、配对码和签名密钥只允许存入 Worker Secrets。
 - 不把 IndexedDB 导出、auth token、浏览器缓存、音频、日志、安装包或构建产物写入仓库。
 - 任何 GitHub token、Cloudflare/Supabase Secret、Project 私密配置或设备私钥都不得写入仓库。
 

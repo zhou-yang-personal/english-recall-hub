@@ -1,7 +1,7 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.3.2-m2-account-foundation`
-Updated: `2026-08-18`
+Version: `0.7.1-m5-pwa-refresh`
+Updated: `2026-08-21`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
 
@@ -13,11 +13,10 @@ Real first-version need:
 
 ```text
 personal/family use
-→ sign in once without a normal password
-→ choose a learner Profile
+→ choose/create a learner Profile without login
 → sync formal cards from GitHub
 → review and listen offline
-→ synchronize progress across the user's devices
+→ optionally pair a new device once for cross-device progress
 ```
 
 Selected stack:
@@ -26,8 +25,8 @@ Selected stack:
 React + TypeScript + Vite + React Router
 Dexie / IndexedDB + Zod
 Web Speech API + vite-plugin-pwa
-Supabase Auth + Postgres + Row Level Security
-Cloudflare Workers Static Assets
+Supabase Postgres + Row Level Security
+Cloudflare Worker API + Static Assets
 GitHub card branch
 ```
 
@@ -37,18 +36,18 @@ Key decisions:
 |---|---|
 | IndexedDB is the runtime source | Review must be immediate and offline |
 | GitHub `card` is the content source | Existing Builder/Note pipeline remains valid |
-| Supabase stores accounts and progress | Account sync needs queryable user-isolated cloud state |
+| Supabase optionally stores cloud progress | Cross-device sync needs queryable user-isolated cloud state |
 | Review events are synchronized | Idempotent events converge more safely than whole-snapshot replacement |
-| Browser accesses Supabase directly | Auth JWT + RLS avoid a custom progress backend |
-| Cloudflare serves static assets only | No server-only MVP use case remains |
-| Email OTP is the only MVP sign-in | Passwordless and simple on mobile |
+| Browser accesses only same-origin `/api` | Platform credentials and ownership checks stay server-side |
+| Cloudflare Worker is the tiny backend | It pairs devices and proxies Profile/ReviewEvent operations without D1/KV |
+| Pairing happens once per new device | Daily use remains direct with no email/login screen |
 
 Explicit non-goals:
 
 ```text
 native apps; normal passwords; social login; public SaaS
 family invitations/roles/admin console; real-time collaboration
-manual conflict UI; custom API framework; D1/KV/R2
+manual conflict UI; general API framework; D1/KV/R2
 cloud TTS/audio/IPA/scoring; advanced card types
 push/exact background jobs; payment/ads/analytics/community
 ```
@@ -57,7 +56,7 @@ Supabase Realtime and Edge Functions are not required unless a later concrete re
 
 ## 2. Current Reality
 
-The M1 application shell, local database, scheduler/replay and atomic rating transaction are implemented. M2 adds the Supabase migration/RLS, persisted email passwordless session and LearnerProfile selection/cache. Content import, ReviewEvent remote synchronization, TTS, browser E2E and CI remain subsequent work.
+M1 implements the application shell, local database, scheduler/replay and atomic rating transaction. M2 adds local-first LearnerProfile selection/creation plus Supabase migration/RLS. M3 imports real public content and connects Home/Review. M4 replaces the mistaken email-account UI with one-time family-device pairing, a minimal Worker API, family Profile loading/linking and incremental ReviewEvent synchronization/replay. M5 adds Web Speech pronunciation/listening, schedule previews, per-Note progress insights and a mobile-first review/navigation pass. M5.1 adds a narrow PWA resource-recovery action that preserves all IndexedDB and device-grant state. Browser E2E and CI remain subsequent work.
 
 Observed `card/profiles/manman/manifest.json` on `2026-08-17`:
 
@@ -72,14 +71,22 @@ The count is a snapshot, never a client constant. The client follows the manifes
 
 ## 3. Scenario View (+1)
 
-### S1. First sign-in
+### S1. First local use
 
 ```text
-open PWA → enter email → enter OTP → persist Supabase session
-→ load/create LearnerProfile → sync cards/progress → Home
+open PWA → choose/create local LearnerProfile without login
+→ persist in IndexedDB → sync public cards → Home
 ```
 
-No GitHub token, Supabase secret key or normal password appears in the UI.
+No email, GitHub token, Supabase secret key or normal password is required in the browser.
+
+### S1b. Optional new-device pairing
+
+```text
+choose “配对云同步” → enter family code once
+→ Worker validates code → signed HttpOnly device Cookie
+→ load family-linked LearnerProfiles → choose learner directly thereafter
+```
 
 ### S2. Daily/offline review
 
@@ -92,7 +99,7 @@ open cached PWA → render Home from IndexedDB → review
 ### S3. New device
 
 ```text
-sign in with same account → select LearnerProfile
+pair the device once → select LearnerProfile
 → download card content → download review events in pages
 → rebuild ReviewState locally → continue review
 ```
@@ -105,12 +112,21 @@ compare manifest.updated_at → fetch listed templates/packs when changed
 → retain progress by stable card_id
 ```
 
-### S5. Auth/cloud failure
+### S5. Pairing/cloud failure
 
 ```text
-Supabase unavailable or session expired
+Worker/Supabase unavailable or device grant expired
 → local review stays available → events remain pending
-→ retry after connectivity/session recovery
+→ retry after connectivity/pairing recovery
+```
+
+### S6. Stale application shell
+
+```text
+open Settings → choose “reload latest version”
+→ unregister current Service Worker + delete Cache Storage
+→ cache-busted reload → generated registration installs the current Worker
+→ IndexedDB progress and the device-grant Cookie remain intact
 ```
 
 ## 4. Logical View
@@ -118,12 +134,15 @@ Supabase unavailable or session expired
 Identity and content are different concepts:
 
 ```text
-Account          Supabase authenticated user
-LearnerProfile   learner settings/progress identity; belongs to one Account
-ContentProfile   GitHub card source such as `manman`; not a login identity
+FamilySpace      server-configured ownership boundary for this small family
+DeviceGrant      signed Worker Cookie created after one-time pairing
+LearnerProfile   internal local-first settings/progress identity; may link to FamilySpace
+ContentProfile   visible learner and GitHub card source such as `manman`; not a login identity
 ```
 
-A LearnerProfile references one ContentProfile. Multiple accounts can review the same ContentProfile without sharing progress.
+A LearnerProfile references one ContentProfile. In this family deployment each GitHub ContentProfile is one visible learner and has one canonical family progress identity.
+
+The visible catalog is discovered from GitHub `card/profiles/*`; the UI has no manual LearnerProfile form. Internal creation is idempotent on ContentProfile and returns its oldest identity. Historical duplicates remain untouched but do not create duplicate visible choices.
 
 Domain chain:
 
@@ -139,13 +158,15 @@ LearnerProfile + Card → ReviewEvent → materialized ReviewState
 Feature modules:
 
 ```text
-auth          email OTP session
-profiles      LearnerProfile create/select
+sync-access   device pairing/status/unpair
+profiles      GitHub ContentProfile discovery/selection and automatic progress identity cache
 content-sync  GitHub manifest/template/pack import
 review        queue, UI, rating and scheduler
+progress      local progress aggregation and per-Note insights
 progress-sync pending push, remote pull and replay
 tts           voice resolution/playback
 settings      learner preferences
+app-update    application-shell cache reset and cache-busted reload
 local-store   Dexie schema/transactions
 ```
 
@@ -164,10 +185,11 @@ Domain code never imports React, Dexie, Supabase or browser globals.
 
 ```text
 1. Render cached shell and open Dexie.
-2. Load persisted Supabase session.
-3. Show SignInPage when no session exists.
-4. Load local Profiles and render Home from local data.
-5. In background, sync progress and check the card manifest.
+2. Load the GitHub ContentProfile catalog, falling back to locally cached identities when offline.
+3. Select a ContentProfile and automatically obtain its LearnerProfile without waiting for normal account authentication.
+4. Check the persisted device grant through same-origin `/api` without blocking local UI.
+5. When paired, refresh family-linked Profiles and synchronize progress in the background.
+6. Check the public card manifest independently of cloud state.
 ```
 
 Startup does not wait for network after local initialization.
@@ -187,7 +209,7 @@ If it fails, the UI stays on the current Card.
 ### 5.3 Progress synchronization
 
 ```text
-1. Verify authenticated session.
+1. Worker verifies the signed device Cookie and configured family boundary.
 2. Upload pending events in bounded batches.
 3. Insert with event_id conflict ignored; Supabase assigns sync_seq.
 4. Pull events where sync_seq > local cursor, page by page.
@@ -217,12 +239,16 @@ fetch/validate manifest → return unchanged when timestamp matches
 
 A missing required pack preserves the previous dataset. Invalid rows are skipped and reported without discarding valid rows.
 
+### 5.5 Application-resource recovery
+
+The manual recovery action only unregisters Service Workers and deletes Cache Storage for the current origin, then replaces the current URL with one cache-busting query marker. It does not open or delete IndexedDB, localStorage, cookies, Profiles, Cards, ReviewEvents, ReviewStates or sync cursors. Cleanup failures degrade to the cache-busted reload.
+
 ## 6. Development View
 
 Use lightweight Ports and Adapters inside feature folders. Create a port only for a real external boundary that needs a production adapter and a test fake:
 
 ```text
-AuthClient  CardSource  ProgressRemote  LocalStore  SpeechPlayer  Clock
+DeviceAccessClient  CardSource  ProgressRemote  LocalStore  SpeechPlayer  Clock
 ```
 
 No dependency-injection container is used; `src/app/bootstrap.ts` assembles adapters. Do not create interfaces for pure functions or one-line utilities.
@@ -233,18 +259,20 @@ Planned directory:
 src/
 ├─ app/                    App, router, bootstrap, small AppContext
 ├─ features/
-│  ├─ auth/                page + use cases + Supabase port
+│  ├─ sync-access/         one-time pairing page + device access port
 │  ├─ profiles/
 │  ├─ content-sync/
 │  ├─ review/
+│  ├─ progress/
 │  ├─ progress-sync/
+│  ├─ app-update/
 │  ├─ settings/
 │  └─ tts/
 ├─ domain/                 models, cardGenerator, scheduler, replay
 ├─ infrastructure/
 │  ├─ db/                  Dexie database/schema
 │  ├─ github/              public CardSource
-│  ├─ supabase/            auth/progress adapters
+│  ├─ worker/              same-origin Profile/progress adapters
 │  └─ speech/              Web Speech adapter
 ├─ shared/                 errors, result, ids, time
 └─ styles/
@@ -268,7 +296,7 @@ State rules:
 Typed boundary errors:
 
 ```text
-AUTH_REQUIRED, AUTH_OTP_FAILED, NETWORK_ERROR
+DEVICE_NOT_PAIRED, PAIRING_CODE_INVALID, NETWORK_ERROR
 INVALID_MANIFEST, INVALID_PACK_ROW, DB_TRANSACTION_FAILED
 PROGRESS_PUSH_FAILED, PROGRESS_PULL_FAILED, PROGRESS_REPLAY_FAILED
 TTS_UNAVAILABLE, IMPORT_INVALID
@@ -277,23 +305,45 @@ TTS_UNAVAILABLE, IMPORT_INVALID
 ## 7. Deployment View
 
 ```text
-Cloudflare static PWA
+Cloudflare Worker + static PWA
        │ browser
        ├── public read ── GitHub `card`
-       └── authenticated ── shared Supabase project
-                            schema `english_recall`
-                            Auth + Postgres + RLS
+       └── signed device Cookie ── same-origin `/api`
+                                  └── server secret ── Supabase Postgres
+                                                       schema `english_recall`
 ```
 
 Frontend configuration:
 
 ```text
-VITE_SUPABASE_URL
-VITE_SUPABASE_PUBLISHABLE_KEY
 VITE_CARD_REPOSITORY_BASE_URL
+VITE_CARD_PROFILE_CATALOG_URL
+VITE_PROGRESS_API_BASE_URL (optional; empty means same origin)
 ```
 
 These are not privileged credentials. Database passwords, secret/service-role keys, GitHub PATs and Cloudflare tokens never enter frontend code, Git, logs or Project Sources.
+
+Worker-only Secrets:
+
+```text
+SUPABASE_URL
+SUPABASE_SECRET_KEY
+FAMILY_OWNER_USER_ID
+FAMILY_PAIRING_CODE
+DEVICE_SESSION_SECRET
+```
+
+`FAMILY_OWNER_USER_ID` points to the existing bootstrap `auth.users.id` used by the current foreign keys; this is a server-side ownership anchor, not a frontend account. The Worker exposes only:
+
+```text
+GET  /api/device/status
+POST /api/device/pair
+POST /api/device/unpair
+GET/POST /api/profiles
+GET/POST /api/review-events
+```
+
+No update/delete/admin endpoint is part of the MVP.
 
 The shared Supabase project uses a dedicated exposed `english_recall` schema. Other apps use other schemas. Every exposed table has explicit grants and RLS.
 
@@ -304,7 +354,7 @@ Key types:
 ```ts
 type LearnerProfile = {
   learnerProfileId: string; // UUID
-  userId: string;
+  cloudSyncId?: 'family'; // present only when linked to FamilySpace
   displayName: string;
   contentProfileId: string;
   uiLang: 'zh-CN';
@@ -345,15 +395,16 @@ type ReviewState = {
 
 ReviewState is derived and is not the cloud synchronization authority.
 
-Suggested Dexie v1 schema:
+Current Dexie v2 schema:
 
 ```ts
-learnerProfiles: '&learnerProfileId, userId, contentProfileId'
+learnerProfiles: '&learnerProfileId, cloudSyncId, contentProfileId'
 notes: '&[contentProfileId+noteId], contentProfileId, [contentProfileId+status]'
 cards: '&[contentProfileId+cardId], contentProfileId, [contentProfileId+noteId], [contentProfileId+status]'
 reviewEvents: '&eventId, learnerProfileId, [learnerProfileId+cardId], [learnerProfileId+syncStatus], remoteSeq'
 reviewStates: '&[learnerProfileId+cardId], [learnerProfileId+dueAt], [learnerProfileId+state]'
 syncStates: '&learnerProfileId'
+contentSyncStates: '&contentProfileId'
 ```
 
 Review queries use `learnerProfileId`; content queries use `contentProfileId`.
@@ -390,13 +441,14 @@ review_events (
 
 Constraints limit rating, scheduler version, device-id pattern and text lengths.
 
-RLS intent:
+Access intent:
 
 ```text
-learner_profiles select/insert/update/delete: user_id = auth.uid()
-review_events select/insert: user_id = auth.uid()
-event learner_profile_id must belong to the same auth.uid()
-review_events update/delete: denied to normal clients
+browser: no direct Supabase credential or table access
+Worker: service secret bypasses RLS, so every query/write filters FAMILY_OWNER_USER_ID
+Worker event insert: learner_profile_id must belong to FAMILY_OWNER_USER_ID
+review_events update/delete: no Worker endpoint
+legacy authenticated RLS policies remain defense-in-depth during migration
 ```
 
 Integration tests use two users. A publishable key without an authenticated user must read/write neither table.
@@ -432,14 +484,17 @@ overdue relearning → overdue learning → due review/mature → new within lim
 P0 routes:
 
 ```text
-/sign-in   email/OTP
-/profiles  select/create LearnerProfile
+/pair-device  one-time family device pairing
+/profiles  direct GitHub ContentProfile selection; internal LearnerProfile preparation is automatic
 /          Home
 /review    review session
+/progress  local-first review statistics and per-Note schedule details
 /settings  preferences and both sync controls
 ```
 
 Home distinguishes content sync from progress sync and shows due/learning/new counts. A successful card download must never be shown as successful progress synchronization.
+
+Progress groups Cards by Note. Recognition and production remain independent schedules, so their next due times, intervals and counts are shown separately. Aggregate status is unseen, learning, review or mature; due is a separate attention flag.
 
 Voice fallback:
 
@@ -451,10 +506,13 @@ English locales are en-US/en-GB; Spanish locales are es-MX/es-US/es-ES; rates ar
 
 The service worker caches only the app shell and versioned assets. Business data remains in IndexedDB. Updates never interrupt an in-flight rating transaction.
 
+Settings shows the package version and a manual “reload latest version” recovery action. This is an application-shell operation, not content sync, progress sync, sign-out or local-data reset.
+
 ## 12. Security and Recovery
 
-- RLS is enabled before frontend access.
-- Only the publishable Supabase key enters frontend code.
+- RLS remains enabled and anonymous direct table access is denied.
+- Supabase URL/secret, family owner UUID, pairing code and signing secret are Worker Secrets.
+- Device grants are HMAC-signed HttpOnly/Secure/SameSite Cookies scoped to `/api`.
 - External payloads are validated at boundaries.
 - Failed content import never deletes the last successful dataset.
 - Failed progress push never deletes pending events.
@@ -466,8 +524,9 @@ The service worker caches only the app shell and versioned assets. Business data
 
 | Need | Modules | Minimum proof |
 |---|---|---|
-| Passwordless account | auth | OTP success/failure and persisted session |
-| Profile isolation | profiles, db, RLS | two-user and two-profile isolation |
+| Direct learner selection | profiles, GitHub, db | catalog selection automatically reuses/creates progress identity; cached selection works offline |
+| One-time device pairing | sync-access, Worker | invalid code denied; signed Cookie persists |
+| Family boundary | profiles, Worker, RLS | every Profile/Event operation filtered by owner UUID |
 | Existing cards | content-sync | current manifest/templates/packs fixture import |
 | Offline review | review, db, PWA | rating persists with network disabled |
 | Stable scheduling | scheduler | matrix, caps and fixed-clock tests |
@@ -475,6 +534,9 @@ The service worker caches only the app shell and versioned assets. Business data
 | Idempotent retry | progress-sync | duplicate upload creates one row |
 | Cloud failure safety | progress-sync | pending events survive failure |
 | TTS/listening | tts, review | fallback and hidden-before-reveal tests |
+| Review transparency | scheduler, review | rating previews equal committed state; next due is visible |
+| Progress insights | progress, db | Note grouping, stage counts, recent activity and mature estimate |
+| PWA resource recovery | app-update, settings | unregister/delete/reload is invoked while IndexedDB and device-grant APIs are absent from the operation |
 | Installable PWA | app, deployment | E2E plus iPhone/Android acceptance |
 
 Test layers: unit domain tests; Dexie/Supabase/RLS integration tests; component tests; critical E2E flows; manual device/TTS acceptance.
@@ -484,19 +546,19 @@ Test layers: unit domain tests; Dexie/Supabase/RLS integration tests; component 
 | Milestone | Scope | Estimate |
 |---|---|---:|
 | M1 | Vite/PWA, feature structure, Dexie, scheduler/replay | 2 days |
-| M2 | Supabase local setup, OTP, Profile, RLS tests | 1.5 days |
+| M2 | Supabase schema, Profile and RLS foundation | 1.5 days |
 | M3 | Manifest/packs/templates, validation, Card generation | 2 days |
-| M4 | Home, queue, Review UI, TTS/listening | 2 days |
-| M5 | Event push/pull/replay/status/retry | 2 days |
-| M6 | Offline/update, export/import, Cloudflare deploy | 1.5 days |
+| M4 | Family pairing, Worker API and Event push/pull/replay | 2 days |
+| M5 | TTS/listening, schedule transparency, progress insights and mobile Review UI | 3–4 days |
+| M6 | Offline/update recovery, export/import, Cloudflare deploy | 1.5 days; update recovery is implemented |
 | M7 | Automated tests and device fixes | 2–3 days |
 
 Estimated total: `13–15 working days`. It is a planning range, not a code-volume target.
 
 ## 15. Acceptance Gate
 
-1. Email OTP works and daily use does not repeatedly request login.
-2. The same Account loads its LearnerProfile on a second device.
+1. First use and daily use can select a LearnerProfile without login.
+2. A new device pairs once without email login, then loads family-linked LearnerProfiles directly.
 3. Current card data imports without hardcoded Note counts.
 4. Recognition and Production work.
 5. Every rating persists before UI navigation.
@@ -507,7 +569,8 @@ Estimated total: `13–15 working days`. It is a planning range, not a code-volu
 10. English/Spanish TTS fallback works.
 11. Export/import round-trips without secrets.
 12. PWA installation is verified on iPhone and Android.
-13. Build, typecheck and test results are reported honestly.
+13. A stale shell can reload current resources without clearing IndexedDB or the device grant.
+14. Build, typecheck and test results are reported honestly.
 
 ## 16. Upgrade Triggers
 
@@ -516,7 +579,7 @@ Estimated total: `13–15 working days`. It is a planning range, not a code-volu
 | Family members must manage each other | memberships/invitations/roles |
 | Event rebuild becomes slow | remote materialized state/checkpoints |
 | Open devices need instant updates | Supabase Realtime |
-| Privileged validation is required | RPC/Edge Function/Cloudflare Worker |
+| Multiple independent households are required | memberships plus scoped household identifiers |
 | Card data becomes private | authenticated card API |
 | Browser voices are inadequate | cloud TTS/native app |
 | Pack sync becomes costly | Builder hashes/sealed packs |

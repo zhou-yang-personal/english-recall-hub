@@ -4,13 +4,13 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.3.2-m2-account-foundation`
+- Version: `0.7.1-m5-pwa-refresh`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
 - First platform: Web/PWA on iPhone, Android and desktop
-- Status: M2 account foundation implemented; content and ReviewEvent synchronization remain subsequent milestones
-- Reserved production URL: `https://english-recall-hub.zhou-yang-personal.workers.dev` (activates after the production branch deploys)
+- Status: M5 learning experience plus safe one-click PWA resource refresh are implemented on top of the M4 family sync
+- Production URL: `https://english-recall-hub.zhou-yang-personal.workers.dev`
 
 ## Product flow
 
@@ -18,7 +18,7 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 ChatGPT Project → draft DraftNote → Builder validation/dedupe
 → card formal Notes/Templates → Web/PWA IndexedDB
 → recognition/production review → local ReviewEvents
-→ Supabase account progress synchronization
+→ paired-family progress synchronization
 ```
 
 ## MVP architecture
@@ -27,8 +27,8 @@ ChatGPT Project → draft DraftNote → Builder validation/dedupe
 React + TypeScript + Vite + React Router
 Dexie / IndexedDB + Zod
 Web Speech API + vite-plugin-pwa
-Supabase Auth (email OTP) + Postgres + RLS
-Cloudflare Workers Static Assets
+Supabase Postgres + RLS
+Cloudflare Worker API + Static Assets
 GitHub public `card` content
 ```
 
@@ -36,30 +36,32 @@ Core boundaries:
 
 - IndexedDB is the runtime source; review works offline after setup.
 - GitHub `card` is Builder-owned content and is read publicly.
-- Supabase stores Account, LearnerProfile and append-only ReviewEvents.
+- GitHub `card/profiles/*` is the visible learner directory; IndexedDB/Supabase store its internal progress identities and ReviewEvents.
 - ReviewEvents synchronize incrementally; ReviewState is rebuilt locally.
-- Cloudflare serves the PWA; no custom progress Worker API is required in MVP.
-- Frontend contains no GitHub PAT, Supabase secret/service-role key or database password.
+- Cloudflare serves the PWA and a minimal same-origin progress API.
+- A new device enters one family pairing code once; normal use then opens directly to learner selection.
+- Supabase secret/service-role key is a Worker Secret and never enters frontend JavaScript, Git or logs.
 
 ## MVP scope
 
 Must have:
 
-1. Email OTP account and persisted session.
-2. LearnerProfile selection and isolation from ContentProfile paths.
+1. Direct GitHub learner selection without login; progress identity is prepared automatically.
+2. One-time family-device pairing with a long-lived signed HttpOnly Cookie; no email login UI.
 3. Current manifest/pack/template import without hardcoded counts.
 4. IndexedDB/offline recognition and production review.
 5. Unknown/fuzzy/known scheduler v1.
 6. Idempotent ReviewEvent synchronization and new-device reconstruction.
-7. English/Spanish browser TTS and listening mode.
-8. Progress JSON export/import.
-9. Installable mobile-first PWA.
+7. English/Spanish browser TTS, automatic pronunciation and listening mode.
+8. Per-item next-review details, review history summary and transparent scheduler explanations.
+9. Progress JSON export/import.
+10. Installable mobile-first PWA with a safe one-click reload of the latest Web resources.
 
 Not in MVP:
 
 - Native apps, normal passwords, social login or public SaaS.
 - Family invitation/role/admin system or real-time collaboration.
-- Cloudflare progress API, D1/KV/R2 or a custom backend framework.
+- D1/KV/R2 or a general backend/admin framework.
 - Advanced card types, cloud TTS, pronunciation scoring or push notifications.
 - Payment, ads, analytics platform or community decks.
 
@@ -93,6 +95,6 @@ npx supabase test db
 npm run deploy
 ```
 
-Copy `.env.example` to `.env.local` and provide only the public Supabase URL/publishable key and card repository URL. The linked Supabase project now has the `english_recall` schema, explicit grants and RLS; no privileged browser credential is required.
+Copy `.env.example` to `.env.local` for the public card repository URL. The browser calls same-origin `/api`; Supabase URL, secret key, family owner UUID, pairing code and device-session signing secret are configured only as Cloudflare Worker Secrets.
 
 The Supabase local stack and pgTAP database tests require Docker or another compatible container runtime.

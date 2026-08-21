@@ -1,16 +1,21 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { LearnerProfile } from '../../src/domain/profile';
 import {
+  createLocalLearnerProfile,
   createLearnerProfile,
+  findLearnerProfileForContent,
+  linkLocalLearnerProfile,
+  listLocalLearnerProfiles,
   loadCachedLearnerProfiles,
   loadLearnerProfiles,
+  updateLearnerProfileSettings,
   type LearnerProfileLocalStore,
   type LearnerProfileRepository,
 } from '../../src/features/profiles/profileRepository';
 
 const profile: LearnerProfile = {
   learnerProfileId: 'profile-1',
-  userId: 'user-1',
+  cloudSyncId: 'family',
   displayName: 'Manman',
   contentProfileId: 'manman',
   uiLang: 'zh-CN',
@@ -19,18 +24,22 @@ const profile: LearnerProfile = {
   englishVoiceLocale: 'en-US',
   spanishVoiceLocale: 'es-MX',
   ttsRate: 1,
+  autoSpeak: true,
   listeningModeDefault: false,
   dailyNewCardLimit: 10,
 };
 
 function dependencies() {
   const remote: LearnerProfileRepository = {
-    listByUser: vi.fn().mockResolvedValue([profile]),
+    list: vi.fn().mockResolvedValue([profile]),
     create: vi.fn().mockResolvedValue(profile),
+    update: vi.fn().mockResolvedValue(profile),
   };
   const local: LearnerProfileLocalStore = {
-    listByUser: vi.fn().mockResolvedValue([profile]),
-    replaceForUser: vi.fn().mockResolvedValue(undefined),
+    listAll: vi.fn().mockResolvedValue([profile]),
+    getById: vi.fn().mockResolvedValue(profile),
+    listCloudLinked: vi.fn().mockResolvedValue([profile]),
+    replaceCloudLinked: vi.fn().mockResolvedValue(undefined),
     put: vi.fn().mockResolvedValue(undefined),
   };
 
@@ -38,26 +47,94 @@ function dependencies() {
 }
 
 describe('LearnerProfile use cases', () => {
+  it('resolves one progress identity for a GitHub content profile', () => {
+    const older = { ...profile, learnerProfileId: 'older' };
+    const preferred = { ...profile, learnerProfileId: 'preferred' };
+
+    expect(findLearnerProfileForContent([older, preferred], 'manman', 'preferred')).toEqual(preferred);
+    expect(findLearnerProfileForContent([older, preferred], 'other')).toBeUndefined();
+  });
+
+  it('lists every locally available learner without an account', async () => {
+    const { local } = dependencies();
+
+    await expect(listLocalLearnerProfiles(local)).resolves.toEqual([profile]);
+    expect(local.listAll).toHaveBeenCalledOnce();
+  });
+
   it('loads cached profiles without requiring the remote repository', async () => {
     const { local } = dependencies();
 
-    await expect(loadCachedLearnerProfiles('user-1', local)).resolves.toEqual([profile]);
-    expect(local.listByUser).toHaveBeenCalledWith('user-1');
+    await expect(loadCachedLearnerProfiles(local)).resolves.toEqual([profile]);
+    expect(local.listCloudLinked).toHaveBeenCalledOnce();
   });
 
   it('refreshes the local cache after loading remote profiles', async () => {
     const { remote, local } = dependencies();
 
-    await expect(loadLearnerProfiles('user-1', remote, local)).resolves.toEqual([profile]);
-    expect(local.replaceForUser).toHaveBeenCalledWith('user-1', [profile]);
+    await expect(loadLearnerProfiles(remote, local)).resolves.toEqual([profile]);
+    expect(local.replaceCloudLinked).toHaveBeenCalledWith([profile]);
   });
 
   it('writes a newly created remote profile to the local store', async () => {
     const { remote, local } = dependencies();
-    const input = { userId: 'user-1', displayName: 'Manman', contentProfileId: 'manman' };
+    const input = { displayName: 'Manman', contentProfileId: 'manman' };
 
     await expect(createLearnerProfile(input, remote, local)).resolves.toEqual(profile);
     expect(remote.create).toHaveBeenCalledWith(input);
     expect(local.put).toHaveBeenCalledWith(profile);
+  });
+
+  it('updates profile settings remotely and refreshes the local cache', async () => {
+    const { remote, local } = dependencies();
+    const settings = {
+      uiLang: 'zh-CN' as const,
+      nativeLang: 'zh-CN',
+      defaultLearningLang: 'en',
+      englishVoiceLocale: 'en-GB' as const,
+      spanishVoiceLocale: 'es-MX' as const,
+      ttsRate: 0.75 as const,
+      autoSpeak: false,
+      listeningModeDefault: true,
+      dailyNewCardLimit: 5,
+    };
+    const updated = { ...profile, ...settings };
+    vi.mocked(remote.update).mockResolvedValue(updated);
+
+    await expect(updateLearnerProfileSettings(profile, settings, remote, local)).resolves.toEqual(updated);
+    expect(remote.update).toHaveBeenCalledWith({ learnerProfileId: 'profile-1', settings });
+    expect(local.put).toHaveBeenCalledWith(updated);
+  });
+
+  it('links an existing local learner without changing its identifier', async () => {
+    const { remote, local } = dependencies();
+    const localProfile = { ...profile };
+    delete localProfile.cloudSyncId;
+
+    await expect(linkLocalLearnerProfile(localProfile, remote, local)).resolves.toEqual(profile);
+    expect(remote.create).toHaveBeenCalledWith({
+      learnerProfileId: 'profile-1',
+      displayName: 'Manman',
+      contentProfileId: 'manman',
+    });
+  });
+
+  it('creates a local-only learner without an account identifier', async () => {
+    const { local } = dependencies();
+
+    const created = await createLocalLearnerProfile(
+      { displayName: '  本机学习者  ', contentProfileId: 'manman' },
+      local,
+      () => 'local-profile-1',
+    );
+
+    expect(created).toMatchObject({
+      learnerProfileId: 'local-profile-1',
+      displayName: '本机学习者',
+      contentProfileId: 'manman',
+      dailyNewCardLimit: 10,
+    });
+    expect(created).not.toHaveProperty('cloudSyncId');
+    expect(local.put).toHaveBeenCalledWith(created);
   });
 });

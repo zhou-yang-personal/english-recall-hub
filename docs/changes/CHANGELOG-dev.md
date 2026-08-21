@@ -1,5 +1,217 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.7.1-m5-pwa-refresh｜2026-08-21
+
+### Added
+
+- Added a Settings action that unregisters current Service Workers, deletes Cache Storage and reloads the current route with a cache-busting marker.
+- Added the package version to Settings so stale installations can be diagnosed directly.
+- Added unit coverage for route preservation, resource cleanup and cleanup-failure fallback.
+
+### Data safety
+
+- Application-resource refresh does not access or delete IndexedDB, local selection, pending ReviewEvents, sync cursors or the paired-device Cookie.
+- The operation is separate from public content sync, progress sync, learner switching and sign-out.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test -- --run: 56 passed across 18 test files
+npm run build: passed; route chunks and PWA service worker generated
+npx wrangler deploy --dry-run: passed; Worker entry plus 17 static files discovered
+Local production root/Review/Progress/Settings-with-refresh-marker/PWA assets: HTTP 200
+Hosted deployment: Worker version `a73bd97d-572d-4fa7-a143-105c79b3e250`
+Hosted current HTML/hashes/PWA assets: HTTP 200; HTML remains `max-age=0, must-revalidate`
+Hosted entry asset contains version `0.7.1-m5-pwa-refresh`, refresh marker and action label
+Dependencies: unchanged; lock file unchanged.
+Database schema: unchanged.
+```
+
+## 0.7.0-m5-learning-experience｜2026-08-21
+
+### Added
+
+- Added Web Speech pronunciation, manual replay, automatic pronunciation and listening mode.
+- Added synchronized speech/listening/daily-limit Profile settings through the existing Worker and JSON settings column.
+- Added dynamic rating-delay previews and committed next-review feedback.
+- Added a local-first progress route with Note-level recognition/production details and seven-day activity.
+
+### Changed
+
+- Explained Scheduler v1 and labeled remaining-review values as minimum `known` estimates rather than fixed rounds.
+- Simplified mobile navigation and prioritized review actions over maintenance status.
+- Rebuilt cached Card projections once at projection version 2 so existing content gains display text and pronunciation metadata without losing ReviewEvents or ReviewStates.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test -- --run: 53 passed across 17 test files
+npm run build: passed; route chunks and PWA service worker generated
+npx wrangler deploy --dry-run: passed; Worker entry plus 17 static files discovered
+Hosted deployment: Worker version `2b4ffec9-b522-4f71-9726-7505d4281079`
+Hosted Home/Review/Progress/Settings routes, current hashed assets, PWA assets and GitHub profile catalog: HTTP 200
+Hosted unpaired Profile settings write: denied with HTTP 401 as intended
+Dependencies: unchanged; lock file unchanged.
+Database schema: unchanged; existing learner_profiles.settings JSON is extended compatibly.
+```
+
+## 0.6.0-m4-github-profiles｜2026-08-18
+
+### Changed
+
+- Made public GitHub `card/profiles/*` the visible learner catalog; the frontend no longer asks users to create a second learner record.
+- Selecting a GitHub ContentProfile now automatically reuses or creates its internal local/family progress identity.
+- Changed family progress identity creation to be idempotent by ContentProfile and to return the oldest existing row.
+- Collapsed historical duplicate LearnerProfile rows into one visible ContentProfile choice without automatically deleting any data.
+- Added cached-profile fallback when the public GitHub catalog cannot be reached.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 44 passed in 14 files
+npm run build: passed; PWA generated
+Hosted deployment: Worker version `bbd620e1-89ac-439f-b577-e0ceda2e8b3d`
+Hosted Profiles route/new asset/GitHub catalog CORS: passed
+Unauthenticated progress API request: denied with HTTP 401 as intended
+Dependencies: unchanged; lock file unchanged.
+```
+
+## 0.5.1-m4-family-sync｜2026-08-18
+
+### Fixed
+
+- Bound the injected browser `fetch` to `globalThis` so Safari/WebKit-style receivers no longer throw `Illegal invocation` during public card synchronization.
+- Made family learner creation idempotent by normalized display name and ContentProfile.
+- Rejected local-to-cloud linking when an independent same-name cloud learner already exists, preventing silent progress splitting.
+- Upserted a returned cloud learner in the Profiles page instead of appending the same UUID twice.
+- Added an explicit duplicate-record warning and short record suffix for pre-existing same-name learners; no record or progress is automatically deleted.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 41 passed in 13 files
+Hosted deployment: Worker version `6d6059a6-24f4-4a85-a206-18766d151fd3`
+Hosted same-name create: returned existing UUID; Profile count unchanged
+Dependencies: unchanged; lock file changed only for version synchronization
+```
+
+## 0.5.0-m4-family-sync｜2026-08-18
+
+### Changed
+
+- Replaced the user-facing Supabase email/Magic Link flow with one-time family-device pairing.
+- Changed the normal cloud experience to `pair new device once → directly select learner thereafter`.
+- Moved all Supabase progress access behind a same-origin Cloudflare Worker API.
+- Replaced the local `userId` account marker with `cloudSyncId: family`, including a Dexie v2-to-v3 migration.
+- Removed browser Supabase URL/key configuration and the unused `@supabase/supabase-js` dependency.
+
+### Added
+
+- Added HMAC-signed, one-year HttpOnly/Secure/SameSite device grants scoped to `/api`.
+- Added Worker endpoints for pairing status/pair/unpair, family Profile list/create, and ReviewEvent push/pull.
+- Added server-side family-owner checks before every Profile/Event operation; no D1/KV/R2 or backend framework is used.
+- Added local-only LearnerProfile linking that preserves the learner UUID and existing local progress.
+- Added bounded idempotent event upload, incremental `sync_seq` download, canonical replay and transactional cursor updates.
+- Added progress synchronization on Home, after review ratings, on reconnect and by manual action.
+- Added device-pairing, event-sync failure safety and legacy cloud-marker migration tests.
+
+### Security and operations
+
+- Supabase secret key, family owner UUID, pairing code and session signing secret are Worker-only configuration.
+- The pairing code is never stored by the frontend; a signed HttpOnly Cookie is the persisted device grant.
+- Anonymous browsers still cannot access Supabase tables directly; existing RLS remains defense-in-depth.
+- Hosted deployment requires configuring `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `FAMILY_OWNER_USER_ID`, `FAMILY_PAIRING_CODE` and `DEVICE_SESSION_SECRET` as Worker Secrets.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 39 passed in 12 files
+npm run build: passed; PWA generated
+npx wrangler deploy --dry-run: passed; Worker entry plus 16 static files discovered
+Dependencies: removed @supabase/supabase-js; package-lock updated
+Hosted deployment: Worker version `d0b47e8c-f4d8-4987-bd66-ff2e156601c6`
+Hosted pairing/Profile/Event-read smoke: passed; fabricated Event write intentionally not performed
+```
+
+## 0.4.0-m3-content-review｜2026-08-18
+
+### Added
+
+- Added a public GitHub CardSource adapter using the configured `card` branch base URL and native `fetch`.
+- Added Zod validation for Manifest, Templates and formal Notes, including safe repository paths.
+- Added bounded-concurrency Template/Pack retrieval and JSONL parsing that accepts a final record without a newline.
+- Added stable SHA-256 recognition/production Card generation from real templates.
+- Added Dexie v2 `contentSyncStates` and atomic Note/Card/content-version replacement.
+- Added automatic/manual Home content sync with real due, learning, new-card and total-card counts.
+- Added the prioritized local review queue, reveal interaction and unknown/fuzzy/known rating UI.
+- Made a direct Review-route visit synchronize content automatically when the local queue is empty.
+- Connected live ratings to the existing atomic pending ReviewEvent + ReviewState transaction.
+- Added unit/integration coverage for generation, import, unchanged/failure safety, content transactions, queue priority and v1-to-v2 database upgrade.
+
+### Data safety and compatibility
+
+- A failed required fetch, invalid Manifest or zero-valid-Note import leaves the previous local dataset unchanged.
+- Removed/unsupported Cards do not delete historical ReviewEvents or ReviewStates.
+- Null Pack hashes are reported honestly; `manifest.updated_at` remains the current change detector.
+- Invalid Note rows are skipped and reported while valid rows continue importing.
+- Existing v1 IndexedDB LearnerProfiles survive the v2 schema upgrade.
+- No Supabase schema, migration or RLS policy changed.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 31 passed in 10 files
+npm run build: passed; route chunks and PWA service worker generated
+npx wrangler deploy --dry-run: passed; 16 static files discovered
+Real card-source smoke: 27/27 packs, 137 valid Notes, 274 unique Cards, 0 skipped rows
+Dependencies: unchanged; lock file changed only for project version synchronization
+```
+
+## 0.3.3-m2-local-first-profiles｜2026-08-18
+
+### Changed
+
+- Made LearnerProfile selection and creation available without authentication or network access.
+- Redirected the first local Home visit to the learner selector when no learner is selected.
+- Kept previously cached cloud LearnerProfiles locally usable while cloud sync is disconnected.
+- Changed email authentication from the default entry gate to the optional “开启云同步” flow.
+- Preserved the selected local learner when stopping cloud sync.
+- Added a 60-second login-email resend cooldown to reduce accidental Supabase rate-limit exhaustion.
+- Centralized default learner settings for both local and cloud Profile creation.
+- Updated the 4+1 design, requirements, project source and handoff to make local-first access authoritative.
+
+### Added
+
+- Added local-only LearnerProfile creation with no fabricated Account identifier.
+- Added an IndexedDB integration test proving local-only learners persist and remain independent of cloud-user queries.
+- Added local/cloud status labels and an explicit optional cloud checkbox when creating a learner while connected.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test: 21 passed in 6 files
+npm run build: passed; PWA service worker generated
+npx wrangler deploy --dry-run: passed; 13 static files discovered
+Local production preview: /, /profiles, /sign-in, /settings, manifest and service worker returned HTTP 200
+Database migration: not changed
+Dependencies: unchanged; lock file changed only for project version synchronization
+E2E/browser interaction: not configured; no browser executable was available in this environment
+```
+
 ## 0.3.2-m2-account-foundation｜2026-08-18
 
 ### Added

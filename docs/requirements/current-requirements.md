@@ -1,17 +1,18 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.3.2-m2-account-foundation`
-Updated: `2026-08-18`
+Version: `0.7.1-m5-pwa-refresh`
+Updated: `2026-08-21`
 
 ## 1. Product Goal
 
-Build a personal/family Web/PWA that turns formal Notes from GitHub into fast daily active recall on iPhone, Android and desktop, works offline after setup, and synchronizes a learner's progress across devices through a lightweight account backend.
+Build a personal/family Web/PWA that turns formal Notes from GitHub into fast daily active recall on iPhone, Android and desktop, works offline after setup, and synchronizes a learner's progress across paired family devices through a tiny backend.
 
 Primary journey:
 
 ```text
-email OTP sign-in → choose LearnerProfile → sync cards
-→ review/listen offline → save locally → synchronize progress
+read and choose a GitHub ContentProfile without login → prepare progress identity → sync cards
+→ review/listen offline → save locally
+→ optionally pair a new device once to synchronize progress across devices
 ```
 
 ## 2. Product Assumptions
@@ -20,7 +21,7 @@ email OTP sign-in → choose LearnerProfile → sync cards
 - UI is Chinese; learning content is English-first and language-extensible.
 - This is not a public multi-tenant SaaS or course platform.
 - GitHub `card` is the formal content source.
-- IndexedDB is the runtime source; Supabase is the account/progress source.
+- IndexedDB is the runtime source; Worker + Supabase are the optional family progress source.
 - Cloudflare hosts the static PWA.
 - One Supabase project may be shared with other personal apps through the isolated `english_recall` schema.
 
@@ -31,20 +32,26 @@ email OTP sign-in → choose LearnerProfile → sync cards
 - Run in current iOS Safari, Android Chrome and desktop Chrome/Edge.
 - Be installable to a mobile home screen.
 - Open the cached shell offline after one successful load.
+- Provide a one-click “reload latest version” action that resets only Service Worker/Cache Storage resources and performs a cache-busted reload.
+- Never delete IndexedDB learning data, pending ReviewEvents, local selection or the device-grant Cookie during an application-resource refresh.
 
-### R2. Passwordless account
+### R2. Local-first access and one-time device pairing
 
-- Sign in with email OTP through Supabase Auth.
-- Persist the session so normal daily use does not repeatedly request login.
-- Allow offline review when a previously authenticated session cannot refresh.
+- Read the visible learner choices from public GitHub `card/profiles/*`; if offline, use choices derivable from locally cached progress identities.
+- Do not expose manual LearnerProfile creation; selecting a ContentProfile automatically reuses or creates its internal progress identity.
+- Offer a family pairing-code screen only when a new device enables cloud sync.
+- Exchange the pairing code for a signed HttpOnly/Secure/SameSite device Cookie; never place the pairing code in localStorage.
+- Keep normal daily use login-free after pairing and allow offline review when the Worker is unavailable.
 - Never request a GitHub token, Supabase secret key or normal password.
 
 ### R3. Learner and content Profiles
 
-- A user can select or create a LearnerProfile.
-- A LearnerProfile owns settings and progress and references one ContentProfile.
-- A ContentProfile identifies a GitHub content path such as `manman`; it is not an account.
-- Every local and remote progress query is isolated by authenticated user and LearnerProfile.
+- A user directly selects a ContentProfile discovered under GitHub `card/profiles/*` without pairing or login.
+- A ContentProfile identifies the visible learner and GitHub content path such as `manman`; it is not an account.
+- A LearnerProfile is an internal settings/progress identity created or reused automatically for one ContentProfile, and may link to the configured FamilySpace for cloud sync.
+- Local progress is isolated by LearnerProfile; remote progress is additionally constrained to the configured FamilySpace.
+- The same FamilySpace and ContentProfile must reuse the oldest existing LearnerProfile instead of creating another UUID.
+- Historical duplicate LearnerProfiles are not separate visible choices and must not be deleted automatically; migration/deletion requires explicit data-safety handling.
 
 ### R4. Card manifest sync
 
@@ -116,12 +123,12 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Pull events incrementally by monotonically increasing server `sync_seq`.
 - Upsert events locally and replay affected Cards in `sync_seq` order.
 - Store the sync cursor only after local event/state updates commit.
-- Trigger sync on app open, reconnect, review completion, manual action and active-use debounce.
+- When cloud sync is enabled, trigger it on app open, reconnect, review completion, manual action and active-use debounce.
 - Never delete pending events after a failed push.
 
 ### R11. New-device reconstruction
 
-- After the same account signs in on a new device, load its LearnerProfiles.
+- After a new device enters the family pairing code, load its family-linked LearnerProfiles without email authentication.
 - Download content and paged ReviewEvents.
 - Rebuild ReviewState locally before showing synchronized completion.
 - Concurrent events from two devices must converge, not overwrite each other.
@@ -134,13 +141,27 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Fall back from exact locale to language prefix and then system default.
 - Listening mode hides target text until reveal and uses the same Card/ReviewState.
 - Playback failure must not block review.
+- Recognition cards automatically pronounce the target when enabled; production cards pronounce only after reveal.
+- Always provide a manual replay control when pronunciation text exists.
 
 ### R13. Settings and status
 
-- Store display name, language, voice, speed, listening default and daily new limit per LearnerProfile.
+- Store language, voice, speed, listening default and daily new limit per LearnerProfile; the visible learner name comes from ContentProfile.
 - Distinguish content sync from progress sync.
 - Show: local ready, local changes pending, syncing, synchronized, content unchanged/updated, and content/progress failure with local data retained.
 - Never report success before confirmed persistence.
+- Allow editing automatic pronunciation, listening default, locale, speech rate and daily new-card limit; paired Profiles persist these settings through the Worker.
+- Show the current application version and keep application-resource update status separate from content/progress synchronization.
+
+### R13a. Review transparency and progress insights
+
+- Before rating, show the actual Scheduler v1 delay produced by unknown/fuzzy/known for the current Card.
+- After rating commits locally, show the exact next due time without delaying the next Card.
+- Provide a local-first progress route grouped by Note with separate recognition/production states.
+- Show total/unseen/learning/review/mature/due counts, today and recent-seven-day review activity.
+- For each Card show stage, next due time, interval, review count and lapse count.
+- Explain Scheduler v1 in the product UI.
+- Never present a fixed number of remaining reviews. An optional value must be labeled as the minimum additional `known` ratings needed to reach the 90-day mature threshold.
 
 ### R14. Export/import and sign-out safety
 
@@ -164,7 +185,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Native mobile packages or stores.
 - Normal passwords, social login or public registration workflow.
 - Manual conflict resolution or collaborative simultaneous sessions.
-- Custom account backend, Cloudflare progress API, D1/KV/R2.
+- D1/KV/R2, general account backend, family invitations/roles or an admin console.
 - Exact background scheduling or push notifications.
 - Cloud TTS, audio cache, IPA or pronunciation scoring.
 - Payment, advertisements, community decks or analytics platform.
@@ -181,9 +202,9 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 ### NFR2. Security
 
 - Every exposed Supabase table has explicit grants and RLS.
-- Unauthenticated clients cannot read/write Profiles or ReviewEvents.
-- One authenticated user cannot access another user's rows.
-- Frontend contains only Supabase URL/publishable key and public content URL.
+- Browsers can use IndexedDB but cannot read/write Supabase Profiles or ReviewEvents directly.
+- Worker requests require a valid signed device Cookie and every Supabase operation is limited to the configured family owner UUID.
+- Frontend contains only the same-origin API path and public content URL.
 - Secret/service-role keys, database passwords and PATs are never committed or logged.
 
 ### NFR3. Performance
@@ -205,9 +226,9 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 
 | ID | Use case | Acceptance result |
 |---|---|---|
-| UC01 | First sign-in | Email OTP creates a persisted session |
-| UC02 | Daily open | Existing session reaches local Home without repeated login |
-| UC03 | Profile selection | LearnerProfile loads correct content/settings/progress |
+| UC01 | First open | User directly selects a GitHub ContentProfile without login; progress identity is prepared automatically |
+| UC02 | Daily open | Selected LearnerProfile reaches local Home without login |
+| UC03 | New-device cloud connection | One family code entry creates a persisted signed device grant |
 | UC04 | First content sync | Current manifest-listed data imports with honest warnings |
 | UC05 | No-change content sync | Packs are not re-imported |
 | UC06 | Content failure | Last local Cards remain usable |
@@ -217,19 +238,20 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 | UC10 | Offline review | Ratings persist and remain pending offline |
 | UC11 | Reconnect | Pending events upload and progress becomes synchronized |
 | UC12 | Idempotent retry | Retried event creates one remote record |
-| UC13 | New device | Same account reconstructs matching ReviewState |
+| UC13 | New device | Family pairing reconstructs matching ReviewState |
 | UC14 | Concurrent devices | Interleaved events converge on both devices |
-| UC15 | User isolation | RLS blocks cross-user reads/writes |
+| UC15 | Cloud isolation | Direct anonymous access is denied and Worker queries stay within the configured family owner |
 | UC16 | English/Spanish TTS | Locale preference/fallback works |
 | UC17 | Listening mode | Target text remains hidden until reveal |
 | UC18 | Export/import | Progress round-trip succeeds without secrets |
 | UC19 | Sign-out | Session clears without silently deleting local progress |
 | UC20 | PWA install | Home-screen install works on target mobile browsers |
+| UC21 | PWA resource recovery | One action loads current shell resources without deleting IndexedDB progress or device pairing |
 
 ## 8. Delivery Estimate
 
 ```text
-Full Web MVP with account progress sync: 13–15 working days
+Full Web MVP with family progress sync: 13–15 working days
 Production source estimate: 4,500–6,500 LOC
 Test estimate: 1,500–2,300 LOC
 ```
