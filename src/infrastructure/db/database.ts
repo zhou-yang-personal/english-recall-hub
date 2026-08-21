@@ -16,6 +16,7 @@ export interface SyncState {
 export interface ContentSyncState {
   contentProfileId: string;
   manifestUpdatedAt: string;
+  projectionVersion?: number;
   importedAt: string;
   noteCount: number;
   cardCount: number;

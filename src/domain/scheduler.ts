@@ -18,6 +18,10 @@ interface ScheduleResult {
   lapseCount: number;
 }
 
+export interface ReviewSchedulePreview extends ScheduleResult {
+  reviewCount: number;
+}
+
 function timestamp(value: string): number {
   const parsed = Date.parse(value);
 
@@ -85,6 +89,43 @@ function existingSchedule(
   };
 }
 
+export function previewReviewSchedule(
+  current: ReviewState | undefined,
+  rating: ReviewRating,
+  reviewedAt: string,
+): ReviewSchedulePreview {
+  const effectiveAt = monotonicEffectiveAt(current, reviewedAt);
+  const scheduled = current
+    ? existingSchedule(current, rating, effectiveAt)
+    : initialSchedule(rating, effectiveAt);
+
+  return {
+    ...scheduled,
+    reviewCount: (current?.reviewCount ?? 0) + 1,
+  };
+}
+
+export function estimateMinimumKnownRatingsToMature(
+  current: ReviewState | undefined,
+): number {
+  if (current?.state === 'mature') {
+    return 0;
+  }
+
+  let intervalDays = current?.intervalDays ?? 0;
+  let reviews = 0;
+
+  do {
+    intervalDays = Math.min(
+      MAX_INTERVAL_DAYS,
+      Math.max(3, Math.round(intervalDays * 2.5)),
+    );
+    reviews += 1;
+  } while (intervalDays < MATURE_INTERVAL_DAYS);
+
+  return reviews;
+}
+
 export function monotonicEffectiveAt(current: ReviewState | undefined, candidate: string): string {
   const candidateTimestamp = timestamp(candidate);
   const previousTimestamp = current?.lastReviewedAt
@@ -124,9 +165,7 @@ export function applyReviewEvent(
   }
 
   const effectiveAt = monotonicEffectiveAt(current, event.effectiveAt);
-  const scheduled = current
-    ? existingSchedule(current, event.rating, effectiveAt)
-    : initialSchedule(event.rating, effectiveAt);
+  const scheduled = previewReviewSchedule(current, event.rating, effectiveAt);
 
   return {
     learnerProfileId: event.learnerProfileId,

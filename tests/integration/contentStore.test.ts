@@ -19,6 +19,9 @@ const note: NoteRecord = {
   status: 'active',
   source: 'notes.jsonl',
   updatedAt: '2026-08-18T00:00:00Z',
+  noteType: 'word',
+  core: 'hello',
+  meaningCn: '你好',
   payload: {},
 };
 
@@ -31,6 +34,8 @@ const card: CardRecord = {
   status: 'active',
   prompt: 'prompt',
   answer: 'answer',
+  core: 'hello',
+  meaningCn: '你好',
 };
 
 const syncState = {

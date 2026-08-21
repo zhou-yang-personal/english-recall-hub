@@ -19,6 +19,7 @@ describe('generateCardsForNote', () => {
         core: 'work out',
         meaningCn: '奏效',
         pronunciationText: 'work out',
+        pronunciationLang: 'en',
       },
       [
         {
@@ -43,6 +44,7 @@ describe('generateCardsForNote', () => {
       prompt: 'work out 是什么意思？',
       answer: '奏效',
       pronunciationText: 'work out',
+      pronunciationLang: 'en',
     });
     expect(result.warnings).toEqual([]);
   });

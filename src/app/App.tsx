@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { SettingsPage } from '../features/settings/SettingsPage';
-import { useApp } from './AppContext';
 
 const HomePage = lazy(() =>
   import('../features/home/HomePage').then((module) => ({ default: module.HomePage })),
@@ -15,17 +14,18 @@ const PairDevicePage = lazy(() =>
 const ProfilesPage = lazy(() =>
   import('../features/profiles/ProfilesPage').then((module) => ({ default: module.ProfilesPage })),
 );
+const ProgressPage = lazy(() =>
+  import('../features/progress/ProgressPage').then((module) => ({ default: module.ProgressPage })),
+);
 
 const navigation = [
   { to: '/', label: '首页', end: true },
   { to: '/review', label: '复习' },
-  { to: '/profiles', label: '学习者' },
+  { to: '/progress', label: '进度' },
   { to: '/settings', label: '设置' },
 ] as const;
 
 export function App() {
-  const { cloudStatus, unpairDevice } = useApp();
-
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -47,14 +47,6 @@ export function App() {
               {item.label}
             </NavLink>
           ))}
-          {cloudStatus === 'unpaired' || cloudStatus === 'unavailable' ? (
-            <NavLink to="/pair-device">配对云同步</NavLink>
-          ) : null}
-          {cloudStatus === 'paired' ? (
-            <button className="nav-button" onClick={() => void unpairDevice()} type="button">
-              断开此设备
-            </button>
-          ) : null}
         </nav>
       </header>
 
@@ -66,6 +58,7 @@ export function App() {
             <Route path="/sign-in" element={<Navigate replace to="/pair-device" />} />
             <Route path="/profiles" element={<ProfilesPage />} />
             <Route path="/review" element={<ReviewPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate replace to="/" />} />
           </Routes>

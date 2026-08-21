@@ -3,6 +3,7 @@ import type { LearnerProfile } from '../../domain/profile';
 import type {
   CreateLearnerProfileInput,
   LearnerProfileRepository,
+  UpdateLearnerProfileInput,
 } from '../../features/profiles/profileRepository';
 import type { WorkerApiClient } from './WorkerApiClient';
 
@@ -17,6 +18,7 @@ const profileSchema = z.object({
   englishVoiceLocale: z.enum(['en-US', 'en-GB']),
   spanishVoiceLocale: z.enum(['es-MX', 'es-US', 'es-ES']),
   ttsRate: z.union([z.literal(0.75), z.literal(1), z.literal(1.25)]),
+  autoSpeak: z.boolean().default(true),
   listeningModeDefault: z.boolean(),
   dailyNewCardLimit: z.number().int().min(0).max(100),
 });
@@ -32,6 +34,14 @@ export class WorkerLearnerProfileRepository implements LearnerProfileRepository 
   async create(input: CreateLearnerProfileInput): Promise<LearnerProfile> {
     const result = await this.api.request<{ profile: unknown }>('/profiles', {
       method: 'POST',
+      body: JSON.stringify(input),
+    });
+    return profileSchema.parse(result.profile);
+  }
+
+  async update(input: UpdateLearnerProfileInput): Promise<LearnerProfile> {
+    const result = await this.api.request<{ profile: unknown }>('/profiles', {
+      method: 'PATCH',
       body: JSON.stringify(input),
     });
     return profileSchema.parse(result.profile);

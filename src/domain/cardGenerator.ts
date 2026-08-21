@@ -69,8 +69,13 @@ export async function generateCardsForNote(
         status: note.status,
         prompt,
         answer,
+        core: note.core,
+        meaningCn: note.meaningCn,
         ...(note.pronunciationText
           ? { pronunciationText: note.pronunciationText }
+          : {}),
+        ...(note.pronunciationLang
+          ? { pronunciationLang: note.pronunciationLang }
           : {}),
       });
     }

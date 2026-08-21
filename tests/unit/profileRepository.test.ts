@@ -8,6 +8,7 @@ import {
   listLocalLearnerProfiles,
   loadCachedLearnerProfiles,
   loadLearnerProfiles,
+  updateLearnerProfileSettings,
   type LearnerProfileLocalStore,
   type LearnerProfileRepository,
 } from '../../src/features/profiles/profileRepository';
@@ -23,6 +24,7 @@ const profile: LearnerProfile = {
   englishVoiceLocale: 'en-US',
   spanishVoiceLocale: 'es-MX',
   ttsRate: 1,
+  autoSpeak: true,
   listeningModeDefault: false,
   dailyNewCardLimit: 10,
 };
@@ -31,6 +33,7 @@ function dependencies() {
   const remote: LearnerProfileRepository = {
     list: vi.fn().mockResolvedValue([profile]),
     create: vi.fn().mockResolvedValue(profile),
+    update: vi.fn().mockResolvedValue(profile),
   };
   const local: LearnerProfileLocalStore = {
     listAll: vi.fn().mockResolvedValue([profile]),
@@ -80,6 +83,27 @@ describe('LearnerProfile use cases', () => {
     await expect(createLearnerProfile(input, remote, local)).resolves.toEqual(profile);
     expect(remote.create).toHaveBeenCalledWith(input);
     expect(local.put).toHaveBeenCalledWith(profile);
+  });
+
+  it('updates profile settings remotely and refreshes the local cache', async () => {
+    const { remote, local } = dependencies();
+    const settings = {
+      uiLang: 'zh-CN' as const,
+      nativeLang: 'zh-CN',
+      defaultLearningLang: 'en',
+      englishVoiceLocale: 'en-GB' as const,
+      spanishVoiceLocale: 'es-MX' as const,
+      ttsRate: 0.75 as const,
+      autoSpeak: false,
+      listeningModeDefault: true,
+      dailyNewCardLimit: 5,
+    };
+    const updated = { ...profile, ...settings };
+    vi.mocked(remote.update).mockResolvedValue(updated);
+
+    await expect(updateLearnerProfileSettings(profile, settings, remote, local)).resolves.toEqual(updated);
+    expect(remote.update).toHaveBeenCalledWith({ learnerProfileId: 'profile-1', settings });
+    expect(local.put).toHaveBeenCalledWith(updated);
   });
 
   it('links an existing local learner without changing its identifier', async () => {

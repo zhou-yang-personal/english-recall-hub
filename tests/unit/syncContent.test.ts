@@ -112,7 +112,17 @@ describe('syncContent', () => {
     });
     expect(store.notes).toHaveLength(1);
     expect(store.cards).toHaveLength(2);
-    expect(store.state).toMatchObject({ noteCount: 1, cardCount: 2 });
+    expect(store.notes[0]).toMatchObject({
+      core: 'work out',
+      meaningCn: '奏效',
+      pronunciationLang: 'en',
+    });
+    expect(store.cards[0]).toMatchObject({
+      core: 'work out',
+      meaningCn: '奏效',
+      pronunciationLang: 'en',
+    });
+    expect(store.state).toMatchObject({ noteCount: 1, cardCount: 2, projectionVersion: 2 });
     expect(report.warnings).toContain(
       'Manifest 未提供 Pack 哈希，本次仅按 updated_at 判断内容版本。',
     );
@@ -124,6 +134,7 @@ describe('syncContent', () => {
     store.state = {
       contentProfileId: 'manman',
       manifestUpdatedAt: manifest.updated_at,
+      projectionVersion: 2,
       importedAt: '2026-08-18T01:00:00Z',
       noteCount: 137,
       cardCount: 274,
@@ -135,6 +146,23 @@ describe('syncContent', () => {
       generatedCards: 274,
     });
     expect(source.reads).toEqual([manifestPath]);
+  });
+
+  it('rebuilds local projections when the projection version changes', async () => {
+    const source = new FakeSource(sourceValues());
+    const store = new MemoryContentStore();
+    store.state = {
+      contentProfileId: 'manman',
+      manifestUpdatedAt: manifest.updated_at,
+      projectionVersion: 1,
+      importedAt: '2026-08-18T01:00:00Z',
+      noteCount: 137,
+      cardCount: 274,
+    };
+
+    await expect(syncContent('manman', source, store)).resolves.toMatchObject({ status: 'updated' });
+    expect(source.reads).toEqual([manifestPath, templatePath, packPath]);
+    expect(store.state?.projectionVersion).toBe(2);
   });
 
   it('does not replace the previous content when a required pack fails', async () => {
@@ -149,6 +177,9 @@ describe('syncContent', () => {
       status: 'active',
       source: 'existing.jsonl',
       updatedAt: '2026-08-17T00:00:00Z',
+      noteType: 'word',
+      core: 'existing',
+      meaningCn: '已有',
       payload: {},
     }];
 

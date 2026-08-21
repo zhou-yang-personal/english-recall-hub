@@ -9,7 +9,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 a { color: inherit; }
-button, input { font: inherit; }
+button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: wait; opacity: 0.65; }
 
@@ -58,10 +58,18 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .sync-panel button, .primary-action, .reveal-button { background: #18392b; border: 0; border-radius: 0.7rem; color: #fffaf0; display: inline-block; font-weight: 750; padding: 0.8rem 1rem; text-decoration: none; }
 .sync-panel button { flex: 0 0 auto; }
 .primary-action { margin-top: 0.4rem; }
+.secondary-link { color: #ad4b2a; font-weight: 750; text-decoration: none; }
+.home-actions { align-items: center; display: flex; gap: 1rem; margin: 1.6rem 0; }
+.home-actions .primary-action { margin: 0; }
+.data-status { background: rgba(255, 250, 240, 0.72); border: 1px solid #e4dccd; border-radius: 0.9rem; margin-top: 1.5rem; padding: 0.9rem 1rem; }
+.data-status.error { border-color: #c87a61; }
+.data-status > summary { align-items: center; cursor: pointer; display: flex; justify-content: space-between; }
+.data-status > summary span { color: #65756f; font-size: 0.9rem; }
+.data-status .sync-panel { margin: 0.8rem 0 0; }
 .form-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.7rem; margin-top: 2rem; padding: 1.3rem; }
 .secondary-form { margin-top: 1rem; }
 .form-card label { font-size: 0.86rem; font-weight: 750; }
-.form-card input { background: white; border: 1px solid #b8c2bc; border-radius: 0.65rem; color: inherit; padding: 0.8rem; }
+.form-card input, .field-grid input, .field-grid select, .progress-toolbar input { background: white; border: 1px solid #b8c2bc; border-radius: 0.65rem; color: inherit; padding: 0.8rem; }
 .form-card button { background: #18392b; border: 0; border-radius: 0.65rem; color: #fffaf0; font-weight: 750; padding: 0.8rem 1rem; }
 .status-message { background: #e3eadc; border-radius: 0.7rem; padding: 0.8rem 1rem; }
 .profile-list { display: grid; gap: 0.8rem; margin-top: 2rem; }
@@ -78,29 +86,103 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .cloud-option a, .setting-card a { color: #ad4b2a; font-weight: 750; }
 .setting-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.6rem; margin-top: 2rem; padding: 1.3rem; }
 .setting-card span { color: #65756f; }
+.setting-card > div:first-child { display: grid; gap: 0.25rem; }
+.settings-form { display: grid; gap: 1rem; }
+.settings-form .setting-card { margin-top: 0; }
+.toggle-row { align-items: center; border-top: 1px solid #e4dccd; display: flex; gap: 1rem; justify-content: space-between; padding-top: 0.9rem; }
+.toggle-row > span { display: grid; gap: 0.2rem; }
+.toggle-row small { color: #65756f; font-weight: 400; line-height: 1.4; }
+.toggle-row input { height: 1.3rem; width: 1.3rem; }
+.field-grid { display: grid !important; gap: 0.9rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.field-grid label { display: grid; font-size: 0.86rem; font-weight: 750; gap: 0.35rem; }
 .review-page { padding-top: clamp(2rem, 5vw, 4rem); }
 .review-progress { color: #65756f; display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.review-progress-track { background: #e4dccd; border-radius: 999px; height: 0.35rem; margin: -0.55rem 0 1rem; overflow: hidden; }
+.review-progress-track span { background: #ad4b2a; display: block; height: 100%; transition: width 180ms ease; }
+.review-tools { display: flex; gap: 0.6rem; justify-content: flex-end; margin-bottom: 0.8rem; }
+.review-tools button, .listening-prompt button { background: #e3eadc; border: 0; border-radius: 999px; color: #173128; font-weight: 750; padding: 0.55rem 0.8rem; }
+.review-tools button.active { background: #18392b; color: #fffaf0; }
 .review-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1.4rem; min-height: 25rem; padding: clamp(1.5rem, 5vw, 3rem); }
 .review-card h1 { font-size: clamp(1.8rem, 4vw, 3.5rem); line-height: 1.2; margin-top: 1.4rem; overflow-wrap: anywhere; }
 .card-kind { background: #e3eadc; border-radius: 999px; color: #52635c; display: inline-block; font-size: 0.8rem; font-weight: 800; padding: 0.35rem 0.65rem; }
 .answer-panel { border-top: 1px solid #e4dccd; display: grid; gap: 0.7rem; margin-top: 2rem; padding-top: 1.5rem; }
 .answer-panel span { color: #ad4b2a; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.12em; }
 .answer-panel strong { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1.35; overflow-wrap: anywhere; }
+.answer-panel p { color: #52635c; margin: 0; }
+.listening-prompt { align-items: center; display: flex; flex-direction: column; justify-content: center; min-height: 16rem; text-align: center; }
+.listening-prompt > span { color: #ad4b2a; font-size: 2rem; }
+.listening-prompt h1 { font-size: clamp(1.6rem, 3vw, 2.4rem); }
 .reveal-button { margin-top: 2rem; width: 100%; }
 .rating-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(3, 1fr); margin-top: 1rem; }
 .rating-grid button { background: #fffaf0; border: 1px solid #b8c2bc; border-radius: 0.9rem; color: inherit; display: grid; gap: 0.35rem; padding: 1rem; }
 .rating-grid button:hover { border-color: #18392b; }
 .rating-grid span { color: #65756f; font-size: 0.82rem; }
+.schedule-notice { background: #e3eadc; border-radius: 0.7rem; color: #365247 !important; font-size: 0.9rem !important; margin: 0 0 0.8rem; padding: 0.7rem 0.9rem; }
+.completion-actions { align-items: center; display: flex; gap: 1rem; }
 .completion-card .primary-action { margin-top: 1rem; }
 .route-loading { color: #65756f; padding: 2rem; text-align: center; }
 
+.progress-page h1 { max-width: 13ch; }
+.insight-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 2rem 0; }
+.insight-grid article { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.35rem; padding: 1rem; }
+.insight-grid strong { font-family: Georgia, serif; font-size: 2rem; }
+.insight-grid span { color: #65756f; font-size: 0.86rem; }
+.activity-card { align-items: center; background: #18392b; border-radius: 1.2rem; color: #fffaf0; display: grid; gap: 2rem; grid-template-columns: minmax(10rem, 0.5fr) 1fr; padding: 1.3rem; }
+.activity-card h2 { font-family: Georgia, "Noto Serif SC", serif; margin: 0.2rem 0; }
+.section-kicker { color: #d9b49f; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.13em; margin: 0; text-transform: uppercase; }
+.activity-bars { align-items: end; display: grid; gap: 0.55rem; grid-template-columns: repeat(7, 1fr); min-height: 7rem; }
+.activity-day { align-items: center; display: flex; flex-direction: column; gap: 0.25rem; justify-content: end; }
+.activity-day strong, .activity-day small { font-size: 0.72rem; }
+.activity-bar { background: #d68b67; border-radius: 999px 999px 0.25rem 0.25rem; display: block; min-height: 0.35rem; width: min(1.5rem, 70%); }
+.mechanism-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; margin: 1rem 0 2rem; padding: 1rem 1.2rem; }
+.mechanism-card summary { cursor: pointer; font-weight: 800; }
+.mechanism-card p { color: #52635c; line-height: 1.55; }
+.progress-toolbar { align-items: center; display: flex; gap: 1rem; justify-content: space-between; margin: 1.5rem 0 1rem; }
+.filter-row { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.filter-row button { background: #fffaf0; border: 1px solid #d7cdbd; border-radius: 999px; color: inherit; padding: 0.5rem 0.75rem; }
+.filter-row button.active { background: #18392b; border-color: #18392b; color: #fffaf0; }
+.progress-toolbar input { min-width: 13rem; }
+.progress-list { display: grid; gap: 0.8rem; }
+.progress-item { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; padding: 0.95rem 1.1rem; }
+.progress-item > summary { align-items: center; cursor: pointer; display: flex; gap: 1rem; justify-content: space-between; list-style: none; }
+.progress-item > summary::-webkit-details-marker { display: none; }
+.progress-item > summary > span:first-child { display: grid; gap: 0.25rem; }
+.progress-item > summary small { color: #65756f; }
+.stage-pill { background: #edf0e8; border-radius: 999px; flex: 0 0 auto; font-size: 0.78rem; font-weight: 800; padding: 0.38rem 0.62rem; }
+.stage-pill.mature { background: #d9eadc; }
+.stage-pill.learning { background: #f0e4cb; }
+.card-progress-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 1rem; }
+.card-progress-grid article { background: #f7f2e8; border-radius: 0.8rem; padding: 0.9rem; }
+.card-progress-grid article > div { display: flex; justify-content: space-between; }
+.card-progress-grid article > div span { color: #ad4b2a; font-size: 0.82rem; font-weight: 750; }
+.card-progress-grid dl { display: grid; gap: 0.45rem; margin: 0.8rem 0; }
+.card-progress-grid dl div { display: flex; gap: 0.8rem; justify-content: space-between; }
+.card-progress-grid dt { color: #65756f; }
+.card-progress-grid dd { font-weight: 650; margin: 0; text-align: right; }
+.card-progress-grid p { color: #52635c; font-size: 0.82rem; line-height: 1.45; margin-bottom: 0; }
+
 @media (max-width: 760px) {
-  .app-header { align-items: flex-start; gap: 1rem; }
+  body { padding-bottom: calc(4.4rem + env(safe-area-inset-bottom)); }
+  .app-header { padding: 0.8rem 1rem; }
+  .brand-mark { height: 2.2rem; width: 2.2rem; }
   .brand small { display: none; }
-  nav { flex-wrap: wrap; justify-content: flex-end; }
-  nav a { font-size: 0.9rem; padding: 0.45rem 0.65rem; }
+  nav { background: rgba(255, 250, 240, 0.96); border-top: 1px solid #e4dccd; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); left: 0; padding: 0.45rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom)); position: fixed; right: 0; z-index: 20; }
+  nav a { font-size: 0.82rem; padding: 0.55rem 0.35rem; text-align: center; }
   .hero { grid-template-columns: 1fr; }
+  .page { padding-top: 2.3rem; }
+  .home-actions { align-items: stretch; flex-direction: column; }
+  .home-actions .secondary-link { text-align: center; }
   .profile-card { align-items: flex-start; flex-direction: column; gap: 0.45rem; }
   .sync-panel { align-items: stretch; flex-direction: column; }
-  .rating-grid { grid-template-columns: 1fr; }
+  .review-card { min-height: 20rem; }
+  .rating-grid { bottom: calc(4.3rem + env(safe-area-inset-bottom)); gap: 0.45rem; position: sticky; z-index: 10; }
+  .rating-grid button { padding: 0.8rem 0.35rem; }
+  .rating-grid span { font-size: 0.72rem; }
+  .insight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .activity-card { grid-template-columns: 1fr; }
+  .progress-toolbar { align-items: stretch; flex-direction: column; }
+  .progress-toolbar input { min-width: 0; width: 100%; }
+  .card-progress-grid { grid-template-columns: 1fr; }
+  .field-grid { grid-template-columns: 1fr; }
+  .completion-actions { align-items: stretch; flex-direction: column; }
 }

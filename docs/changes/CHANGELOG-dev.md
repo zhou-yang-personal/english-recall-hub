@@ -1,5 +1,35 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.7.0-m5-learning-experience｜2026-08-21
+
+### Added
+
+- Added Web Speech pronunciation, manual replay, automatic pronunciation and listening mode.
+- Added synchronized speech/listening/daily-limit Profile settings through the existing Worker and JSON settings column.
+- Added dynamic rating-delay previews and committed next-review feedback.
+- Added a local-first progress route with Note-level recognition/production details and seven-day activity.
+
+### Changed
+
+- Explained Scheduler v1 and labeled remaining-review values as minimum `known` estimates rather than fixed rounds.
+- Simplified mobile navigation and prioritized review actions over maintenance status.
+- Rebuilt cached Card projections once at projection version 2 so existing content gains display text and pronunciation metadata without losing ReviewEvents or ReviewStates.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test -- --run: 53 passed across 17 test files
+npm run build: passed; route chunks and PWA service worker generated
+npx wrangler deploy --dry-run: passed; Worker entry plus 17 static files discovered
+Hosted deployment: Worker version `2b4ffec9-b522-4f71-9726-7505d4281079`
+Hosted Home/Review/Progress/Settings routes, current hashed assets, PWA assets and GitHub profile catalog: HTTP 200
+Hosted unpaired Profile settings write: denied with HTTP 401 as intended
+Dependencies: unchanged; lock file unchanged.
+Database schema: unchanged; existing learner_profiles.settings JSON is extended compatibly.
+```
+
 ## 0.6.0-m4-github-profiles｜2026-08-18
 
 ### Changed

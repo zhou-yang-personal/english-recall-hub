@@ -113,4 +113,54 @@ describe('Worker device pairing', () => {
     });
     expect(fetcher).toHaveBeenCalledOnce();
   });
+
+  it('updates only a paired family profile with validated settings', async () => {
+    const env = environment();
+    const pairResponse = await handleApiRequest(
+      new Request('https://app.example/api/device/pair', {
+        method: 'POST',
+        headers: { origin: 'https://app.example', 'content-type': 'application/json' },
+        body: JSON.stringify({ pairingCode: env.FAMILY_PAIRING_CODE }),
+      }),
+      env,
+    );
+    const cookie = pairResponse.headers.get('set-cookie')!.split(';')[0]!;
+    const settings = {
+      uiLang: 'zh-CN',
+      nativeLang: 'zh-CN',
+      defaultLearningLang: 'en',
+      englishVoiceLocale: 'en-GB',
+      spanishVoiceLocale: 'es-MX',
+      ttsRate: 0.75,
+      autoSpeak: false,
+      listeningModeDefault: true,
+      dailyNewCardLimit: 5,
+    };
+    const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify([{
+      learner_profile_id: '22222222-2222-4222-8222-222222222222',
+      display_name: 'manman',
+      content_profile_id: 'manman',
+      settings,
+    }]), { headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetcher);
+
+    const response = await handleApiRequest(
+      new Request('https://app.example/api/profiles', {
+        method: 'PATCH',
+        headers: { cookie, origin: 'https://app.example', 'content-type': 'application/json' },
+        body: JSON.stringify({
+          learnerProfileId: '22222222-2222-4222-8222-222222222222',
+          settings,
+        }),
+      }),
+      env,
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      profile: { learnerProfileId: '22222222-2222-4222-8222-222222222222', autoSpeak: false },
+    });
+    expect(fetcher).toHaveBeenCalledOnce();
+    expect(fetcher.mock.calls[0]?.[1]).toMatchObject({ method: 'PATCH' });
+  });
 });

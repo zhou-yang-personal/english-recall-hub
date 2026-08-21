@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.6.0-m4-github-profiles`
+Version: `0.7.0-m5-learning-experience`
 Updated: `2026-08-18`
 
 ## 1. Product Goal
@@ -139,6 +139,8 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Fall back from exact locale to language prefix and then system default.
 - Listening mode hides target text until reveal and uses the same Card/ReviewState.
 - Playback failure must not block review.
+- Recognition cards automatically pronounce the target when enabled; production cards pronounce only after reveal.
+- Always provide a manual replay control when pronunciation text exists.
 
 ### R13. Settings and status
 
@@ -146,6 +148,17 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Distinguish content sync from progress sync.
 - Show: local ready, local changes pending, syncing, synchronized, content unchanged/updated, and content/progress failure with local data retained.
 - Never report success before confirmed persistence.
+- Allow editing automatic pronunciation, listening default, locale, speech rate and daily new-card limit; paired Profiles persist these settings through the Worker.
+
+### R13a. Review transparency and progress insights
+
+- Before rating, show the actual Scheduler v1 delay produced by unknown/fuzzy/known for the current Card.
+- After rating commits locally, show the exact next due time without delaying the next Card.
+- Provide a local-first progress route grouped by Note with separate recognition/production states.
+- Show total/unseen/learning/review/mature/due counts, today and recent-seven-day review activity.
+- For each Card show stage, next due time, interval, review count and lapse count.
+- Explain Scheduler v1 in the product UI.
+- Never present a fixed number of remaining reviews. An optional value must be labeled as the minimum additional `known` ratings needed to reach the 90-day mature threshold.
 
 ### R14. Export/import and sign-out safety
 

@@ -6,6 +6,11 @@ export interface NoteRecord {
   status: ContentStatus;
   source: string;
   updatedAt: string;
+  noteType: string;
+  core: string;
+  meaningCn: string;
+  pronunciationText?: string;
+  pronunciationLang?: string;
   payload: unknown;
 }
 
@@ -18,7 +23,10 @@ export interface CardRecord {
   status: ContentStatus;
   prompt: string;
   answer: string;
+  core: string;
+  meaningCn: string;
   pronunciationText?: string;
+  pronunciationLang?: string;
 }
 
 export interface CardTemplateDefinition {
@@ -39,4 +47,5 @@ export interface CardGenerationNote {
   core: string;
   meaningCn: string;
   pronunciationText?: string;
+  pronunciationLang?: string;
 }

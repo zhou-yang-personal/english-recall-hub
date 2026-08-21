@@ -27,6 +27,8 @@ const card = (cardId: string): CardRecord => ({
   status: 'active',
   prompt: cardId,
   answer: cardId,
+  core: cardId,
+  meaningCn: cardId,
 });
 
 const state = (

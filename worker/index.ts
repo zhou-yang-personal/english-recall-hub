@@ -42,6 +42,18 @@ interface RemoteReviewEventRow {
   scheduler_version: 1;
 }
 
+interface ProfileSettings {
+  uiLang: 'zh-CN';
+  nativeLang: string;
+  defaultLearningLang: string;
+  englishVoiceLocale: 'en-US' | 'en-GB';
+  spanishVoiceLocale: 'es-MX' | 'es-US' | 'es-ES';
+  ttsRate: 0.75 | 1 | 1.25;
+  autoSpeak: boolean;
+  listeningModeDefault: boolean;
+  dailyNewCardLimit: number;
+}
+
 const encoder = new TextEncoder();
 
 function json(body: unknown, status = 200, headers?: HeadersInit): Response {
@@ -243,9 +255,35 @@ function toClientProfile(row: RemoteProfileRow): Record<string, unknown> {
     englishVoiceLocale: row.settings.englishVoiceLocale,
     spanishVoiceLocale: row.settings.spanishVoiceLocale,
     ttsRate: row.settings.ttsRate,
+    autoSpeak: typeof row.settings.autoSpeak === 'boolean' ? row.settings.autoSpeak : true,
     listeningModeDefault: row.settings.listeningModeDefault,
     dailyNewCardLimit: row.settings.dailyNewCardLimit,
   };
+}
+
+function isProfileSettings(value: unknown): value is ProfileSettings {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const settings = value as Record<string, unknown>;
+  return settings.uiLang === 'zh-CN'
+    && typeof settings.nativeLang === 'string'
+    && /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})?$/u.test(settings.nativeLang)
+    && typeof settings.defaultLearningLang === 'string'
+    && /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})?$/u.test(settings.defaultLearningLang)
+    && (settings.englishVoiceLocale === 'en-US' || settings.englishVoiceLocale === 'en-GB')
+    && (
+      settings.spanishVoiceLocale === 'es-MX'
+      || settings.spanishVoiceLocale === 'es-US'
+      || settings.spanishVoiceLocale === 'es-ES'
+    )
+    && (settings.ttsRate === 0.75 || settings.ttsRate === 1 || settings.ttsRate === 1.25)
+    && typeof settings.autoSpeak === 'boolean'
+    && typeof settings.listeningModeDefault === 'boolean'
+    && Number.isInteger(settings.dailyNewCardLimit)
+    && Number(settings.dailyNewCardLimit) >= 0
+    && Number(settings.dailyNewCardLimit) <= 100;
 }
 
 function toClientEvent(row: RemoteReviewEventRow): Record<string, unknown> {
@@ -338,6 +376,7 @@ async function createProfile(request: Request, env: WorkerEnv): Promise<Response
         englishVoiceLocale: 'en-US',
         spanishVoiceLocale: 'es-MX',
         ttsRate: 1,
+        autoSpeak: true,
         listeningModeDefault: false,
         dailyNewCardLimit: 10,
       },
@@ -351,6 +390,43 @@ async function createProfile(request: Request, env: WorkerEnv): Promise<Response
   }
 
   return json({ profile: toClientProfile(row) }, 201);
+}
+
+async function updateProfile(request: Request, env: WorkerEnv): Promise<Response> {
+  const body = await readJson(request) as {
+    learnerProfileId?: unknown;
+    settings?: unknown;
+  };
+  const learnerProfileId = typeof body.learnerProfileId === 'string'
+    ? body.learnerProfileId
+    : '';
+
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(learnerProfileId)) {
+    return apiError(400, 'INVALID_LEARNER_PROFILE_ID', '学习者标识无效。');
+  }
+
+  if (!isProfileSettings(body.settings)) {
+    return apiError(400, 'INVALID_PROFILE_SETTINGS', '学习设置无效。');
+  }
+
+  const query = new URLSearchParams({
+    select: 'learner_profile_id,display_name,content_profile_id,settings',
+    learner_profile_id: `eq.${learnerProfileId}`,
+    user_id: `eq.${env.FAMILY_OWNER_USER_ID}`,
+  });
+  const response = await supabaseRequest(env, `learner_profiles?${query}`, {
+    method: 'PATCH',
+    headers: { prefer: 'return=representation' },
+    body: JSON.stringify({ settings: body.settings }),
+  });
+  const rows = await response.json() as RemoteProfileRow[];
+  const row = rows[0];
+
+  if (!row) {
+    return apiError(404, 'PROFILE_NOT_FOUND', '未找到该学习者。');
+  }
+
+  return json({ profile: toClientProfile(row) });
 }
 
 async function ownerProfileIds(env: WorkerEnv): Promise<Set<string>> {
@@ -508,6 +584,10 @@ export async function handleApiRequest(request: Request, env: WorkerEnv): Promis
 
     if (url.pathname === '/api/profiles' && request.method === 'POST') {
       return await createProfile(request, env);
+    }
+
+    if (url.pathname === '/api/profiles' && request.method === 'PATCH') {
+      return await updateProfile(request, env);
     }
 
     if (url.pathname === '/api/review-events' && request.method === 'POST') {

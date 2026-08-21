@@ -181,31 +181,42 @@ export function HomePage() {
         <p className="lead">
           卡片和复习进度保存在本机。联网时会检查公开学习内容，断网后仍可使用已导入的卡片。
         </p>
-        <div className={`sync-panel ${syncStatus === 'failed' ? 'error' : ''}`}>
-          <span role="status">{syncMessage}</span>
-          <button
-            disabled={syncStatus === 'syncing'}
-            onClick={() => void manuallySyncContent()}
-            type="button"
-          >
-            {syncStatus === 'syncing' ? '同步中…' : '同步学习内容'}
-          </button>
+        <div className="home-actions">
+          {summary.due + summary.newCards > 0 ? (
+            <Link className="primary-action" to="/review">开始复习</Link>
+          ) : (
+            <Link className="primary-action" to="/progress">查看学习进度</Link>
+          )}
+          <Link className="secondary-link" to="/progress">查看全部进度</Link>
         </div>
-        <div className={`sync-panel ${progressStatus === 'failed' ? 'error' : ''}`}>
-          <span role="status">{progressMessage}</span>
-          {cloudStatus === 'paired' && activeProfile.cloudSyncId ? (
+        <details className={`data-status ${syncStatus === 'failed' || progressStatus === 'failed' ? 'error' : ''}`}>
+          <summary>
+            <strong>数据状态</strong>
+            <span>{syncStatus === 'syncing' || progressStatus === 'syncing' ? '正在同步…' : syncStatus === 'failed' || progressStatus === 'failed' ? '部分同步失败' : '本机数据已准备'}</span>
+          </summary>
+          <div className={`sync-panel ${syncStatus === 'failed' ? 'error' : ''}`}>
+            <span role="status">{syncMessage}</span>
             <button
-              disabled={progressStatus === 'syncing'}
-              onClick={() => void manuallySyncProgress()}
+              disabled={syncStatus === 'syncing'}
+              onClick={() => void manuallySyncContent()}
               type="button"
             >
-              {progressStatus === 'syncing' ? '同步中…' : '同步复习进度'}
+              {syncStatus === 'syncing' ? '同步中…' : '同步学习内容'}
             </button>
-          ) : null}
-        </div>
-        {summary.due + summary.newCards > 0 ? (
-          <Link className="primary-action" to="/review">开始复习</Link>
-        ) : null}
+          </div>
+          <div className={`sync-panel ${progressStatus === 'failed' ? 'error' : ''}`}>
+            <span role="status">{progressMessage}</span>
+            {cloudStatus === 'paired' && activeProfile.cloudSyncId ? (
+              <button
+                disabled={progressStatus === 'syncing'}
+                onClick={() => void manuallySyncProgress()}
+                type="button"
+              >
+                {progressStatus === 'syncing' ? '同步中…' : '同步复习进度'}
+              </button>
+            ) : null}
+          </div>
+        </details>
       </div>
       <div className="metric-grid" aria-label="复习概览">
         <article><strong>{summary.due}</strong><span>到期</span></article>

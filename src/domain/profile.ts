@@ -10,6 +10,7 @@ export interface LearnerProfile {
   englishVoiceLocale: 'en-US' | 'en-GB';
   spanishVoiceLocale: 'es-MX' | 'es-US' | 'es-ES';
   ttsRate: 0.75 | 1 | 1.25;
+  autoSpeak: boolean;
   listeningModeDefault: boolean;
   dailyNewCardLimit: number;
 }
@@ -21,6 +22,7 @@ export const DEFAULT_LEARNER_PROFILE_SETTINGS = {
   englishVoiceLocale: 'en-US',
   spanishVoiceLocale: 'es-MX',
   ttsRate: 1,
+  autoSpeak: true,
   listeningModeDefault: false,
   dailyNewCardLimit: 10,
 } as const satisfies Omit<

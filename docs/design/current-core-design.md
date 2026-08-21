@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.6.0-m4-github-profiles`
+Version: `0.7.0-m5-learning-experience`
 Updated: `2026-08-18`
 Branch: `dev`
 
@@ -144,6 +144,14 @@ Mature begins at 90 days. The scheduler is a pure function shared by live rating
 - Web Speech supports English and Spanish locale fallback at 0.75/1.0/1.25 speed.
 - Listening mode hides target text until reveal and reuses normal progress.
 - No audio-file cache, cloud TTS, IPA or pronunciation scoring.
+
+## 8.1 Review transparency and progress insights
+
+- Rating actions preview their actual Scheduler v1 delay before commit.
+- The UI shows the committed next due time after every rating.
+- Progress is computed locally from synchronized ReviewEvents, ReviewStates, Notes and Cards; no analytics backend is introduced.
+- The progress view groups recognition and production Cards by Note and shows stage, next due time, interval, review count and lapse count for each direction.
+- “Remaining rounds” is presented only as an estimate of the minimum future `known` ratings needed to reach the 90-day mature threshold; the product never claims a fixed completion count.
 
 ## 9. Security Boundaries
 

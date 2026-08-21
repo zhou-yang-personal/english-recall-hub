@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.6.0-m4-github-profiles",
+  "version": "0.7.0-m5-learning-experience",
   "type": "module",
   "scripts": {
     "dev": "vite",

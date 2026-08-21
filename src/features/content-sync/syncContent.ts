@@ -15,6 +15,8 @@ import {
 import type { CardContentSource } from './contentSource';
 import type { ContentStore } from './contentStore';
 
+export const CONTENT_PROJECTION_VERSION = 2;
+
 export interface ContentSyncReport {
   status: 'unchanged' | 'updated';
   requestedPacks: number;
@@ -138,6 +140,9 @@ function toGenerationNote(note: NotePayload): CardGenerationNote {
     ...(note.pronunciation?.text
       ? { pronunciationText: note.pronunciation.text }
       : {}),
+    ...(note.pronunciation?.lang
+      ? { pronunciationLang: note.pronunciation.lang }
+      : {}),
   };
 }
 
@@ -158,7 +163,10 @@ export async function syncContent(
 
   const previous = await store.getSyncState(contentProfileId);
 
-  if (previous?.manifestUpdatedAt === manifest.updated_at) {
+  if (
+    previous?.manifestUpdatedAt === manifest.updated_at
+    && previous.projectionVersion === CONTENT_PROJECTION_VERSION
+  ) {
     return {
       status: 'unchanged',
       requestedPacks: manifest.packs.length,
@@ -222,6 +230,15 @@ export async function syncContent(
       status: payload.status,
       source: noteSource,
       updatedAt: payload.updated_at ?? manifest.updated_at,
+      noteType: payload.type,
+      core: payload.core,
+      meaningCn: payload.meaning_cn,
+      ...(payload.pronunciation?.text
+        ? { pronunciationText: payload.pronunciation.text }
+        : {}),
+      ...(payload.pronunciation?.lang
+        ? { pronunciationLang: payload.pronunciation.lang }
+        : {}),
       payload,
     });
 
@@ -259,6 +276,7 @@ export async function syncContent(
   await store.replaceContent(contentProfileId, notes, deduplicatedCards, {
     contentProfileId,
     manifestUpdatedAt: manifest.updated_at,
+    projectionVersion: CONTENT_PROJECTION_VERSION,
     importedAt: dependencies.now().toISOString(),
     noteCount: notes.length,
     cardCount: deduplicatedCards.length,

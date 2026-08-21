@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.6.0-m4-github-profiles
+Version: 0.7.0-m5-learning-experience
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev

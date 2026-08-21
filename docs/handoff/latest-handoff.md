@@ -1,7 +1,7 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.6.0-m4-github-profiles`
-Updated: `2026-08-18`
+Version: `0.7.0-m5-learning-experience`
+Updated: `2026-08-21`
 Source-of-truth branch: `dev`
 
 ## 1. Current Direction
@@ -111,6 +111,12 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 - M4: Worker-only Supabase secret/owner boundary with family Profile list/create and local-profile linking.
 - M4: Bounded idempotent ReviewEvent push, cursor-based pull, canonical local replay and reconnect/manual triggers.
 - M4: Removed the email/Magic Link UI and browser Supabase configuration; daily flow now directly selects a learner.
+- M5: Web Speech auto/manual pronunciation with locale fallback, persisted voice/rate/listening settings and an audio-first listening mode.
+- M5: Rating buttons show prospective delays; committed ratings show the exact next-review time.
+- M5: Local-first `/progress` insights show unseen/learning/review/mature/due counts, seven-day activity and Note-level recognition/production schedules.
+- M5: Each Card shows its stage, due time, interval, review/lapse counts and a clearly labeled minimum all-`known` estimate to reach the 90-day mature threshold.
+- M5: Review-first Home actions and a four-item mobile bottom navigation improve one-handed daily use.
+- M5: Content projection version 2 adds Note/Card display and pronunciation fields while retaining stable Card identifiers and existing progress.
 - Remote migration `20260818020000` is applied and the schema is exposed through Data API.
 - Hosted smoke testing found that column-only LearnerProfile INSERT grants produced Data API HTTP 401; migration `20260818030000` adds the table-level INSERT grant while retaining RLS ownership checks.
 
@@ -118,9 +124,9 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 
 1. Perform a real user rating on one paired browser and confirm hosted Event push/pull on a second paired device.
 2. Run the two-user RLS script where Docker/pg_prove is available.
-3. Add Web Speech TTS, voice fallback and listening mode to the live Review UI.
-4. Add offline update UX plus progress export/import behavior.
-5. Add browser E2E and perform iPhone/Android device acceptance.
+3. Add offline update UX plus progress export/import behavior.
+4. Add browser E2E and perform iPhone/Android device acceptance, especially iOS Web Speech gesture/fallback behavior.
+5. Consider incremental ProgressEvent paging only if real household data volume makes local aggregation observably slow.
 
 Estimated full MVP: `13–15 working days`.
 
@@ -128,7 +134,7 @@ Estimated full MVP: `13–15 working days`.
 
 ```text
 Application typecheck/lint/build: passed
-Unit/integration: 44 passed across 14 test files
+Unit/integration: 53 passed across 17 test files
 Supabase remote migration/list/lint: passed
 Anonymous Data API read/write: blocked with HTTP 401 as intended
 Two-user pgTAP script: added; execution blocked because this environment cannot access Docker
@@ -138,13 +144,14 @@ CI: not configured
 Supabase: provisioned, linked and migrated; prior hosted LearnerProfile persistence smoke test passed
 Cloudflare: preview routes/PWA assets and fixed production domain return HTTP 200
 Real card-source smoke test: 27/27 packs, 137 valid Notes, 274 unique Cards, 0 skipped rows
-Cloudflare production: version `bbd620e1-89ac-439f-b577-e0ceda2e8b3d` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
+Cloudflare production: version `2b4ffec9-b522-4f71-9726-7505d4281079` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
 Worker Secrets: all five required names configured as `secret_text`; Supabase/signing values were not printed, and the pairing code was returned once to the operator
 Hosted family pairing: wrong code denied; valid code issued a device grant; paired status and unpair passed
 Hosted family Profile/Event reads: one existing family Profile loaded; ReviewEvent page returned HTTP 200
 Hosted ReviewEvent write: not smoke-tested to avoid inserting a fabricated learner rating
 Hosted `0.5.1` hotfix: same-name create returned the existing UUID and kept the Profile count unchanged; one accidental smoke-test row was removed after confirming it had zero events
 Hosted `0.6.0` catalog flow: Profiles route/new asset returned HTTP 200, GitHub catalog CORS passed and listed `manman`; no ReviewEvent was written
+Hosted `0.7.0` learning-experience flow: Home/Review/Progress/Settings routes, current hashed assets, PWA assets and GitHub profile catalog returned HTTP 200; an unpaired Profile settings PATCH was denied with HTTP 401 as intended
 ```
 
-This handoff describes an implemented M4 family-sync foundation, not a completed MVP.
+This handoff describes implemented M1–M5 foundations; offline update UX, export/import and device/browser acceptance remain before the full MVP is complete.

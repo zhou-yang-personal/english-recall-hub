@@ -1,6 +1,6 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.6.0-m4-github-profiles`
+Version: `0.7.0-m5-learning-experience`
 Updated: `2026-08-18`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
@@ -56,7 +56,7 @@ Supabase Realtime and Edge Functions are not required unless a later concrete re
 
 ## 2. Current Reality
 
-M1 implements the application shell, local database, scheduler/replay and atomic rating transaction. M2 adds local-first LearnerProfile selection/creation plus Supabase migration/RLS. M3 imports real public content and connects Home/Review. M4 replaces the mistaken email-account UI with one-time family-device pairing, a minimal Worker API, family Profile loading/linking and incremental ReviewEvent synchronization/replay. TTS/listening, browser E2E and CI remain subsequent work.
+M1 implements the application shell, local database, scheduler/replay and atomic rating transaction. M2 adds local-first LearnerProfile selection/creation plus Supabase migration/RLS. M3 imports real public content and connects Home/Review. M4 replaces the mistaken email-account UI with one-time family-device pairing, a minimal Worker API, family Profile loading/linking and incremental ReviewEvent synchronization/replay. M5 adds Web Speech pronunciation/listening, schedule previews, per-Note progress insights and a mobile-first review/navigation pass. Browser E2E and CI remain subsequent work.
 
 Observed `card/profiles/manman/manifest.json` on `2026-08-17`:
 
@@ -153,6 +153,7 @@ sync-access   device pairing/status/unpair
 profiles      GitHub ContentProfile discovery/selection and automatic progress identity cache
 content-sync  GitHub manifest/template/pack import
 review        queue, UI, rating and scheduler
+progress      local progress aggregation and per-Note insights
 progress-sync pending push, remote pull and replay
 tts           voice resolution/playback
 settings      learner preferences
@@ -248,6 +249,7 @@ src/
 │  ├─ profiles/
 │  ├─ content-sync/
 │  ├─ review/
+│  ├─ progress/
 │  ├─ progress-sync/
 │  ├─ settings/
 │  └─ tts/
@@ -471,10 +473,13 @@ P0 routes:
 /profiles  direct GitHub ContentProfile selection; internal LearnerProfile preparation is automatic
 /          Home
 /review    review session
+/progress  local-first review statistics and per-Note schedule details
 /settings  preferences and both sync controls
 ```
 
 Home distinguishes content sync from progress sync and shows due/learning/new counts. A successful card download must never be shown as successful progress synchronization.
+
+Progress groups Cards by Note. Recognition and production remain independent schedules, so their next due times, intervals and counts are shown separately. Aggregate status is unseen, learning, review or mature; due is a separate attention flag.
 
 Voice fallback:
 
@@ -512,6 +517,8 @@ The service worker caches only the app shell and versioned assets. Business data
 | Idempotent retry | progress-sync | duplicate upload creates one row |
 | Cloud failure safety | progress-sync | pending events survive failure |
 | TTS/listening | tts, review | fallback and hidden-before-reveal tests |
+| Review transparency | scheduler, review | rating previews equal committed state; next due is visible |
+| Progress insights | progress, db | Note grouping, stage counts, recent activity and mature estimate |
 | Installable PWA | app, deployment | E2E plus iPhone/Android acceptance |
 
 Test layers: unit domain tests; Dexie/Supabase/RLS integration tests; component tests; critical E2E flows; manual device/TTS acceptance.
@@ -524,7 +531,7 @@ Test layers: unit domain tests; Dexie/Supabase/RLS integration tests; component 
 | M2 | Supabase schema, Profile and RLS foundation | 1.5 days |
 | M3 | Manifest/packs/templates, validation, Card generation | 2 days |
 | M4 | Family pairing, Worker API and Event push/pull/replay | 2 days |
-| M5 | TTS/listening and remaining Review UI | 2 days |
+| M5 | TTS/listening, schedule transparency, progress insights and mobile Review UI | 3–4 days |
 | M6 | Offline/update, export/import, Cloudflare deploy | 1.5 days |
 | M7 | Automated tests and device fixes | 2–3 days |
 

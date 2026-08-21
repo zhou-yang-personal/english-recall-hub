@@ -9,9 +9,20 @@ export interface CreateLearnerProfileInput {
   contentProfileId: string;
 }
 
+export type LearnerProfileSettings = Omit<
+  LearnerProfile,
+  'learnerProfileId' | 'cloudSyncId' | 'displayName' | 'contentProfileId'
+>;
+
+export interface UpdateLearnerProfileInput {
+  learnerProfileId: string;
+  settings: LearnerProfileSettings;
+}
+
 export interface LearnerProfileRepository {
   list(): Promise<LearnerProfile[]>;
   create(input: CreateLearnerProfileInput): Promise<LearnerProfile>;
+  update(input: UpdateLearnerProfileInput): Promise<LearnerProfile>;
 }
 
 export interface LearnerProfileLocalStore {
@@ -81,6 +92,19 @@ export async function linkLocalLearnerProfile(
   });
   await local.put(linked);
   return linked;
+}
+
+export async function updateLearnerProfileSettings(
+  profile: LearnerProfile,
+  settings: LearnerProfileSettings,
+  remote: LearnerProfileRepository | undefined,
+  local: LearnerProfileLocalStore,
+): Promise<LearnerProfile> {
+  const updated = remote
+    ? await remote.update({ learnerProfileId: profile.learnerProfileId, settings })
+    : { ...profile, ...settings };
+  await local.put(updated);
+  return updated;
 }
 
 export async function createLocalLearnerProfile(

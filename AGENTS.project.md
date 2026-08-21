@@ -6,7 +6,7 @@
 
 - [ ] 项目名称：`English Recall Hub`。
 - [ ] 仓库：`zhou-yang-personal/english-recall-hub`。
-- [ ] 当前版本：`0.6.0-m4-github-profiles`。
+- [ ] 当前版本：`0.7.0-m5-learning-experience`。
 - [ ] 产品定位：面向个人和家庭的多语言主动回忆工具，把 ChatGPT 学习记录转为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和账号进度同步。
 - [ ] 第一版平台：iPhone、Android、PC 浏览器；可安装为 PWA，不开发原生 iOS/Android App。
 - [ ] 第一版技术栈：`React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Worker API/Static Assets + Supabase Postgres/RLS`。
@@ -72,6 +72,7 @@
 10. Supabase ReviewEvent 幂等增量同步和新设备重建。
 11. 本地 progress JSON 导出/导入兜底。
 12. PWA 安装与移动端适配。
+13. 复习机制说明、单条目下次复习/次数/遗忘/阶段信息和本地进度统计视图。
 
 第一版明确不做：
 
