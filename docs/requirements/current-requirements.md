@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.7.2-m5-responsive-layout`
+Version: `0.7.3-m5-desktop-density`
 Updated: `2026-09-06`
 
 ## 1. Product Goal
@@ -152,6 +152,9 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Never report success before confirmed persistence.
 - Allow editing automatic pronunciation, listening default, locale, speech rate and daily new-card limit; paired Profiles persist these settings through the Worker.
 - Show the current application version and keep application-resource update status separate from content/progress synchronization.
+- Automatically activate future PWA resource updates; retain the manual resource-reset action for recovery from an already-stale installed worker.
+- At desktop widths, the complete Settings work area must visibly use two columns rather than placing only the final two cards side by side below a full-width form.
+- At a common 1366 × 768 PC viewport and default browser zoom, Settings should avoid document scrolling when no status/error message is open; smaller viewports and enlarged text must retain natural scrolling rather than clipping content.
 
 ### R13a. Review transparency and progress insights
 

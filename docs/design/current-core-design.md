@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.7.2-m5-responsive-layout`
+Version: `0.7.3-m5-desktop-density`
 Updated: `2026-09-06`
 Branch: `dev`
 
@@ -141,6 +141,7 @@ Mature begins at 90 days. The scheduler is a pure function shared by live rating
 - Service worker caches the app shell/assets.
 - IndexedDB holds business data.
 - Settings provides a one-click application-resource reset that unregisters the current Service Worker, deletes Cache Storage and reloads with a cache-busting URL.
+- New PWA releases use automatic Service Worker activation because the product does not expose a separate update-confirmation prompt; the manual Settings action remains the recovery path for devices already controlled by an older waiting worker.
 - Application-resource reset never deletes IndexedDB, local profile selection, pending ReviewEvents or the paired-device Cookie.
 - After first successful content sync, Home/Review work offline.
 - Web Speech supports English and Spanish locale fallback at 0.75/1.0/1.25 speed.
@@ -160,7 +161,8 @@ Mature begins at 90 days. The scheduler is a pure function shared by live rating
 
 - Vertical page spacing follows viewport height rather than width, so a wide PC/PWA window does not create oversized top and bottom gaps.
 - Home and Review use available desktop height without imposing a full-screen minimum on mobile.
-- Settings uses two secondary columns on wide screens and returns to one column on mobile.
+- Settings uses a true two-column desktop work area: learning controls remain in the primary column while learner/cloud and application-update operations form the side column. It returns to one content column below the desktop breakpoint.
+- Desktop Settings typography, card padding and control spacing are bounded so a common laptop-height viewport does not gain avoidable document scrolling; content remains naturally scrollable when zoom, translated text or a short viewport genuinely requires it.
 - Long content remains naturally scrollable; the layout removes unnecessary scrolling but never clips answers, controls or safe-area content.
 
 ## 9. Security Boundaries

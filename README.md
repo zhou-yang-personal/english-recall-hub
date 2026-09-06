@@ -4,12 +4,12 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.7.2-m5-responsive-layout`
+- Version: `0.7.3-m5-desktop-density`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
 - First platform: Web/PWA on iPhone, Android and desktop
-- Status: M5 learning experience, safe PWA refresh and compact PC/mobile responsive layouts are implemented on top of the M4 family sync
+- Status: M5 learning experience, automatic/safe PWA updates and compact two-column PC/mobile responsive layouts are implemented on top of the M4 family sync
 - Production URL: `https://english-recall-hub.zhou-yang-personal.workers.dev`
 
 ## Product flow

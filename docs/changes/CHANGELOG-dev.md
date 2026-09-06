@@ -1,5 +1,30 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.7.3-m5-desktop-density｜2026-09-06
+
+### Fixed
+
+- Replaced the misleading bottom-only Settings columns with a visible primary/secondary desktop work area.
+- Compacted the Settings heading, controls, fields and card gaps so a common laptop-height viewport avoids unnecessary document scrolling.
+- Kept Settings single-column below the PC breakpoint and retained natural scrolling for short or zoomed viewports.
+- Changed PWA registration from an unimplemented update prompt to automatic activation; the manual resource-reset action remains the recovery path for already-stale devices.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test -- --run: 56 passed across 18 test files
+npm run build: passed; route chunks and auto-activating PWA service worker generated
+npx wrangler deploy --dry-run: passed; Worker entry plus 17 static files discovered
+Local Chromium at 1366×768: two Settings columns (679px + 329px); scrollHeight/clientHeight 768/768; no vertical or horizontal overflow
+Local Chromium at 390×844: one Settings column; no horizontal overflow; natural vertical scrolling retained
+Hosted deployment: Worker version `b6f8e66d-ce85-4b52-87a5-5777730f0b5b`
+Hosted Chromium at 1366×768: current version and two Settings columns loaded; scrollHeight/clientHeight 768/768; Service Worker controlled
+Dependencies: unchanged; lock file unchanged.
+Database schema: unchanged.
+```
+
 ## 0.7.2-m5-responsive-layout｜2026-09-06
 
 ### Fixed

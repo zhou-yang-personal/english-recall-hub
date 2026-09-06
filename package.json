@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.7.2-m5-responsive-layout",
+  "version": "0.7.3-m5-desktop-density",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -93,96 +93,102 @@ export function SettingsPage() {
       <p className="eyebrow">{profile.contentProfileId} · 设置</p>
       <h1>让复习更顺手。</h1>
 
-      <form className="settings-form" onSubmit={saveSettings}>
-        <section className="setting-card">
-          <div><strong>发音与听力</strong><span>使用手机或电脑内置的 Web Speech 语音。</span></div>
-          <label className="toggle-row">
-            <span><strong>自动朗读</strong><small>理解卡出现时、表达卡揭示后自动播放</small></span>
-            <input
-              checked={settings.autoSpeak}
-              onChange={(event) => setSettings({ ...settings, autoSpeak: event.target.checked })}
-              type="checkbox"
-            />
-          </label>
-          <label className="toggle-row">
-            <span><strong>默认听力模式</strong><small>先听发音，揭示后再显示英文目标</small></span>
-            <input
-              checked={settings.listeningModeDefault}
-              onChange={(event) => setSettings({ ...settings, listeningModeDefault: event.target.checked })}
-              type="checkbox"
-            />
-          </label>
-          <div className="field-grid">
-            <label>英文口音
-              <select
-                onChange={(event) => setSettings({ ...settings, englishVoiceLocale: event.target.value as LearnerProfileSettings['englishVoiceLocale'] })}
-                value={settings.englishVoiceLocale}
-              >
-                <option value="en-US">美式英语</option>
-                <option value="en-GB">英式英语</option>
-              </select>
-            </label>
-            <label>西班牙语口音
-              <select
-                onChange={(event) => setSettings({ ...settings, spanishVoiceLocale: event.target.value as LearnerProfileSettings['spanishVoiceLocale'] })}
-                value={settings.spanishVoiceLocale}
-              >
-                <option value="es-MX">墨西哥西语</option>
-                <option value="es-US">美国西语</option>
-                <option value="es-ES">西班牙西语</option>
-              </select>
-            </label>
-            <label>语速
-              <select
-                onChange={(event) => setSettings({ ...settings, ttsRate: Number(event.target.value) as LearnerProfileSettings['ttsRate'] })}
-                value={settings.ttsRate}
-              >
-                <option value="0.75">0.75x</option>
-                <option value="1">1.0x</option>
-                <option value="1.25">1.25x</option>
-              </select>
-            </label>
-            <label>每日新卡
-              <input
-                max={100}
-                min={0}
-                onChange={(event) => setSettings({ ...settings, dailyNewCardLimit: Number(event.target.value) })}
-                type="number"
-                value={settings.dailyNewCardLimit}
-              />
-            </label>
-          </div>
-          <button className="secondary-action" onClick={() => void testVoice()} type="button">试听英文发音</button>
-        </section>
+      <div className="settings-layout">
+        <form className="settings-form" onSubmit={saveSettings}>
+          <section className="setting-card">
+            <div><strong>发音与听力</strong><span>使用手机或电脑内置的 Web Speech 语音。</span></div>
+            <div className="settings-control-grid">
+              <div className="settings-toggle-stack">
+                <label className="toggle-row">
+                  <span><strong>自动朗读</strong><small>理解卡出现时、表达卡揭示后自动播放</small></span>
+                  <input
+                    checked={settings.autoSpeak}
+                    onChange={(event) => setSettings({ ...settings, autoSpeak: event.target.checked })}
+                    type="checkbox"
+                  />
+                </label>
+                <label className="toggle-row">
+                  <span><strong>默认听力模式</strong><small>先听发音，揭示后再显示英文目标</small></span>
+                  <input
+                    checked={settings.listeningModeDefault}
+                    onChange={(event) => setSettings({ ...settings, listeningModeDefault: event.target.checked })}
+                    type="checkbox"
+                  />
+                </label>
+              </div>
+              <div className="field-grid">
+                <label>英文口音
+                  <select
+                    onChange={(event) => setSettings({ ...settings, englishVoiceLocale: event.target.value as LearnerProfileSettings['englishVoiceLocale'] })}
+                    value={settings.englishVoiceLocale}
+                  >
+                    <option value="en-US">美式英语</option>
+                    <option value="en-GB">英式英语</option>
+                  </select>
+                </label>
+                <label>西班牙语口音
+                  <select
+                    onChange={(event) => setSettings({ ...settings, spanishVoiceLocale: event.target.value as LearnerProfileSettings['spanishVoiceLocale'] })}
+                    value={settings.spanishVoiceLocale}
+                  >
+                    <option value="es-MX">墨西哥西语</option>
+                    <option value="es-US">美国西语</option>
+                    <option value="es-ES">西班牙西语</option>
+                  </select>
+                </label>
+                <label>语速
+                  <select
+                    onChange={(event) => setSettings({ ...settings, ttsRate: Number(event.target.value) as LearnerProfileSettings['ttsRate'] })}
+                    value={settings.ttsRate}
+                  >
+                    <option value="0.75">0.75x</option>
+                    <option value="1">1.0x</option>
+                    <option value="1.25">1.25x</option>
+                  </select>
+                </label>
+                <label>每日新卡
+                  <input
+                    max={100}
+                    min={0}
+                    onChange={(event) => setSettings({ ...settings, dailyNewCardLimit: Number(event.target.value) })}
+                    type="number"
+                    value={settings.dailyNewCardLimit}
+                  />
+                </label>
+              </div>
+            </div>
+            <button className="secondary-action" onClick={() => void testVoice()} type="button">试听英文发音</button>
+          </section>
 
-        <button className="primary-action" disabled={saving} type="submit">
-          {saving ? '正在保存…' : '保存学习设置'}
-        </button>
-      </form>
-
-      <div className="settings-secondary-grid">
-        <section className="setting-card">
-          <div><strong>学习者与家庭云端</strong><span>学习数据先保存在本机，配对设备会同步复习事件和设置。</span></div>
-          <Link to="/profiles">切换学习者</Link>
-          {cloudStatus === 'paired' ? (
-            <button className="secondary-action" onClick={() => void unpairDevice()} type="button">断开此设备</button>
-          ) : (
-            <Link to="/pair-device">输入家庭同步码</Link>
-          )}
-        </section>
-
-        <section className="setting-card app-update-card">
-          <div><strong>应用更新</strong><span>当前版本：{__APP_VERSION__}</span></div>
-          <p>清除旧的 Web/PWA 资源缓存并重新加载当前页面，不会删除学习者、卡片、复习进度、待同步事件或家庭配对。</p>
-          <button
-            className="secondary-action"
-            disabled={reloading}
-            onClick={() => void reloadLatestResources()}
-            type="button"
-          >
-            {reloading ? '正在重新加载…' : '重新加载最新版'}
+          <button className="primary-action" disabled={saving} type="submit">
+            {saving ? '正在保存…' : '保存学习设置'}
           </button>
-        </section>
+        </form>
+
+        <div className="settings-side-stack">
+          <section className="setting-card">
+            <div><strong>学习者与家庭云端</strong><span>学习数据先保存在本机，配对设备会同步复习事件和设置。</span></div>
+            <Link to="/profiles">切换学习者</Link>
+            {cloudStatus === 'paired' ? (
+              <button className="secondary-action" onClick={() => void unpairDevice()} type="button">断开此设备</button>
+            ) : (
+              <Link to="/pair-device">输入家庭同步码</Link>
+            )}
+          </section>
+
+          <section className="setting-card app-update-card">
+            <div><strong>应用更新</strong><span>当前版本：{__APP_VERSION__}</span></div>
+            <p>清除旧的 Web/PWA 资源缓存并重新加载当前页面，不会删除学习者、卡片、复习进度、待同步事件或家庭配对。</p>
+            <button
+              className="secondary-action"
+              disabled={reloading}
+              onClick={() => void reloadLatestResources()}
+              type="button"
+            >
+              {reloading ? '正在重新加载…' : '重新加载最新版'}
+            </button>
+          </section>
+        </div>
       </div>
 
       {message ? <p className="status-message" role="status">{message}</p> : null}
