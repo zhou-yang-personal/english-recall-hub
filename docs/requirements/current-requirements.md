@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.7.3-m5-desktop-density`
+Version: `0.7.4-m5-review-workspace`
 Updated: `2026-09-06`
 
 ## 1. Product Goal
@@ -90,6 +90,10 @@ read and choose a GitHub ContentProfile without login → prepare progress ident
 ### R8. Review transaction
 
 - Show prompt, explicit answer reveal, then unknown/fuzzy/known ratings.
+- At PC widths, present prompt/listening on the left and reveal/answer/rating on the right; do not stack the complete interaction into one long central column.
+- Keep the right action area present before reveal, then replace it in place with the answer and ratings so the page height remains stable.
+- At a common 1366 × 768 PC viewport and default zoom, an ordinary unrevealed or revealed card must avoid document scrolling; long content must remain reachable through natural scrolling rather than clipping.
+- Below the PC breakpoint, return to a single-column prompt-then-answer sequence with touch-friendly rating controls.
 - In one Dexie transaction, append a pending ReviewEvent and update ReviewState.
 - Advance only after that transaction commits.
 - Preserve the last completed rating across refresh/browser close.

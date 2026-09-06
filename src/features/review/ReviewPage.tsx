@@ -25,6 +25,13 @@ function speechLocale(profile: LearnerProfile, card: CardRecord): string {
     : profile.englishVoiceLocale;
 }
 
+function textDensity(text: string): 'short' | 'medium' | 'long' {
+  const length = Array.from(text.trim()).length;
+  if (length > 90) return 'long';
+  if (length > 48) return 'medium';
+  return 'short';
+}
+
 export function ReviewPage() {
   const { cloudStatus, selectedLearnerProfileId } = useApp();
   const { loading: profileLoading, profile } = useSelectedLearnerProfile();
@@ -161,59 +168,66 @@ export function ReviewPage() {
     previewReviewSchedule(current.state, rating, previewedAt.toISOString()),
   ]));
   const listeningCard = listeningMode && current.card.cardType === 'recognition';
-  const hideTarget = listeningCard && !revealed;
   const canSpeakNow = Boolean(
     current.card.pronunciationText
     && (current.card.cardType === 'recognition' || revealed),
   );
 
   return (
-    <section className="page narrow review-page">
-      <div className="review-progress">
-        <span>{profile.contentProfileId}</span>
-        <span>{index + 1} / {queue.length}</span>
+    <section className="page review-page">
+      <div className="review-session-bar">
+        <div className="review-progress">
+          <span>{profile.contentProfileId}</span>
+          <span>{index + 1} / {queue.length}</span>
+        </div>
+        <div className="review-tools">
+          <button className={listeningMode ? 'active' : undefined} onClick={() => setListeningMode((value) => !value)} type="button">
+            {listeningMode ? '听力模式已开' : '听力模式'}
+          </button>
+          {canSpeakNow ? <button onClick={() => void speak(current.card)} type="button">🔊 再听一次</button> : null}
+        </div>
       </div>
       <div className="review-progress-track" aria-hidden="true"><span style={{ width: `${(index + 1) / queue.length * 100}%` }} /></div>
-      <div className="review-tools">
-        <button className={listeningMode ? 'active' : undefined} onClick={() => setListeningMode((value) => !value)} type="button">
-          {listeningMode ? '听力模式已开' : '听力模式'}
-        </button>
-        {canSpeakNow ? <button onClick={() => void speak(current.card)} type="button">🔊 再听一次</button> : null}
-      </div>
 
       {scheduleNotice ? <p className="schedule-notice" role="status">{scheduleNotice}</p> : null}
 
-      <article className="review-card">
-        <span className="card-kind">{current.card.cardType === 'recognition' ? '理解' : '表达'}</span>
-        {hideTarget ? (
-          <div className="listening-prompt">
-            <span aria-hidden="true">◖))</span>
-            <h1>请听发音，回想它的含义</h1>
-            <button onClick={() => void speak(current.card)} type="button">播放发音</button>
-          </div>
-        ) : <h1>{current.card.prompt}</h1>}
+      <div className="review-workspace">
+        <article className="review-card review-prompt-card">
+          <span className="card-kind">{current.card.cardType === 'recognition' ? '理解' : '表达'}</span>
+          {listeningCard ? (
+            <div className="listening-prompt">
+              <span aria-hidden="true">◖))</span>
+              <h1>请听发音，回想它的含义</h1>
+              <button onClick={() => void speak(current.card)} type="button">播放发音</button>
+            </div>
+          ) : <h1 className={`review-text-${textDensity(current.card.prompt)}`}>{current.card.prompt}</h1>}
+        </article>
 
-        {revealed ? (
-          <div className="answer-panel">
-            <span>答案</span>
-            {listeningCard ? <p>{current.card.prompt}</p> : null}
-            <strong>{current.card.answer}</strong>
-          </div>
-        ) : (
-          <button className="reveal-button" onClick={() => setRevealed(true)} type="button">显示答案</button>
-        )}
-      </article>
-
-      {revealed ? (
-        <div className="rating-grid" aria-label="评分">
-          {ratingOptions.map((option) => (
-            <button disabled={saving} key={option.rating} onClick={() => void rate(option.rating)} type="button">
-              <strong>{option.label}</strong>
-              <span>{formatScheduleDelay(ratingPreviews.get(option.rating)!.dueAt, previewedAt)}</span>
-            </button>
-          ))}
-        </div>
-      ) : null}
+        <section className="review-action-card" aria-label={revealed ? '答案与评分' : '揭示答案'}>
+          {revealed ? (
+            <>
+              <div className="answer-panel">
+                <span>答案</span>
+                {listeningCard ? <p>{current.card.prompt}</p> : null}
+                <strong className={`review-text-${textDensity(current.card.answer)}`}>{current.card.answer}</strong>
+              </div>
+              <div className="rating-grid" aria-label="评分">
+                {ratingOptions.map((option) => (
+                  <button disabled={saving} key={option.rating} onClick={() => void rate(option.rating)} type="button">
+                    <strong>{option.label}</strong>
+                    <span>{formatScheduleDelay(ratingPreviews.get(option.rating)!.dueAt, previewedAt)}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="reveal-panel">
+              <p>先在心里完成回忆，再查看答案。</p>
+              <button className="reveal-button" onClick={() => setRevealed(true)} type="button">显示答案</button>
+            </div>
+          )}
+        </section>
+      </div>
 
       {message ? <p className="status-message" role="status">{message}</p> : null}
     </section>

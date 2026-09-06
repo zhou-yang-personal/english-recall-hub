@@ -6,7 +6,7 @@
 
 - [ ] 项目名称：`English Recall Hub`。
 - [ ] 仓库：`zhou-yang-personal/english-recall-hub`。
-- [ ] 当前版本：`0.7.3-m5-desktop-density`。
+- [ ] 当前版本：`0.7.4-m5-review-workspace`。
 - [ ] 产品定位：面向个人和家庭的多语言主动回忆工具，把 ChatGPT 学习记录转为正式 Note/Card，并通过 Web/PWA 完成离线复习、朗读和账号进度同步。
 - [ ] 第一版平台：iPhone、Android、PC 浏览器；可安装为 PWA，不开发原生 iOS/Android App。
 - [ ] 第一版技术栈：`React + TypeScript + Vite + Dexie/IndexedDB + Web Speech API + Cloudflare Worker API/Static Assets + Supabase Postgres/RLS`。
@@ -76,6 +76,7 @@
 14. 可从设置页一键重置应用资源缓存并加载最新版，不删除 IndexedDB 学习数据、待同步事件或设备配对 Cookie。
 15. PC/PWA 窗口使用紧凑的响应式纵向布局；长进度列表渐进显示，手机保持单列和安全区。
 16. PC 设置页的完整工作区采用主从双列；PWA 后续版本自动激活，手动资源重载继续作为旧缓存恢复入口。
+17. 核心复习页在 PC 使用“题目/听力任务 + 答案/评分操作”左右双栏，普通卡片在常见笔记本视口不产生无意义的页面滚动。
 
 第一版明确不做：
 

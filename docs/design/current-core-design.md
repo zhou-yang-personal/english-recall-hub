@@ -1,6 +1,6 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.7.3-m5-desktop-density`
+Version: `0.7.4-m5-review-workspace`
 Updated: `2026-09-06`
 Branch: `dev`
 
@@ -161,6 +161,8 @@ Mature begins at 90 days. The scheduler is a pure function shared by live rating
 
 - Vertical page spacing follows viewport height rather than width, so a wide PC/PWA window does not create oversized top and bottom gaps.
 - Home and Review use available desktop height without imposing a full-screen minimum on mobile.
+- Review is the primary workflow. On PC it uses a two-column workspace: the prompt/listening task stays on the left, while reveal, answer and rating actions occupy the right. Both columns remain visible before and after reveal so the interaction does not grow vertically when state changes.
+- Review returns to a single prompt-then-answer flow on mobile. Ordinary cards at a 1366 × 768 viewport should not create document scrolling; unusually long prompts/answers and enlarged text retain natural scrolling without clipping.
 - Settings uses a true two-column desktop work area: learning controls remain in the primary column while learner/cloud and application-update operations form the side column. It returns to one content column below the desktop breakpoint.
 - Desktop Settings typography, card padding and control spacing are bounded so a common laptop-height viewport does not gain avoidable document scrolling; content remains naturally scrollable when zoom, translated text or a short viewport genuinely requires it.
 - Long content remains naturally scrollable; the layout removes unnecessary scrolling but never clips answers, controls or safe-area content.

@@ -1,6 +1,6 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.7.3-m5-desktop-density`
+Version: `0.7.4-m5-review-workspace`
 Updated: `2026-09-06`
 Source-of-truth branch: `dev`
 
@@ -120,6 +120,7 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 - M5.1: Settings shows the package version and can reset only Service Worker/Cache Storage resources before a cache-busted reload; IndexedDB progress and the paired-device Cookie are preserved.
 - M5.2: PC/PWA spacing is height-aware, wide Settings secondary panels share a row, mobile drops desktop viewport-height constraints and Progress reveals matching Notes in batches of 12.
 - M5.3: PC Settings now uses a primary/secondary two-column work area with compact internal controls; future PWA workers auto-activate while the manual resource reset remains available for already-stale devices.
+- M5.4: The core PC Review route now keeps the prompt/listening task on the left and reveal/answer/rating actions on the right; the action column changes in place instead of extending the page downward.
 - Remote migration `20260818020000` is applied and the schema is exposed through Data API.
 - Hosted smoke testing found that column-only LearnerProfile INSERT grants produced Data API HTTP 401; migration `20260818030000` adds the table-level INSERT grant while retaining RLS ownership checks.
 
@@ -147,7 +148,7 @@ CI: not configured
 Supabase: provisioned, linked and migrated; prior hosted LearnerProfile persistence smoke test passed
 Cloudflare: preview routes/PWA assets and fixed production domain return HTTP 200
 Real card-source smoke test: 27/27 packs, 137 valid Notes, 274 unique Cards, 0 skipped rows
-Cloudflare production: version `b6f8e66d-ce85-4b52-87a5-5777730f0b5b` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
+Cloudflare production: version `41e7f02e-7c45-4307-9f25-36471496c8db` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
 Worker Secrets: all five required names configured as `secret_text`; Supabase/signing values were not printed, and the pairing code was returned once to the operator
 Hosted family pairing: wrong code denied; valid code issued a device grant; paired status and unpair passed
 Hosted family Profile/Event reads: one existing family Profile loaded; ReviewEvent page returned HTTP 200
@@ -159,6 +160,7 @@ Hosted `0.7.1` PWA refresh flow: current HTML and hashed assets returned HTTP 20
 Hosted `0.7.2` responsive-layout flow: root/Settings/Progress/Review/PWA assets returned HTTP 200; the entry asset contained the release version and the current Progress chunk contained the progressive-display action
 Hosted `0.7.3` desktop-density flow: Chromium at 1366×768 loaded two Settings columns (679px + 329px), version `0.7.3-m5-desktop-density`, no horizontal overflow and scrollHeight/clientHeight 768/768; the generated worker contains immediate activation/control behavior
 Mobile layout smoke: Chromium at 390×844 loaded one Settings column with no horizontal overflow and retained natural vertical scrolling
+Hosted `0.7.4` core Review flow: Chromium at 1366×768 loaded a real long card in 504px + 504px prompt/action columns; unrevealed and revealed states both kept scrollHeight/clientHeight at 768/768, and the right column showed all three rating actions after reveal
 ```
 
 This handoff describes implemented M1–M5 foundations; offline update UX, export/import and device/browser acceptance remain before the full MVP is complete.

@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.7.3-m5-desktop-density",
+  "version": "0.7.4-m5-review-workspace",
   "type": "module",
   "scripts": {
     "dev": "vite",

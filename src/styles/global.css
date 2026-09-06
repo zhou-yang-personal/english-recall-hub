@@ -105,25 +105,38 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 5vw,
 .field-grid { display: grid !important; gap: 0.65rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .field-grid label { display: grid; font-size: 0.86rem; font-weight: 750; gap: 0.35rem; }
 .settings-page .field-grid input, .settings-page .field-grid select { padding: 0.6rem; }
-.review-page { padding-top: clamp(2rem, 5vw, 4rem); }
-.review-progress { color: #65756f; display: flex; justify-content: space-between; margin-bottom: 1rem; }
-.review-progress-track { background: #e4dccd; border-radius: 999px; height: 0.35rem; margin: -0.55rem 0 1rem; overflow: hidden; }
+.review-page { max-width: 72rem; padding-bottom: clamp(1rem, 2vh, 1.75rem); padding-top: clamp(1rem, 2vh, 1.75rem); }
+.review-session-bar { align-items: center; display: flex; gap: 1rem; justify-content: space-between; }
+.review-progress { color: #65756f; display: flex; gap: 2rem; justify-content: space-between; min-width: 10rem; }
+.review-progress-track { background: #e4dccd; border-radius: 999px; height: 0.35rem; margin: 0.55rem 0 0.9rem; overflow: hidden; }
 .review-progress-track span { background: #ad4b2a; display: block; height: 100%; transition: width 180ms ease; }
-.review-tools { display: flex; gap: 0.6rem; justify-content: flex-end; margin-bottom: 0.8rem; }
+.review-tools { display: flex; gap: 0.6rem; justify-content: flex-end; }
 .review-tools button, .listening-prompt button { background: #e3eadc; border: 0; border-radius: 999px; color: #173128; font-weight: 750; padding: 0.55rem 0.8rem; }
 .review-tools button.active { background: #18392b; color: #fffaf0; }
-.review-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1.4rem; min-height: clamp(18rem, 46dvh, 23rem); padding: clamp(1.4rem, 4vw, 2.5rem); }
-.review-card h1 { font-size: clamp(1.8rem, 4vw, 3.5rem); line-height: 1.2; margin-top: 1.4rem; overflow-wrap: anywhere; }
+.review-workspace { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.review-card, .review-action-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1.4rem; min-height: clamp(20rem, 56dvh, 27rem); padding: clamp(1.4rem, 3vw, 2.3rem); }
+.review-prompt-card { display: flex; flex-direction: column; }
+.review-prompt-card .card-kind { align-self: flex-start; }
+.review-card h1 { line-height: 1.15; margin: auto 0; overflow-wrap: anywhere; }
+.review-card h1.review-text-short { font-size: clamp(2.4rem, 5vw, 4.4rem); }
+.review-card h1.review-text-medium { font-size: clamp(1.9rem, 3.3vw, 3.1rem); line-height: 1.2; }
+.review-card h1.review-text-long { font-size: clamp(1.5rem, 2.35vw, 2.25rem); line-height: 1.3; }
+.review-action-card { display: flex; flex-direction: column; justify-content: space-between; }
 .card-kind { background: #e3eadc; border-radius: 999px; color: #52635c; display: inline-block; font-size: 0.8rem; font-weight: 800; padding: 0.35rem 0.65rem; }
 .answer-panel { border-top: 1px solid #e4dccd; display: grid; gap: 0.7rem; margin-top: 2rem; padding-top: 1.5rem; }
+.review-action-card .answer-panel { border-top: 0; margin: 0; padding: 0; }
 .answer-panel span { color: #ad4b2a; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.12em; }
-.answer-panel strong { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1.35; overflow-wrap: anywhere; }
+.answer-panel strong { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(1.7rem, 3.5vw, 3.2rem); line-height: 1.25; overflow-wrap: anywhere; }
+.answer-panel strong.review-text-medium { font-size: clamp(1.55rem, 2.6vw, 2.35rem); }
+.answer-panel strong.review-text-long { font-size: clamp(1.35rem, 2vw, 1.9rem); line-height: 1.4; }
 .answer-panel p { color: #52635c; margin: 0; }
-.listening-prompt { align-items: center; display: flex; flex-direction: column; justify-content: center; min-height: 16rem; text-align: center; }
+.listening-prompt { align-items: center; display: flex; flex: 1; flex-direction: column; justify-content: center; text-align: center; }
 .listening-prompt > span { color: #ad4b2a; font-size: 2rem; }
 .listening-prompt h1 { font-size: clamp(1.6rem, 3vw, 2.4rem); }
-.reveal-button { margin-top: 2rem; width: 100%; }
-.rating-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(3, 1fr); margin-top: 1rem; }
+.reveal-panel { align-items: center; display: flex; flex: 1; flex-direction: column; justify-content: center; text-align: center; }
+.reveal-panel p { color: #65756f; line-height: 1.6; }
+.reveal-button { margin-top: 1rem; width: min(18rem, 100%); }
+.rating-grid { display: grid; gap: 0.65rem; grid-template-columns: repeat(3, 1fr); margin-top: auto; padding-top: 1.2rem; }
 .rating-grid button { background: #fffaf0; border: 1px solid #b8c2bc; border-radius: 0.9rem; color: inherit; display: grid; gap: 0.35rem; padding: 1rem; }
 .rating-grid button:hover { border-color: #18392b; }
 .rating-grid span { color: #65756f; font-size: 0.82rem; }
@@ -186,7 +199,12 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 5vw,
   .home-actions .secondary-link { text-align: center; }
   .profile-card { align-items: flex-start; flex-direction: column; gap: 0.45rem; }
   .sync-panel { align-items: stretch; flex-direction: column; }
-  .review-card { min-height: 20rem; }
+  .review-session-bar { align-items: stretch; flex-direction: column; }
+  .review-progress { min-width: 0; }
+  .review-tools { justify-content: flex-start; }
+  .review-workspace { grid-template-columns: 1fr; }
+  .review-card { min-height: 18rem; }
+  .review-action-card { min-height: 12rem; }
   .rating-grid { bottom: calc(4.3rem + env(safe-area-inset-bottom)); gap: 0.45rem; position: sticky; z-index: 10; }
   .rating-grid button { padding: 0.8rem 0.35rem; }
   .rating-grid span { font-size: 0.72rem; }
@@ -203,6 +221,8 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 5vw,
 
 @media (min-width: 761px) and (max-width: 900px) {
   .settings-layout { grid-template-columns: 1fr; }
+  .review-workspace { grid-template-columns: 1fr; }
+  .review-card, .review-action-card { min-height: 18rem; }
 }
 
 @media (min-width: 761px) and (max-width: 1100px) {

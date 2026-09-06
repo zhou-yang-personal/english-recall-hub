@@ -1,5 +1,30 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.7.4-m5-review-workspace｜2026-09-06
+
+### Fixed
+
+- Rebuilt the core PC Review route as a two-column prompt/action workspace instead of one vertically stacked narrow card.
+- Kept the left prompt/listening task stable while the right column replaces reveal guidance with the answer and three rating actions.
+- Combined session progress and listening/speech controls into one compact top row.
+- Preserved a single-column mobile sequence and natural scrolling for genuinely long content without clipping.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test -- --run: 56 passed across 18 test files
+npm run build: passed; route chunks and PWA service worker generated
+npx wrangler deploy --dry-run: passed; Worker entry plus 17 static files discovered
+Local Chromium at 1366×768, long real Review card: 504px + 504px columns; unrevealed/revealed scrollHeight/clientHeight 768/768; no horizontal overflow
+Local Chromium at 390×844: one Review column; no horizontal overflow; natural vertical scrolling retained
+Hosted deployment: Worker version `41e7f02e-7c45-4307-9f25-36471496c8db`
+Hosted Chromium at 1366×768: unrevealed and revealed Review states both loaded two columns with no document scrolling; three rating actions appeared in the right column; Service Worker controlled
+Dependencies: unchanged; lock file unchanged.
+Database schema: unchanged.
+```
+
 ## 0.7.3-m5-desktop-density｜2026-09-06
 
 ### Fixed

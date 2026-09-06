@@ -1,6 +1,6 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.7.3-m5-desktop-density`
+Version: `0.7.4-m5-review-workspace`
 Updated: `2026-09-06`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
@@ -56,7 +56,7 @@ Supabase Realtime and Edge Functions are not required unless a later concrete re
 
 ## 2. Current Reality
 
-M1 implements the application shell, local database, scheduler/replay and atomic rating transaction. M2 adds local-first LearnerProfile selection/creation plus Supabase migration/RLS. M3 imports real public content and connects Home/Review. M4 replaces the mistaken email-account UI with one-time family-device pairing, a minimal Worker API, family Profile loading/linking and incremental ReviewEvent synchronization/replay. M5 adds Web Speech pronunciation/listening, schedule previews, per-Note progress insights and a mobile-first review/navigation pass. M5.1 adds a narrow PWA resource-recovery action that preserves all IndexedDB and device-grant state. M5.2 removes width-driven vertical whitespace, compacts desktop/PWA layouts and progressively reveals long progress results. M5.3 makes the complete Settings work area visibly two-column on PC and automatically activates future PWA resource updates. Browser E2E and CI remain subsequent work.
+M1 implements the application shell, local database, scheduler/replay and atomic rating transaction. M2 adds local-first LearnerProfile selection/creation plus Supabase migration/RLS. M3 imports real public content and connects Home/Review. M4 replaces the mistaken email-account UI with one-time family-device pairing, a minimal Worker API, family Profile loading/linking and incremental ReviewEvent synchronization/replay. M5 adds Web Speech pronunciation/listening, schedule previews, per-Note progress insights and a mobile-first review/navigation pass. M5.1 adds a narrow PWA resource-recovery action that preserves all IndexedDB and device-grant state. M5.2 removes width-driven vertical whitespace, compacts desktop/PWA layouts and progressively reveals long progress results. M5.3 makes the complete Settings work area visibly two-column on PC and automatically activates future PWA resource updates. M5.4 corrects the core Review route into a stable prompt/action two-column PC workspace. Browser E2E and CI remain subsequent work.
 
 Observed `card/profiles/manman/manifest.json` on `2026-08-17`:
 
@@ -510,7 +510,7 @@ The service worker caches only the app shell and versioned assets. Business data
 
 Settings shows the package version and a manual “reload latest version” recovery action. This is an application-shell operation, not content sync, progress sync, sign-out or local-data reset.
 
-Responsive density uses viewport-height-based vertical spacing. Wide screens divide the complete Settings work area into a primary learning-controls column and a secondary operations column, and use a seven-column progress summary; tablet/mobile breakpoints reduce columns without fixed-height clipping. Mobile Home does not inherit the desktop viewport-height minimum. Future Service Worker releases activate automatically because the application has no separate update-confirmation prompt; manual resource reload remains available for recovery.
+Responsive density uses viewport-height-based vertical spacing. The core PC Review route keeps the prompt/listening task in the left column and replaces reveal with answer/rating in the right column without vertically growing the workflow. Wide screens also divide Settings into primary and secondary columns and use a seven-column progress summary; tablet/mobile breakpoints reduce columns without fixed-height clipping. Mobile Home does not inherit the desktop viewport-height minimum. Future Service Worker releases activate automatically because the application has no separate update-confirmation prompt; manual resource reload remains available for recovery.
 
 ## 12. Security and Recovery
 
@@ -540,7 +540,7 @@ Responsive density uses viewport-height-based vertical spacing. Wide screens div
 | TTS/listening | tts, review | fallback and hidden-before-reveal tests |
 | Review transparency | scheduler, review | rating previews equal committed state; next due is visible |
 | Progress insights | progress, db | Note grouping, stage counts, recent activity and mature estimate |
-| Responsive density | app, settings, progress, review | desktop spacing does not scale with viewport width; long progress results reveal in bounded batches |
+| Responsive density | app, settings, progress, review | PC Review prompt/action columns remain stable before/after reveal; desktop spacing does not scale with viewport width; long progress results reveal in bounded batches |
 | PWA resource recovery | app-update, settings | unregister/delete/reload is invoked while IndexedDB and device-grant APIs are absent from the operation |
 | Installable PWA | app, deployment | E2E plus iPhone/Android acceptance |
 
