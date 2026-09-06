@@ -1,5 +1,32 @@
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.7.2-m5-responsive-layout｜2026-09-06
+
+### Fixed
+
+- Replaced viewport-width-driven vertical page padding with bounded viewport-height spacing so wide PC/PWA windows do not create excessive empty scroll length.
+- Removed the desktop viewport-height minimum from mobile Home and reduced Review card height without clipping variable content.
+- Arranged secondary Settings panels in two columns on wide screens while retaining a single mobile column.
+- Changed Progress to reveal matching Notes in batches of 12, with search and filters still applied to the complete local dataset.
+- Compacted Progress headings, summary metrics, activity chart and mechanism spacing across desktop/tablet breakpoints.
+
+### Verification
+
+```text
+npm run typecheck: passed
+npm run lint: passed
+npm test -- --run: 56 passed across 18 test files
+npm run build: passed; route chunks and PWA service worker generated
+npx wrangler deploy --dry-run: passed; Worker entry plus 17 static files discovered
+Local production root/Settings/Progress/Review/PWA assets: HTTP 200
+Hosted deployment: Worker version `bf4bfff4-cf29-4928-8c85-1596329dabc2`
+Hosted root/Settings/Progress/Review/PWA assets: HTTP 200
+Hosted entry contains version `0.7.2-m5-responsive-layout`; current Progress chunk contains the progressive-display action
+Real desktop/mobile viewport visual acceptance: pending because this environment has no browser executable
+Dependencies: unchanged; lock file unchanged.
+Database schema: unchanged.
+```
+
 ## 0.7.1-m5-pwa-refresh｜2026-08-21
 
 ### Added

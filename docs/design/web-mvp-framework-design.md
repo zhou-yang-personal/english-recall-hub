@@ -1,7 +1,7 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.7.1-m5-pwa-refresh`
-Updated: `2026-08-21`
+Version: `0.7.2-m5-responsive-layout`
+Updated: `2026-09-06`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
 
@@ -56,7 +56,7 @@ Supabase Realtime and Edge Functions are not required unless a later concrete re
 
 ## 2. Current Reality
 
-M1 implements the application shell, local database, scheduler/replay and atomic rating transaction. M2 adds local-first LearnerProfile selection/creation plus Supabase migration/RLS. M3 imports real public content and connects Home/Review. M4 replaces the mistaken email-account UI with one-time family-device pairing, a minimal Worker API, family Profile loading/linking and incremental ReviewEvent synchronization/replay. M5 adds Web Speech pronunciation/listening, schedule previews, per-Note progress insights and a mobile-first review/navigation pass. M5.1 adds a narrow PWA resource-recovery action that preserves all IndexedDB and device-grant state. Browser E2E and CI remain subsequent work.
+M1 implements the application shell, local database, scheduler/replay and atomic rating transaction. M2 adds local-first LearnerProfile selection/creation plus Supabase migration/RLS. M3 imports real public content and connects Home/Review. M4 replaces the mistaken email-account UI with one-time family-device pairing, a minimal Worker API, family Profile loading/linking and incremental ReviewEvent synchronization/replay. M5 adds Web Speech pronunciation/listening, schedule previews, per-Note progress insights and a mobile-first review/navigation pass. M5.1 adds a narrow PWA resource-recovery action that preserves all IndexedDB and device-grant state. M5.2 removes width-driven vertical whitespace, compacts desktop/PWA layouts and progressively reveals long progress results. Browser E2E and CI remain subsequent work.
 
 Observed `card/profiles/manman/manifest.json` on `2026-08-17`:
 
@@ -496,6 +496,8 @@ Home distinguishes content sync from progress sync and shows due/learning/new co
 
 Progress groups Cards by Note. Recognition and production remain independent schedules, so their next due times, intervals and counts are shown separately. Aggregate status is unseen, learning, review or mature; due is a separate attention flag.
 
+Progress search and filters operate on the full local result set, while presentation begins with 12 matching Notes and reveals subsequent batches on demand. This is presentation pagination only: no data or scheduler state is omitted.
+
 Voice fallback:
 
 ```text
@@ -507,6 +509,8 @@ English locales are en-US/en-GB; Spanish locales are es-MX/es-US/es-ES; rates ar
 The service worker caches only the app shell and versioned assets. Business data remains in IndexedDB. Updates never interrupt an in-flight rating transaction.
 
 Settings shows the package version and a manual “reload latest version” recovery action. This is an application-shell operation, not content sync, progress sync, sign-out or local-data reset.
+
+Responsive density uses viewport-height-based vertical spacing. Wide screens place the two secondary Settings panels side by side and use a seven-column progress summary; tablet/mobile breakpoints reduce columns without fixed-height clipping. Mobile Home does not inherit the desktop viewport-height minimum.
 
 ## 12. Security and Recovery
 
@@ -536,6 +540,7 @@ Settings shows the package version and a manual “reload latest version” reco
 | TTS/listening | tts, review | fallback and hidden-before-reveal tests |
 | Review transparency | scheduler, review | rating previews equal committed state; next due is visible |
 | Progress insights | progress, db | Note grouping, stage counts, recent activity and mature estimate |
+| Responsive density | app, settings, progress, review | desktop spacing does not scale with viewport width; long progress results reveal in bounded batches |
 | PWA resource recovery | app-update, settings | unregister/delete/reload is invoked while IndexedDB and device-grant APIs are absent from the operation |
 | Installable PWA | app, deployment | E2E plus iPhone/Android acceptance |
 

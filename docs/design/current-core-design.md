@@ -1,7 +1,7 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.7.1-m5-pwa-refresh`
-Updated: `2026-08-21`
+Version: `0.7.2-m5-responsive-layout`
+Updated: `2026-09-06`
 Branch: `dev`
 
 ## 1. Product Positioning
@@ -154,6 +154,14 @@ Mature begins at 90 days. The scheduler is a pure function shared by live rating
 - Progress is computed locally from synchronized ReviewEvents, ReviewStates, Notes and Cards; no analytics backend is introduced.
 - The progress view groups recognition and production Cards by Note and shows stage, next due time, interval, review count and lapse count for each direction.
 - “Remaining rounds” is presented only as an estimate of the minimum future `known` ratings needed to reach the 90-day mature threshold; the product never claims a fixed completion count.
+- Progress renders a bounded first batch and lets the user reveal more, avoiding a document-height spike from the complete content catalog.
+
+## 8.2 Responsive density
+
+- Vertical page spacing follows viewport height rather than width, so a wide PC/PWA window does not create oversized top and bottom gaps.
+- Home and Review use available desktop height without imposing a full-screen minimum on mobile.
+- Settings uses two secondary columns on wide screens and returns to one column on mobile.
+- Long content remains naturally scrollable; the layout removes unnecessary scrolling but never clips answers, controls or safe-area content.
 
 ## 9. Security Boundaries
 

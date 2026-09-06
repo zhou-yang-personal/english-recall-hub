@@ -7,13 +7,13 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; min-height: 100vh; }
+body { margin: 0; min-width: 320px; min-height: 100vh; overflow-x: hidden; }
 a { color: inherit; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: wait; opacity: 0.65; }
 
-.app-shell { min-height: 100vh; }
+.app-shell { min-height: 100dvh; }
 .app-header {
   align-items: center;
   border-bottom: 1px solid rgba(23, 49, 40, 0.14);
@@ -40,11 +40,11 @@ nav a { border-radius: 999px; padding: 0.55rem 0.85rem; text-decoration: none; }
 nav a:hover, nav a.active { background: #e3eadc; }
 .nav-button { background: transparent; border: 0; border-radius: 999px; color: inherit; padding: 0.55rem 0.85rem; }
 .nav-button:hover { background: #e3eadc; }
-.page { margin: 0 auto; max-width: 72rem; padding: clamp(3rem, 9vw, 8rem) clamp(1rem, 5vw, 4rem); }
+.page { margin: 0 auto; max-width: 72rem; padding: clamp(1.5rem, 4vh, 3.5rem) clamp(1rem, 5vw, 4rem); }
 .narrow { max-width: 50rem; }
-.hero { display: grid; gap: 4rem; grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.8fr); }
+.hero { align-items: center; display: grid; gap: clamp(2rem, 5vw, 4rem); grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.8fr); min-height: calc(100dvh - 4.8rem); }
 .eyebrow { color: #ad4b2a; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
-h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw, 5.8rem); line-height: 1.02; margin: 0.4rem 0 1.5rem; }
+h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 5vw, 4.8rem); line-height: 1.02; margin: 0.4rem 0 1.2rem; }
 .narrow h1 { font-size: clamp(2.3rem, 5vw, 4rem); }
 .lead, .page > p { color: #52635c; font-size: 1.08rem; line-height: 1.75; }
 .metric-grid { align-content: center; display: grid; gap: 0.8rem; }
@@ -84,11 +84,15 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .check-row input { margin: 0; }
 .cloud-option { color: #65756f; font-size: 0.95rem !important; margin-top: 1rem; }
 .cloud-option a, .setting-card a { color: #ad4b2a; font-weight: 750; }
-.setting-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.6rem; margin-top: 2rem; padding: 1.3rem; }
+.setting-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.6rem; margin-top: 1rem; padding: 1.1rem; }
 .setting-card span { color: #65756f; }
 .setting-card > div:first-child { display: grid; gap: 0.25rem; }
 .settings-form { display: grid; gap: 1rem; }
 .settings-form .setting-card { margin-top: 0; }
+.settings-page { max-width: 64rem; }
+.settings-page h1 { margin-bottom: 1rem; }
+.settings-secondary-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.settings-secondary-grid .setting-card { height: 100%; margin-top: 0; }
 .app-update-card p { color: #52635c; line-height: 1.55; margin: 0.35rem 0; }
 .app-update-card .secondary-action { justify-self: start; }
 .toggle-row { align-items: center; border-top: 1px solid #e4dccd; display: flex; gap: 1rem; justify-content: space-between; padding-top: 0.9rem; }
@@ -104,7 +108,7 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .review-tools { display: flex; gap: 0.6rem; justify-content: flex-end; margin-bottom: 0.8rem; }
 .review-tools button, .listening-prompt button { background: #e3eadc; border: 0; border-radius: 999px; color: #173128; font-weight: 750; padding: 0.55rem 0.8rem; }
 .review-tools button.active { background: #18392b; color: #fffaf0; }
-.review-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1.4rem; min-height: 25rem; padding: clamp(1.5rem, 5vw, 3rem); }
+.review-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1.4rem; min-height: clamp(18rem, 46dvh, 23rem); padding: clamp(1.4rem, 4vw, 2.5rem); }
 .review-card h1 { font-size: clamp(1.8rem, 4vw, 3.5rem); line-height: 1.2; margin-top: 1.4rem; overflow-wrap: anywhere; }
 .card-kind { background: #e3eadc; border-radius: 999px; color: #52635c; display: inline-block; font-size: 0.8rem; font-weight: 800; padding: 0.35rem 0.65rem; }
 .answer-panel { border-top: 1px solid #e4dccd; display: grid; gap: 0.7rem; margin-top: 2rem; padding-top: 1.5rem; }
@@ -124,19 +128,20 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .completion-card .primary-action { margin-top: 1rem; }
 .route-loading { color: #65756f; padding: 2rem; text-align: center; }
 
-.progress-page h1 { max-width: 13ch; }
-.insight-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 2rem 0; }
+.progress-page h1 { font-size: clamp(2.2rem, 4vw, 4rem); margin-bottom: 0.75rem; max-width: 13ch; }
+.progress-page .lead { margin-top: 0; }
+.insight-grid { display: grid; gap: 0.65rem; grid-template-columns: repeat(7, minmax(0, 1fr)); margin: 1.3rem 0; }
 .insight-grid article { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; display: grid; gap: 0.35rem; padding: 1rem; }
 .insight-grid strong { font-family: Georgia, serif; font-size: 2rem; }
 .insight-grid span { color: #65756f; font-size: 0.86rem; }
 .activity-card { align-items: center; background: #18392b; border-radius: 1.2rem; color: #fffaf0; display: grid; gap: 2rem; grid-template-columns: minmax(10rem, 0.5fr) 1fr; padding: 1.3rem; }
 .activity-card h2 { font-family: Georgia, "Noto Serif SC", serif; margin: 0.2rem 0; }
 .section-kicker { color: #d9b49f; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.13em; margin: 0; text-transform: uppercase; }
-.activity-bars { align-items: end; display: grid; gap: 0.55rem; grid-template-columns: repeat(7, 1fr); min-height: 7rem; }
+.activity-bars { align-items: end; display: grid; gap: 0.55rem; grid-template-columns: repeat(7, 1fr); min-height: 5.5rem; }
 .activity-day { align-items: center; display: flex; flex-direction: column; gap: 0.25rem; justify-content: end; }
 .activity-day strong, .activity-day small { font-size: 0.72rem; }
 .activity-bar { background: #d68b67; border-radius: 999px 999px 0.25rem 0.25rem; display: block; min-height: 0.35rem; width: min(1.5rem, 70%); }
-.mechanism-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; margin: 1rem 0 2rem; padding: 1rem 1.2rem; }
+.mechanism-card { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; margin: 0.8rem 0 1.3rem; padding: 0.85rem 1.1rem; }
 .mechanism-card summary { cursor: pointer; font-weight: 800; }
 .mechanism-card p { color: #52635c; line-height: 1.55; }
 .progress-toolbar { align-items: center; display: flex; gap: 1rem; justify-content: space-between; margin: 1.5rem 0 1rem; }
@@ -145,6 +150,7 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
 .filter-row button.active { background: #18392b; border-color: #18392b; color: #fffaf0; }
 .progress-toolbar input { min-width: 13rem; }
 .progress-list { display: grid; gap: 0.8rem; }
+.progress-list-footer { align-items: center; color: #65756f; display: flex; gap: 1rem; justify-content: space-between; margin-top: 1rem; }
 .progress-item { background: #fffaf0; border: 1px solid #e4dccd; border-radius: 1rem; padding: 0.95rem 1.1rem; }
 .progress-item > summary { align-items: center; cursor: pointer; display: flex; gap: 1rem; justify-content: space-between; list-style: none; }
 .progress-item > summary::-webkit-details-marker { display: none; }
@@ -170,8 +176,8 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
   .brand small { display: none; }
   nav { background: rgba(255, 250, 240, 0.96); border-top: 1px solid #e4dccd; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); left: 0; padding: 0.45rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom)); position: fixed; right: 0; z-index: 20; }
   nav a { font-size: 0.82rem; padding: 0.55rem 0.35rem; text-align: center; }
-  .hero { grid-template-columns: 1fr; }
-  .page { padding-top: 2.3rem; }
+  .hero { grid-template-columns: 1fr; min-height: 0; }
+  .page { padding-bottom: 1.8rem; padding-top: 1.8rem; }
   .home-actions { align-items: stretch; flex-direction: column; }
   .home-actions .secondary-link { text-align: center; }
   .profile-card { align-items: flex-start; flex-direction: column; gap: 0.45rem; }
@@ -186,5 +192,11 @@ h1 { font-family: Georgia, "Noto Serif SC", serif; font-size: clamp(2.4rem, 6vw,
   .progress-toolbar input { min-width: 0; width: 100%; }
   .card-progress-grid { grid-template-columns: 1fr; }
   .field-grid { grid-template-columns: 1fr; }
+  .settings-secondary-grid { grid-template-columns: 1fr; }
+  .progress-list-footer { align-items: stretch; flex-direction: column; }
   .completion-actions { align-items: stretch; flex-direction: column; }
+}
+
+@media (min-width: 761px) and (max-width: 1100px) {
+  .insight-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }

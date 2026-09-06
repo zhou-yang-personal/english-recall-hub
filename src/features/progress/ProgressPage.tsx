@@ -11,6 +11,7 @@ import {
 } from './progressInsights';
 
 type ProgressFilter = 'all' | 'due' | 'learning' | 'mature' | 'forgotten';
+const PROGRESS_BATCH_SIZE = 12;
 
 const filterOptions: Array<{ value: ProgressFilter; label: string }> = [
   { value: 'all', label: '全部' },
@@ -33,6 +34,7 @@ export function ProgressPage() {
   const [insights, setInsights] = useState<ProgressInsights>();
   const [filter, setFilter] = useState<ProgressFilter>('all');
   const [search, setSearch] = useState('');
+  const [visibleCount, setVisibleCount] = useState(PROGRESS_BATCH_SIZE);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -93,6 +95,12 @@ export function ProgressPage() {
         || item.meaningCn.toLocaleLowerCase().includes(normalizedSearch)),
     );
   }, [filter, insights, search]);
+
+  useEffect(() => {
+    setVisibleCount(PROGRESS_BATCH_SIZE);
+  }, [filter, search]);
+
+  const displayedItems = visibleItems.slice(0, visibleCount);
 
   if (!selectedLearnerProfileId) return <Navigate replace to="/profiles" />;
   if (profileLoading || loading) return <p className="route-loading" role="status">正在整理复习进度…</p>;
@@ -169,7 +177,7 @@ export function ProgressPage() {
       </div>
 
       <div className="progress-list">
-        {visibleItems.map((item) => (
+        {displayedItems.map((item) => (
           <details className="progress-item" key={item.noteId}>
             <summary>
               <span><strong>{item.core}</strong><small>{item.meaningCn}</small></span>
@@ -192,6 +200,21 @@ export function ProgressPage() {
           </details>
         ))}
       </div>
+
+      {visibleItems.length > 0 ? (
+        <div className="progress-list-footer">
+          <span>已显示 {displayedItems.length} / {visibleItems.length} 条</span>
+          {displayedItems.length < visibleItems.length ? (
+            <button
+              className="secondary-action"
+              onClick={() => setVisibleCount((count) => count + PROGRESS_BATCH_SIZE)}
+              type="button"
+            >
+              继续显示（剩余 {visibleItems.length - displayedItems.length} 条）
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {visibleItems.length === 0 ? <p className="empty-state">没有符合当前条件的学习条目。</p> : null}
       {message ? <p className="status-message" role="status">{message}</p> : null}

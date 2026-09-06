@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.7.1-m5-pwa-refresh
+Version: 0.7.2-m5-responsive-layout
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev
@@ -59,6 +59,7 @@ Rates are 0.75, 1.0 and 1.25.
 No cloud TTS/audio files/IPA/pronunciation scoring.
 Service worker caches the shell; business data remains in IndexedDB.
 Settings can reset only Service Worker/Cache Storage resources and reload the latest version; this never deletes IndexedDB progress or the device-grant Cookie.
+PC/PWA pages use compact height-aware spacing; long progress results show in batches while filters still cover all local data.
 
 Code design:
 Use feature-first lightweight Ports and Adapters.
@@ -70,7 +71,7 @@ M1 React/Vite/PWA shell, Dexie stores, Scheduler/replay and atomic rating writes
 M2 local-first LearnerProfile selection/creation and Supabase migration/RLS exist.
 M3 real public card import, stable Card generation, Home counts, review queue and local atomic rating UI exist.
 M4 family-device pairing, Worker Profile/Event API and incremental ReviewEvent synchronization exist.
-M5 TTS/listening, schedule transparency, progress insights and safe PWA resource refresh exist.
+M5 TTS/listening, schedule transparency, progress insights, safe PWA resource refresh and responsive density improvements exist.
 
 MVP includes:
 no-login LearnerProfile; one-time family-device pairing; public card sync

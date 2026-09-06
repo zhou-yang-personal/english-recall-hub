@@ -1,7 +1,7 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.7.1-m5-pwa-refresh`
-Updated: `2026-08-21`
+Version: `0.7.2-m5-responsive-layout`
+Updated: `2026-09-06`
 Source-of-truth branch: `dev`
 
 ## 1. Current Direction
@@ -118,6 +118,7 @@ cloud TTS/scoring; push; payment/ads/analytics/community
 - M5: Review-first Home actions and a four-item mobile bottom navigation improve one-handed daily use.
 - M5: Content projection version 2 adds Note/Card display and pronunciation fields while retaining stable Card identifiers and existing progress.
 - M5.1: Settings shows the package version and can reset only Service Worker/Cache Storage resources before a cache-busted reload; IndexedDB progress and the paired-device Cookie are preserved.
+- M5.2: PC/PWA spacing is height-aware, wide Settings secondary panels share a row, mobile drops desktop viewport-height constraints and Progress reveals matching Notes in batches of 12.
 - Remote migration `20260818020000` is applied and the schema is exposed through Data API.
 - Hosted smoke testing found that column-only LearnerProfile INSERT grants produced Data API HTTP 401; migration `20260818030000` adds the table-level INSERT grant while retaining RLS ownership checks.
 
@@ -145,7 +146,7 @@ CI: not configured
 Supabase: provisioned, linked and migrated; prior hosted LearnerProfile persistence smoke test passed
 Cloudflare: preview routes/PWA assets and fixed production domain return HTTP 200
 Real card-source smoke test: 27/27 packs, 137 valid Notes, 274 unique Cards, 0 skipped rows
-Cloudflare production: version `a73bd97d-572d-4fa7-a143-105c79b3e250` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
+Cloudflare production: version `bf4bfff4-cf29-4928-8c85-1596329dabc2` deployed to `english-recall-hub.zhou-yang-personal.workers.dev`
 Worker Secrets: all five required names configured as `secret_text`; Supabase/signing values were not printed, and the pairing code was returned once to the operator
 Hosted family pairing: wrong code denied; valid code issued a device grant; paired status and unpair passed
 Hosted family Profile/Event reads: one existing family Profile loaded; ReviewEvent page returned HTTP 200
@@ -154,6 +155,8 @@ Hosted `0.5.1` hotfix: same-name create returned the existing UUID and kept the 
 Hosted `0.6.0` catalog flow: Profiles route/new asset returned HTTP 200, GitHub catalog CORS passed and listed `manman`; no ReviewEvent was written
 Hosted `0.7.0` learning-experience flow: Home/Review/Progress/Settings routes, current hashed assets, PWA assets and GitHub profile catalog returned HTTP 200; an unpaired Profile settings PATCH was denied with HTTP 401 as intended
 Hosted `0.7.1` PWA refresh flow: current HTML and hashed assets returned HTTP 200, HTML retained `max-age=0, must-revalidate`, and the entry asset contained the release version, refresh marker and action label
+Hosted `0.7.2` responsive-layout flow: root/Settings/Progress/Review/PWA assets returned HTTP 200; the entry asset contained the release version and the current Progress chunk contained the progressive-display action
+Responsive browser acceptance: pending because this environment has no browser executable; validate one PC window and one installed/mobile PWA after cache refresh
 ```
 
 This handoff describes implemented M1–M5 foundations; offline update UX, export/import and device/browser acceptance remain before the full MVP is complete.

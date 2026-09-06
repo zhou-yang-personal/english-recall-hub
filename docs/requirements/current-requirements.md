@@ -1,7 +1,7 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.7.1-m5-pwa-refresh`
-Updated: `2026-08-21`
+Version: `0.7.2-m5-responsive-layout`
+Updated: `2026-09-06`
 
 ## 1. Product Goal
 
@@ -160,6 +160,7 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Provide a local-first progress route grouped by Note with separate recognition/production states.
 - Show total/unseen/learning/review/mature/due counts, today and recent-seven-day review activity.
 - For each Card show stage, next due time, interval, review count and lapse count.
+- Initially render at most 12 matching progress rows and provide an explicit control to reveal subsequent batches; filtering and search still cover the complete local dataset.
 - Explain Scheduler v1 in the product UI.
 - Never present a fixed number of remaining reviews. An optional value must be labeled as the minimum additional `known` ratings needed to reach the 90-day mature threshold.
 
@@ -214,6 +215,8 @@ known: min(180 days, max(3 days, round(interval × 2.5)))
 - Current manifest import does not freeze the UI.
 - Event upload/download is paged and bounded.
 - The design supports at least tens of thousands of Cards and hundreds of thousands of ReviewEvents before adding checkpoints.
+- Wide PC/PWA windows must not enlarge vertical page padding as a function of viewport width.
+- At typical desktop height, Home and an unrevealed Review card avoid non-content-driven vertical scrolling; data-heavy pages remain progressively scrollable.
 
 ### NFR4. Maintainability
 

@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.7.1-m5-pwa-refresh",
+  "version": "0.7.2-m5-responsive-layout",
   "type": "module",
   "scripts": {
     "dev": "vite",

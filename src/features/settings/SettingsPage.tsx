@@ -89,7 +89,7 @@ export function SettingsPage() {
   }
 
   return (
-    <section className="page narrow settings-page">
+    <section className="page settings-page">
       <p className="eyebrow">{profile.contentProfileId} · 设置</p>
       <h1>让复习更顺手。</h1>
 
@@ -160,28 +160,30 @@ export function SettingsPage() {
         </button>
       </form>
 
-      <section className="setting-card">
-        <div><strong>学习者与家庭云端</strong><span>学习数据先保存在本机，配对设备会同步复习事件和设置。</span></div>
-        <Link to="/profiles">切换学习者</Link>
-        {cloudStatus === 'paired' ? (
-          <button className="secondary-action" onClick={() => void unpairDevice()} type="button">断开此设备</button>
-        ) : (
-          <Link to="/pair-device">输入家庭同步码</Link>
-        )}
-      </section>
+      <div className="settings-secondary-grid">
+        <section className="setting-card">
+          <div><strong>学习者与家庭云端</strong><span>学习数据先保存在本机，配对设备会同步复习事件和设置。</span></div>
+          <Link to="/profiles">切换学习者</Link>
+          {cloudStatus === 'paired' ? (
+            <button className="secondary-action" onClick={() => void unpairDevice()} type="button">断开此设备</button>
+          ) : (
+            <Link to="/pair-device">输入家庭同步码</Link>
+          )}
+        </section>
 
-      <section className="setting-card app-update-card">
-        <div><strong>应用更新</strong><span>当前版本：{__APP_VERSION__}</span></div>
-        <p>清除旧的 Web/PWA 资源缓存并重新加载当前页面，不会删除学习者、卡片、复习进度、待同步事件或家庭配对。</p>
-        <button
-          className="secondary-action"
-          disabled={reloading}
-          onClick={() => void reloadLatestResources()}
-          type="button"
-        >
-          {reloading ? '正在重新加载…' : '重新加载最新版'}
-        </button>
-      </section>
+        <section className="setting-card app-update-card">
+          <div><strong>应用更新</strong><span>当前版本：{__APP_VERSION__}</span></div>
+          <p>清除旧的 Web/PWA 资源缓存并重新加载当前页面，不会删除学习者、卡片、复习进度、待同步事件或家庭配对。</p>
+          <button
+            className="secondary-action"
+            disabled={reloading}
+            onClick={() => void reloadLatestResources()}
+            type="button"
+          >
+            {reloading ? '正在重新加载…' : '重新加载最新版'}
+          </button>
+        </section>
+      </div>
 
       {message ? <p className="status-message" role="status">{message}</p> : null}
     </section>
