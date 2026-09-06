@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { ReviewEvent, ReviewRating, ReviewState } from '../../src/domain/review';
-import { applyReviewEvent, createReviewEvent } from '../../src/domain/scheduler';
+import {
+  applyReviewEvent,
+  createReviewEvent,
+  estimateMinimumKnownRatingsToMature,
+  previewReviewSchedule,
+} from '../../src/domain/scheduler';
 
 const START = '2026-08-17T12:00:00.000Z';
 
@@ -70,6 +75,25 @@ describe('scheduler v1', () => {
     expect(applyReviewEvent(currentState(2), event('known')).intervalDays).toBe(5);
     expect(applyReviewEvent(currentState(40), event('known')).state).toBe('mature');
     expect(applyReviewEvent(currentState(100), event('known')).intervalDays).toBe(180);
+  });
+
+  it('previews the same schedule that a committed event produces', () => {
+    const current = currentState(8);
+    const preview = previewReviewSchedule(current, 'known', START);
+    const committed = applyReviewEvent(current, event('known'));
+
+    expect(preview).toMatchObject({
+      dueAt: committed.dueAt,
+      intervalDays: committed.intervalDays,
+      state: committed.state,
+      reviewCount: committed.reviewCount,
+    });
+  });
+
+  it('estimates only the minimum future known ratings needed for maturity', () => {
+    expect(estimateMinimumKnownRatingsToMature(undefined)).toBe(5);
+    expect(estimateMinimumKnownRatingsToMature(currentState(20))).toBe(2);
+    expect(estimateMinimumKnownRatingsToMature({ ...currentState(125), state: 'mature' })).toBe(0);
   });
 
   it('makes effective time monotonic when a device clock moves backwards', () => {

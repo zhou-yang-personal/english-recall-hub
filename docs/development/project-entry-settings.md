@@ -1,6 +1,6 @@
 # English Recall Hub｜External Entry Settings
 
-Version: `0.3.2-m2-account-foundation`
+Version: `0.4.0-m3-content-review`
 Updated: `2026-08-18`
 
 This document records configuration outside the repository.
@@ -28,7 +28,7 @@ Use only:
 docs/development/English-Recall-Hub-Project-Source.txt
 ```
 
-The `0.3.2` source states Web/PWA + IndexedDB + Supabase account/event sync and records the implemented M2 account foundation.
+The `0.4.0` source states local-first Web/PWA + IndexedDB + optional Supabase account/event sync and records the implemented M3 card import/local review foundation.
 
 ## 3. Development Session Opener
 
@@ -43,7 +43,7 @@ The `0.3.2` source states Web/PWA + IndexedDB + Supabase account/event sync and 
 - Formal `card` content remains Builder-owned and publicly read by the PWA.
 - Cloudflare serves static PWA assets.
 - A shared Supabase project exposes the isolated `english_recall` schema.
-- Supabase Auth uses email OTP; Postgres tables use explicit grants and RLS.
+- Local use requires no account; optional Supabase Auth uses email OTP, and Postgres tables use explicit grants and RLS.
 - Frontend uses only Supabase URL/publishable key and public card URL.
 
 ## 5. External Configuration Not Stored in Git
@@ -79,4 +79,4 @@ Observed/configured on `2026-08-18`:
 - Cloudflare production URL is `https://english-recall-hub.zhou-yang-personal.workers.dev` with preview hosts matching `*-english-recall-hub.zhou-yang-personal.workers.dev`.
 - Hosted Auth Site URL and redirect allow-list are synchronized from `supabase/config.toml`; hosted URL-only changes use a targeted Management API update so unrelated Auth settings remain unchanged.
 - The local numeric OTP template contains `{{ .Token }}`. On the hosted free project, Supabase rejected template modification while using its default email provider; hosted login therefore uses the default one-time Magic Link until custom SMTP or a paid plan is configured.
-- Cloudflare Git integration is configured. Preview deployment is verified; the fixed production domain remains inactive until the configured production branch deploys.
+- Cloudflare Git integration is configured. Preview deployment and the fixed production domain are verified.

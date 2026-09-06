@@ -1,27 +1,31 @@
 import { lazy, Suspense } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import { HomePage } from '../features/home/HomePage';
-import { ReviewPage } from '../features/review/ReviewPage';
 import { SettingsPage } from '../features/settings/SettingsPage';
-import { useApp } from './AppContext';
 
-const SignInPage = lazy(() =>
-  import('../features/auth/SignInPage').then((module) => ({ default: module.SignInPage })),
+const HomePage = lazy(() =>
+  import('../features/home/HomePage').then((module) => ({ default: module.HomePage })),
+);
+const ReviewPage = lazy(() =>
+  import('../features/review/ReviewPage').then((module) => ({ default: module.ReviewPage })),
+);
+const PairDevicePage = lazy(() =>
+  import('../features/sync-access/PairDevicePage').then((module) => ({ default: module.PairDevicePage })),
 );
 const ProfilesPage = lazy(() =>
   import('../features/profiles/ProfilesPage').then((module) => ({ default: module.ProfilesPage })),
+);
+const ProgressPage = lazy(() =>
+  import('../features/progress/ProgressPage').then((module) => ({ default: module.ProgressPage })),
 );
 
 const navigation = [
   { to: '/', label: '首页', end: true },
   { to: '/review', label: '复习' },
-  { to: '/profiles', label: '学习者' },
+  { to: '/progress', label: '进度' },
   { to: '/settings', label: '设置' },
 ] as const;
 
 export function App() {
-  const { authStatus, session, signOut } = useApp();
-
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -43,12 +47,6 @@ export function App() {
               {item.label}
             </NavLink>
           ))}
-          {authStatus === 'ready' && !session ? <NavLink to="/sign-in">登录</NavLink> : null}
-          {session ? (
-            <button className="nav-button" onClick={() => void signOut()} type="button">
-              退出
-            </button>
-          ) : null}
         </nav>
       </header>
 
@@ -56,9 +54,11 @@ export function App() {
         <Suspense fallback={<p className="route-loading" role="status">正在加载…</p>}>
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/sign-in" element={<SignInPage />} />
+            <Route path="/pair-device" element={<PairDevicePage />} />
+            <Route path="/sign-in" element={<Navigate replace to="/pair-device" />} />
             <Route path="/profiles" element={<ProfilesPage />} />
             <Route path="/review" element={<ReviewPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate replace to="/" />} />
           </Routes>
