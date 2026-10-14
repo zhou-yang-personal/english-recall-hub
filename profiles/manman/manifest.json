@@ -287,7 +287,7 @@
   "warnings": [
     "Pack sha256 values are null; current MVP uses manifest.updated_at and does not claim checksum verification.",
     "Historical unsealed daily packs remain from earlier connector runs; current publishing continues in notes_current.jsonl.",
-    "Builder ledger audit remains incomplete because historical runs after 2026-08-12 are missing from the existing large JSONL ledger; this run did not rewrite the ledger.",
+    "Builder ledger audit remains incomplete because some historical runs after 2026-08-12 are missing from the existing ledger.",
     "No build/test/CI was run in the GitHub connector environment.",
     "Historical note types normalized on 2026-10-06: single complete sentences are classified as sentence, fixed non-sentence chunks as phrase, and reusable multi-sentence communication patterns remain expression. Existing note_id values were preserved; dedupe keys and type tags were rekeyed."
   ]
