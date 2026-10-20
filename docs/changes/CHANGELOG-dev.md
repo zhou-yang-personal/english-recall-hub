@@ -1,3 +1,18 @@
+## 0.3.3-m2-builder-foundation｜2026-10-20
+
+### Added
+
+- Prepared dependency-free Node.js 22 Draft-to-Card Builder with strict Draft schema checks, idempotent deduplication, stable Note/Card IDs, merge provenance, and legacy manifest compatibility.
+- Added five Node built-in unit tests and a manual-only GitHub Actions workflow template. Production activation requires installing the workflow file on default main.
+- Added Builder operations guide and clarified single-writer data ownership.
+
+### Verification
+
+- Local Node `--test`: 5/5 passed (Builder-only fixture tests).
+- Remote workflow and card publication: not run; no default-branch activation.
+- Application build/typecheck/CI/E2E: not run.
+- Dependencies unchanged; package-lock.json unchanged per repository rule.
+
 # CHANGELOG-dev｜English Recall Hub
 
 ## 0.3.2-m2-account-foundation｜2026-08-18
