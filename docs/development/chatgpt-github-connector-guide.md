@@ -98,3 +98,10 @@
 - 本次是否发现更优的读取、比较、写入、回读、交付流程。
 
 如新经验具备跨项目复用价值，优先回写公共治理仓；如只属于本项目，写入本文件或 `AGENTS.project.md`。
+
+## 8. Recall Builder 运行经验（2026-10-20）
+
+- ChatGPT 只负责将合格的 DraftNote 写入 `draft`；独立 Builder 才能更新 `card`。
+- GitHub Contents API 的 `create_file` / `update_file` 在不同运行中可能被平台安全检查拦截；不能只根据文件大小判断根因。
+- 已有数据采用单一 Git commit 发布，避免 Notes/Manifest/Index/Ledger 在多次 Connector 写操作中出现半更新。
+- `.github/workflows/recall-builder.yml` 如果只存在于 `dev`，GitHub 不会接受其 `workflow_dispatch` 调用；需要将工作流文件单独部署到默认 `main` 并验证后才恢复周期运行。
