@@ -1,7 +1,7 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.3.2-m2-account-foundation`
-Updated: `2026-08-18`
+Version: `0.3.3-m2-builder-foundation`
+Updated: `2026-10-20`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
 
@@ -522,3 +522,7 @@ Estimated total: `13–15 working days`. It is a planning range, not a code-volu
 | Pack sync becomes costly | Builder hashes/sealed packs |
 
 Until a trigger occurs, these are not development tasks.
+
+## 17. Builder Foundation (2026-10-20)
+
+The draft-to-card Node.js Builder is staged separately from the Web runtime. It preserves the current manifest/index/template contract and publishes new immutable Note packs. Only recognition and production template cards are supported; a grammar Draft requires a deployed grammar template before publication. Publication requires one atomic Git commit on `card`. The manual GitHub Actions workflow is not yet active on `main`; no automatic Builder run is claimed.
