@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.3.2-m2-account-foundation
+Version: 0.3.3-m2-builder-foundation
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev
@@ -94,3 +94,5 @@ docs/design/web-mvp-framework-design.md
 docs/requirements/current-requirements.md
 docs/handoff/latest-handoff.md
 docs/changes/CHANGELOG-dev.md
+
+Builder foundation (2026-10-20): Node.js 22 code prepared in dev; manual workflow requires installation on default main to run. Only independent Builder may write card. Do not claim card publication until workflow or local Builder commits and card HEAD is checked.
