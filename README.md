@@ -4,7 +4,7 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.3.2-m2-account-foundation`
+- Version: `0.3.3-m2-builder-foundation`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`
@@ -96,3 +96,7 @@ npm run deploy
 Copy `.env.example` to `.env.local` and provide only the public Supabase URL/publishable key and card repository URL. The linked Supabase project now has the `english_recall` schema, explicit grants and RLS; no privileged browser credential is required.
 
 The Supabase local stack and pgTAP database tests require Docker or another compatible container runtime.
+
+## Draft → Card Builder (prepared, not activated)
+
+Independent Node.js 22 Builder code and unit tests live in `scripts/recall-builder.mjs` and `tests/builder/`. It reads `draft` and writes only `card` via a single Git commit; `progress` is out of scope. The workflow template is `.github/workflows/recall-builder.yml`, currently manual-only. **GitHub Actions workflow_dispatch is not active until the workflow file is installed on the default (`main`) branch.** See `docs/development/recall-builder-guide.md`. The last observed formal card content was 163 Notes; that snapshot is not a client constant.

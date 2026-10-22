@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.3.2-m2-account-foundation",
+  "version": "0.3.3-m2-builder-foundation",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "test:builder": "node --test tests/builder/*.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",

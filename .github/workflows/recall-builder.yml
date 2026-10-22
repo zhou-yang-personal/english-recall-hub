@@ -1,0 +1,78 @@
+name: Recall Builder (manual)
+
+# Activation: GitHub requires workflow_dispatch files on the default branch.
+# Keep this workflow manual until it has been reviewed and installed on main.
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Content profile to build
+        required: true
+        default: manman
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: recall-builder-card
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Builder source from dev
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          path: app
+          persist-credentials: false
+      - name: Checkout immutable source from draft
+        uses: actions/checkout@v4
+        with:
+          ref: draft
+          path: draft
+          persist-credentials: false
+      - name: Checkout formal card branch
+        uses: actions/checkout@v4
+        with:
+          ref: card
+          path: card
+          persist-credentials: true
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Unit tests
+        run: node --test app/tests/builder/*.test.mjs
+      - name: Build formally validated Notes
+        shell: bash
+        env:
+          PROFILE: ${{ inputs.profile }}
+        run: |
+          set -euo pipefail
+          node app/scripts/recall-builder.mjs \
+            --draft-root draft --card-root card --profile "$PROFILE" \
+            > "$RUNNER_TEMP/recall-builder-result.json"
+          cat "$RUNNER_TEMP/recall-builder-result.json"
+      - name: Commit and push card as one Git commit
+        shell: bash
+        env:
+          PROFILE: ${{ inputs.profile }}
+        run: |
+          set -euo pipefail
+          git -C card config user.name 'github-actions[bot]'
+          git -C card config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C card add -- "profiles/$PROFILE/manifest.json" \
+            "profiles/$PROFILE/collections.json" \
+            "profiles/$PROFILE/dedupe_index.json" \
+            "profiles/$PROFILE/builder-ledger.jsonl" \
+            "profiles/$PROFILE/packs/"
+          if git -C card diff --cached --quiet; then
+            echo 'No new eligible DraftNote; card unchanged.'
+            exit 0
+          fi
+          git -C card commit -m "builder: publish validated $PROFILE DraftNotes"
+          git -C card push origin HEAD:card

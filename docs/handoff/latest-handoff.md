@@ -1,7 +1,7 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.3.2-m2-account-foundation`
-Updated: `2026-08-18`
+Version: `0.3.3-m2-builder-foundation`
+Updated: `2026-10-20`
 Source-of-truth branch: `dev`
 
 ## 1. Current Direction
@@ -133,3 +133,7 @@ Dependencies unchanged; npm audit reported 0 vulnerabilities
 ```
 
 This handoff describes an implemented M2 account foundation, not a completed MVP.
+
+## 9. 2026-10-20 Builder Handoff
+
+Prepared independent Node.js 22 Draft-to-Card Builder, five passing local unit tests, manual GitHub Actions workflow template, and usage guide. Code is submitted for review on `chatgpt/task-recall-builder`; it is not merged to `dev` or installed on default `main`. A workflow_dispatch action must be installed on `main` before it can execute. The six DraftNotes in the 2026-10-20 `draft` inbox are not yet formally published; existing `card` has 163 Notes. No GitHub Actions run, formal card push, CI, app build, or E2E validation is claimed.

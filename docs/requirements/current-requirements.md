@@ -1,7 +1,7 @@
 # English Recall Hub｜Current Requirements
 
-Version: `0.3.2-m2-account-foundation`
-Updated: `2026-08-18`
+Version: `0.3.3-m2-builder-foundation`
+Updated: `2026-10-20`
 
 ## 1. Product Goal
 
@@ -235,3 +235,7 @@ Test estimate: 1,500–2,300 LOC
 ```
 
 These ranges guide sequencing; they are not targets to inflate implementation.
+
+## 9. Builder Publication Gate
+
+The formal `card` library may be updated only by an independently executed Builder. Before publication it must verify all required Draft fields, `dedupe_key`, current pack counts and index consistency; duplicate publication must be idempotent. New and merged source IDs must preserve Note identity. All resulting `card` files must land together in one Git commit; if verification fails, do not push. This stage is separate from Web/PWA runtime and does not use the `progress` branch.

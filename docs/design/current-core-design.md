@@ -1,7 +1,7 @@
 # English Recall Hub｜Current Core Design
 
-Version: `0.3.2-m2-account-foundation`
-Updated: `2026-08-18`
+Version: `0.3.3-m2-builder-foundation`
+Updated: `2026-10-20`
 Branch: `dev`
 
 ## 1. Product Positioning
@@ -177,3 +177,7 @@ docs/design/web-mvp-framework-design.md
 - Cloudflare progress API/D1/KV/R2.
 - Advanced card types, cloud TTS and push notifications.
 - Payment, ads, analytics platform and community marketplace.
+
+## 12. Independent Builder Boundary
+
+Node.js 22 Builder validates DraftNotes from `draft`, de-duplicates against the `card` manifest/index, and builds compatible Note packs with stable Card identifiers. ChatGPT remains a DraftNote producer only. GitHub Actions will commit `card` changes together after validation; it is prepared but not activated on the default branch. `progress` remains separate and untouched. Details: `docs/development/recall-builder-guide.md`.
