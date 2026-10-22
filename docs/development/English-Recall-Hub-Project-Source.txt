@@ -1,5 +1,5 @@
 English Recall Hub Project Source
-Version: 0.3.3-m2-builder-foundation
+Version: 0.3.4-m2-builder-compat
 
 Repository: zhou-yang-personal/english-recall-hub
 Development branch: dev
