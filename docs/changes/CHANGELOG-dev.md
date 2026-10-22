@@ -15,6 +15,19 @@
 
 # CHANGELOG-dev｜English Recall Hub
 
+## 0.3.4-m2-builder-compat｜2026-10-22
+
+### Fixed
+
+- Accepted legacy `quality_hint=normal` DraftNotes to avoid incorrectly rejecting already-published historical learning records.
+- Kept `low` drafts rejected; added a regression test for legacy normal quality and repeat-run idempotency.
+- No dependency changes or application schema changes.
+
+### Verification
+
+- Builder Node unit tests are rerun separately. Production GitHub Actions validation follows after merging this patch.
+
+
 ## 0.3.2-m2-account-foundation｜2026-08-18
 
 ### Added
