@@ -1,6 +1,6 @@
 {
   "profile_id": "manman",
-  "updated_at": "2026-10-14T15:38:43Z",
+  "updated_at": "2026-10-22T15:43:06.931Z",
   "items": {
     "phrase:straight_line": "note_phrase_straight_line_v1",
     "word:curve": "note_word_curve_v1",
@@ -164,6 +164,12 @@
     "word:underscore": "note_word_underscore_v1",
     "word:plus": "note_word_plus_v1",
     "word:procedure": "note_word_procedure_v1",
-    "sentence:you_can_check_the_excel_file_xxx_where_ive_marked_what_we_currently_support_and_which_items_we_modified": "note_sentence_you_can_check_the_excel_file_xxx_where_ive_marked_what_we_currently_support_and_which_items_we_modified_v1"
+    "sentence:you_can_check_the_excel_file_xxx_where_ive_marked_what_we_currently_support_and_which_items_we_modified": "note_sentence_you_can_check_the_excel_file_xxx_where_ive_marked_what_we_currently_support_and_which_items_we_modified_v1",
+    "sentence:ive_updated_the_certification_documents_and_merged_the_duplicate_files": "note_sentence_ive_updated_the_certification_documents_and_merged_the_duplicate_files_v1",
+    "sentence:is_your_phone_connected_to_the_onts_wi_fi_or_the_aps_wi_fi": "note_sentence_is_your_phone_connected_to_the_onts_wi_fi_or_the_aps_wi_fi_v1",
+    "sentence:if_youre_testing_a_huawei_ont_with_a_huawei_ap_the_ont_also_needs_to_be_added_to_the_whitelist": "note_sentence_if_youre_testing_a_huawei_ont_with_a_huawei_ap_the_ont_also_needs_to_be_added_to_the_whitelist_v1",
+    "sentence:do_we_need_two_devices_that_both_pass_the_test_or_is_one_enough": "note_sentence_do_we_need_two_devices_that_both_pass_the_test_or_is_one_enough_v1",
+    "sentence:could_you_arrange_for_the_same_cleaner_again": "note_sentence_could_you_arrange_for_the_same_cleaner_again_v1",
+    "sentence:do_you_have_any_updates_on_the_app_customization": "note_sentence_do_you_have_any_updates_on_the_app_customization_v1"
   }
 }
