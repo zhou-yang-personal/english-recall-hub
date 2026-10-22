@@ -40,7 +40,7 @@ function verifyDraft(d, profile, templates) {
   if (!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/.test(d.created_at) || Number.isNaN(Date.parse(d.created_at))) return 'invalid created_at';
   if (!d.dedupe_key.startsWith(`${d.note_type}:`)) return 'dedupe_key disagrees with note_type';
   if (!uniqueStrings(d.tags) || !uniqueStrings(d.collections) || !uniqueStrings(d.candidate_cards)) return 'invalid tags/collections/candidate_cards';
-  if (!['high','medium'].includes(d.quality_hint)) return 'low or illegal quality_hint';
+  if (!['high','medium','normal'].includes(d.quality_hint)) return 'low or illegal quality_hint';
   if (!Array.isArray(d.examples) || !d.examples.every(x=>x && typeof x.en==='string' && x.en.trim() && typeof x.cn==='string' && x.cn.trim())) return 'invalid examples';
   const pron=d.pronunciation;
   if (!pron || typeof pron!=='object' || Array.isArray(pron) || Object.keys(pron).some(k=>!PRONUNCIATION_FIELDS.has(k)) || typeof pron.text!=='string' || !pron.text.trim() || typeof pron.lang!=='string' || !pron.lang.trim() || (pron.hint_cn!==undefined && typeof pron.hint_cn!=='string')) return 'invalid pronunciation';
