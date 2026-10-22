@@ -1,7 +1,7 @@
 {
   "name": "english-recall-hub",
   "private": true,
-  "version": "0.3.3-m2-builder-foundation",
+  "version": "0.3.4-m2-builder-compat",
   "type": "module",
   "scripts": {
     "dev": "vite",

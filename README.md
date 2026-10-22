@@ -4,7 +4,7 @@ English Recall Hub 是一个面向个人和家庭的多语言主动回忆工具�
 
 ## Current baseline
 
-- Version: `0.3.3-m2-builder-foundation`
+- Version: `0.3.4-m2-builder-compat`
 - Default branch: `main`
 - Source-of-truth development branch: `dev`
 - Data branches: `draft`, `card`, `progress`

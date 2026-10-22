@@ -1,6 +1,6 @@
 # English Recall Hub — Independent Draft → Card Builder
 
-**Version:** `0.3.3-m2-builder-foundation`
+**Version:** `0.3.4-m2-builder-compat`
 
 ## Ownership
 
@@ -43,3 +43,5 @@ Grammar drafts cannot publish until an approved `grammar` template exists on `ca
 - Full-file local edits happen inside the isolated `card` checkout. This avoids ChatGPT Connector whole-file overwrite failures, but not all possible GitHub Actions/push failures.
 - `builder-ledger.jsonl` still grows; large-scale ledger rotation and legacy audit repair are deferred.
 - Currently `main` does not host the workflow; **no scheduled or automatic publishing has been activated**.
+
+Legacy compatibility: `quality_hint=normal` remains valid for previously captured and future standard-quality DraftNotes; `low` is still rejected.

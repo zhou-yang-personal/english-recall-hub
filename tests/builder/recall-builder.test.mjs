@@ -68,6 +68,15 @@ test('merges another source draft into published note without changing its id',(
  const note=JSON.parse(readFileSync(join(f.card,manifest.packs[0].path),'utf8').trim());
  assert.deepEqual(note.source_draft_ids,['draft_1','draft_2']);assert.equal(note.note_id,noteId(d));assert.equal(note.examples.length,2);
 });
+test('supports legacy normal quality_hint without duplicate publication',()=>{
+ const f=fixture(),d=validDraft();
+ d.quality_hint='normal';
+ pending(f,[JSON.stringify(d)]);
+ const first=build({...f,draftRoot:f.draft,cardRoot:f.card,now});
+ assert.equal(first.published,1);assert.equal(first.rejected,0);
+ const second=build({...f,draftRoot:f.draft,cardRoot:f.card,now:'2026-10-21T00:00:00Z'});
+ assert.equal(second.changed,false);assert.equal(second.skipped,1);assert.equal(second.rejected,0);
+});
 test('aborts without writes if card manifest counts are inconsistent',()=>{
  const f=fixture();pending(f,[JSON.stringify(validDraft())]);
  const manifest=read(f,'profiles/manman/manifest.json');manifest.note_count=42;

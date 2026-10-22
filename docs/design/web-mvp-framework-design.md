@@ -1,6 +1,6 @@
 # English Recall Hub Web MVP Framework Design
 
-Version: `0.3.3-m2-builder-foundation`
+Version: `0.3.4-m2-builder-compat`
 Updated: `2026-10-20`
 Status: Development baseline
 Repository: `zhou-yang-personal/english-recall-hub`
