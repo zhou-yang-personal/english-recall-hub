@@ -1,6 +1,7 @@
 name: Recall Builder
 
 # Builder is the only writer of card. ChatGPT captures DraftNotes at :40 UTC every 4 hours.
+# Compatibility check: dev Builder now accepts historical quality_hint=normal.
 on:
   push:
     branches: [main]
