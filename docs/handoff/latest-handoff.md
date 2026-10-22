@@ -1,6 +1,6 @@
 # English Recall Hub｜Latest Handoff
 
-Version: `0.3.3-m2-builder-foundation`
+Version: `0.3.4-m2-builder-compat`
 Updated: `2026-10-20`
 Source-of-truth branch: `dev`
 
